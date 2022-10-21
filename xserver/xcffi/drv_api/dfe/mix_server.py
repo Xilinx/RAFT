@@ -276,6 +276,17 @@ class MIX(object):
         XDfeMix_DUCDDCCfg = cdata_to_py(XDfeMix_DUCDDCCfg_ptr[0])
         return XDfeMix_DUCDDCCfg
 
+    def GetStruct_XDfeMix_AuxiliaryCfg(self):
+        """
+        Return Dictionary equivalent of structure XDfeMix_AuxiliaryCfg
+
+        :param : None
+        :return: Dictionary equivalent of structure XDfeMix_AuxiliaryCfg
+        """
+        XDfeMix_AuxiliaryCfg_ptr = ffi.new("XDfeMix_AuxiliaryCfg *")
+        XDfeMix_AuxiliaryCfg = cdata_to_py(XDfeMix_AuxiliaryCfg_ptr[0])
+        return XDfeMix_AuxiliaryCfg
+
     def GetStruct_XDfeMix_CarrierCfg(self):
         """
         Return Dictionary equivalent of structure XDfeMix_CarrierCfg
@@ -661,7 +672,8 @@ class MIX(object):
                  CCCfg: component carrier (CC) configuration container.
         """
         self.logger.debug(f"XDfeMix_AddCCtoCCCfg({device_id}, {json.dumps(CCCfg, indent=2)}, "
-                          f"{CCID}, {CCSeqBitmap}, {json.dumps(CCCfg, indent=2)})")
+                          f"{CCID}, {CCSeqBitmap}, {json.dumps(CarrierCfg, indent=2)}, "
+                          f"{json.dumps(NCO, indent=2)})")
         xmix = self.mix_dict[device_id][1]
         CCCfg_ptr = ffi.new("XDfeMix_CCCfg *", CCCfg)
         CarrierCfg_ptr = ffi.new("XDfeMix_CarrierCfg *", CarrierCfg)
@@ -686,6 +698,46 @@ class MIX(object):
         xmix = self.mix_dict[device_id][1]
         CCCfg_ptr = ffi.new("XDfeMix_CCCfg *", CCCfg)
         mix_handle.XDfeMix_RemoveCCfromCCCfg(xmix, CCCfg_ptr, CCID)
+        CCCfg = cdata_to_py(CCCfg_ptr[0])
+        self.logger.debug(f"Return value = {json.dumps(CCCfg, indent=2)}")
+        return CCCfg
+
+    def XDfeMix_AddAuxNCOtoCCCfg(self, device_id, CCCfg, AuxId, NCO, AuxCfg):
+        """
+		Adds specified auxiliary NCO, with specified configuration, to a local CCCfg.
+
+        :param device_id: id of the opened device.
+        :param CCCfg: component carrier (CC) configuration container.
+        :param AuxId: Channel ID.
+        :param NCO: Auxiliary NCO configuration container.
+        :param AuxCfg: Auxiliary NCO configuration container.
+        :return: CCCfg: component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfeMix_AddAuxNCOtoCCCfg({device_id}, {json.dumps(CCCfg, indent=2)}, "
+                          f"{AuxId}, {json.dumps(AuxCfg, indent=2)})")
+        xmix = self.mix_dict[device_id][1]
+        CCCfg_ptr = ffi.new("XDfeMix_CCCfg *", CCCfg)
+        AuxCfg_ptr = ffi.new("XDfeMix_AuxiliaryCfg *", AuxCfg)
+        NCO_ptr = ffi.new("XDfeMix_NCO *", NCO)
+        mix_handle.XDfeMix_AddAuxNCOtoCCCfg(xmix, CCCfg_ptr, AuxId, NCO_ptr, AuxCfg_ptr)
+        CCCfg = cdata_to_py(CCCfg_ptr[0])
+        self.logger.debug(f"Return value = {json.dumps(CCCfg, indent=2)}")
+        return CCCfg
+
+    def XDfeMix_RemoveAuxNCOfromCCCfg(self, device_id, CCCfg, AuxId):
+        """
+		Disables specified auxiliary NCO configuration structure.
+
+        :param device_id: id of the opened device.
+        :param CCCfg: component carrier (CC) configuration container.
+        :param AuxId: Auxiliary NCO ID to be disabled, range [0-3].
+        :return: CCCfg: component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfeMix_RemoveAuxNCOfromCCCfg({device_id}, "
+                          f"{json.dumps(CCCfg, indent=2)}, {AuxId})")
+        xmix = self.mix_dict[device_id][1]
+        CCCfg_ptr = ffi.new("XDfeMix_CCCfg *", CCCfg)
+        mix_handle.XDfeMix_RemoveAuxNCOfromCCCfg(xmix, CCCfg_ptr, AuxId)
         CCCfg = cdata_to_py(CCCfg_ptr[0])
         self.logger.debug(f"Return value = {json.dumps(CCCfg, indent=2)}")
         return CCCfg

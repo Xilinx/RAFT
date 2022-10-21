@@ -677,6 +677,43 @@ ret, CenterTap = handle.XDfeMix_GetCenterTap(device_id, Rate)
 SwVersion_out, HwVersion_out = handle.XDfeMix_GetVersions(device_id)
 
 #Description:
+#   Adds specified auxiliary NCO, with specified configuration, to a local CCCfg.
+#C header declaration:
+#   void XDfeMix_AddAuxNCOtoCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
+#			      const s32 AuxId, const XDfeMix_NCO *NCO,
+#			      const XDfeMix_AuxiliaryCfg *AuxCfg)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CCCfg: component carrier (CC) configuration container.
+#   AuxId: Channel ID.
+#   NCO: Auxiliary NCO configuration container.
+#   AuxCfg: Auxiliary NCO configuration container.
+#Return:
+#   CCCfg: component carrier (CC) configuration container.
+CurrCCCfg = handle.GetStruct_XDfeMix_CCCfg()
+CurrentCCCfg = handle.XDfeMix_GetCurrentCCCfg(int(device_id), CurrCCCfg)
+NCO = handle.GetStruct_XDfeMix_NCO()
+AuxiliaryCfg = handle.GetStruct_XDfeMix_AuxiliaryCfg()
+AuxId = 1
+CurrentCCCfg = handle.XDfeMix_AddAuxNCOtoCCCfg(device_id, CurrentCCCfg, AuxId, NCO, AuxiliaryCfg)
+AuxId = 2
+CurrentCCCfg = handle.XDfeMix_AddAuxNCOtoCCCfg(device_id, CurrentCCCfg, AuxId, NCO, AuxiliaryCfg)
+
+#Description:
+#   Disables specified auxiliary NCO configuration structure.
+#C header declaration:
+#   void XDfeMix_RemoveAuxNCOfromCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
+#			      const s32 AuxId)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CCCfg: component carrier (CC) configuration container.
+#   AuxId: Channel ID.
+#Return:
+#   CCCfg: component carrier (CC) configuration container.
+AuxId = 1
+CurrentCCCfg = handle.XDfeMix_RemoveAuxNCOfromCCCfg(device_id, CurrentCCCfg, AuxId)
+
+#Description:
 #   Deactivates Mixer and moves the state machine to Initialised state.
 #C header declaration:
 #   void XDfeMix_Deactivate(XDfeMix *InstancePtr);
