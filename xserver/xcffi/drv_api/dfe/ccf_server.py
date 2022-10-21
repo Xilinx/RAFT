@@ -517,6 +517,30 @@ class CCF(object):
         self.logger.debug(f"CurrCCCfg = {json.dumps(CurrCCCfg, indent=2)}")
         return CurrCCCfg
 
+    def XDfeCcf_GetCurrentCCCfgSwitchable(self, device_id, CCCfgDownlink, CCCfgUplink):
+        """
+		Returns the current CC configuration for DL and UL in switchable mode.
+		Not used slot ID in a sequence (Sequence.CCID[Index]) are represented
+		as (-1), not the value in registers.
+
+        :param device_id: id of the opened device.
+		:param CCCfgDownlink: Downlink CC configuration container.
+		:param CCCfgUplink: Uplink CC configuration container.
+        :return: CCCfgDownlink, CCCfgUplink: CC configuration containers
+        """
+        self.logger.debug(f"XDfeCcf_GetCurrentCCCfgSwitchable({device_id}, "
+						  f"{json.dumps(CCCfgDownlink, indent=2)}, "
+						  f"{json.dumps(CCCfgUplink, indent=2)})")
+        CCCfgDownlink_ptr = ffi.new("XDfeCcf_CCCfg *", CCCfgDownlink)
+        CCCfgUplink_ptr = ffi.new("XDfeCcf_CCCfg *", CCCfgUplink)
+        xccf = self.ccf_dict[device_id][1]
+        ccf_handle.XDfeCcf_GetCurrentCCCfgSwitchable(xccf, CCCfgDownlink_ptr, CCCfgUplink_ptr)
+        CCCfgDownlink = cdata_to_py(CCCfgDownlink_ptr[0])
+        CCCfgUplink = cdata_to_py(CCCfgUplink_ptr[0])
+        self.logger.debug(f"CCCfgDownlink = {json.dumps(CCCfgDownlink, indent=2)}")
+        self.logger.debug(f"CCCfgUplink = {json.dumps(CCCfgUplink, indent=2)}")
+        return CCCfgDownlink, CCCfgUplink
+
     def XDfeCcf_GetEmptyCCCfg(self, device_id):
         """
         Returns configuration structure CCCfg with CCCfg->Sequence.Length value set
@@ -668,6 +692,30 @@ class CCF(object):
         self.logger.debug(f"ret = {ret}, CCCfg = {json.dumps(CCCfg, indent=2)}")
         return ret, CCCfg
 
+    def XDfeCcf_SetNextCCCfgAndTriggerSwitchable(self, device_id, CCCfgDownlink, CCCfgUplink):
+        """
+		Writes local CC configuration to the shadow (NEXT) registers and triggers
+		copying from shadow to operational (CURRENT) registers.
+
+        :param device_id: id of the opened device.
+        :param CCCfgDownlink: Downlink CC configuration container.
+        :param CCCfgUplink Uplink CC configuration container.
+        :return: ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
+                 CCCfgDownlink: Downlink component carrier (CC) configuration container.
+                 CCCfgUplink: Uplink component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfeCcf_SetNextCCCfgAndTriggerSwitchable({device_id}, "
+                          f"{json.dumps(CCCfgDownlink, indent=2)}, "
+                          f"{json.dumps(CCCfgDownlink, indent=2)})")
+        xccf = self.ccf_dict[device_id][1]
+        CCCfgDownlink_ptr = ffi.new("XDfeCcf_CCCfg *", CCCfgDownlink)
+        CCCfgUplink_ptr = ffi.new("XDfeCcf_CCCfg *", CCCfgUplink)
+        ret = ccf_handle.XDfeCcf_SetNextCCCfgAndTriggerSwitchable(xccf, CCCfgDownlink_ptr, CCCfgUplink_ptr)
+        CCCfgDownlink = cdata_to_py(CCCfgDownlink_ptr[0])
+        CCCfgUplink = cdata_to_py(CCCfgUplink_ptr[0])
+        self.logger.debug(f"ret = {ret}, CCCfgDownlink = {json.dumps(CCCfgDownlink, indent=2)}, , CCCfgUplink = {json.dumps(CCCfgUplink, indent=2)}")
+        return ret, CCCfgDownlink, CCCfgUplink
+
     def XDfeCcf_AddCC(self, device_id, CCID, CCSeqBitmap, CarrierCfg):
         """
         Adds specified CCID, with specified configuration.
@@ -765,6 +813,28 @@ class CCF(object):
         xccf = self.ccf_dict[device_id][1]
         AntennaCfg_ptr = ffi.new("XDfeCcf_AntennaCfg *", AntennaCfg)
         ret = ccf_handle.XDfeCcf_UpdateAntennaCfg(xccf, AntennaCfg_ptr)
+        self.logger.debug(f"ret = {ret}")
+        return ret
+
+    def XDfeCcf_UpdateAntennaCfgSwitchable(self, device_id, AntennaCfgDownlink, AntennaCfgUplink):
+        """
+		Updates antenna configuration of all antennas. Applies gain to downlink only
+		in switchable mode.
+        Note: Clear event status with XDfeCcf_ClearEventStatus() before
+        running this API.
+
+        :param device_id: id of the opened device.
+        :param AntennaCfgDownlink: Array of all downlink antenna configurations.
+        :param AntennaCfgUplink: Array of all uplink antenna configurations.
+        :return: ret - XST_SUCCESS if successful, XST_FAILURE if error occurs.
+        """
+        self.logger.debug(f"XDfeCcf_UpdateAntennaCfgSwitchable({device_id}, "
+						  f"{json.dumps(AntennaCfgDownlink, indent=2)}, "
+						  f"{json.dumps(AntennaCfgUplink, indent=2)})")
+        xccf = self.ccf_dict[device_id][1]
+        AntennaCfgDownlink_ptr = ffi.new("XDfeCcf_AntennaCfg *", AntennaCfgDownlink)
+        AntennaCfgUplink_ptr = ffi.new("XDfeCcf_AntennaCfg *", AntennaCfgUplink)
+        ret = ccf_handle.XDfeCcf_UpdateAntennaCfgSwitchable(xccf, AntennaCfgDownlink_ptr, AntennaCfgUplink_ptr)
         self.logger.debug(f"ret = {ret}")
         return ret
 
@@ -996,6 +1066,19 @@ class CCF(object):
         TDataDelay = TDataDelay_ptr[0]
         self.logger.debug(f"ret = {ret}, Latency = {TDataDelay}")
         return ret, TDataDelay
+
+    def XDfeCcf_SetRegBank(self, device_id, RegBank):
+        """
+        Sets uplink/downlink register bank.
+
+        :param device_id: id of the opened device.
+        :param RegBank: Register bank value to be set.
+        :return: None
+        """
+        self.logger.debug(f"XDfeCcf_SetRegBank({device_id}, {RegBank})")
+        xccf = self.ccf_dict[device_id][1]
+        ccf_handle.XDfeCcf_SetRegBank(xccf, RegBank)
+        return
 
     def XDfeCcf_GetVersions(self, device_id):
         """

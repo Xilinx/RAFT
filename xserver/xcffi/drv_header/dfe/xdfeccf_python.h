@@ -81,6 +81,7 @@
 *       dc     03/21/22 Add prefix to global variables
 * 1.4   dc     04/08/22 Update documentation
 * 1.5   dc     09/12/22 Update handling overflow status
+* 1.6   dc     04/08/22 Switching UL/DL support
 *
 * </pre>
 * @endcond
@@ -185,6 +186,8 @@ typedef struct {
 		and "Operational" state. */
 	XDfeCcf_Trigger CCUpdate; /**< Transition to next CC
 		configuration. Will initiate flush based on CC configuration. */
+	XDfeCcf_Trigger Switch; /**< Switch between Downlink and Uplink datapth
+		configuration. Will initiate flush based on CC configuration. */
 } XDfeCcf_TriggerCfg;
 
 /**
@@ -195,6 +198,7 @@ typedef struct {
 	s32 CCID[XDFECCF_SEQ_LENGTH_MAX]; /**< [0-15].Array of CCID's
 		arranged in the order the CCIDs are required to be processed
 		in the channel filter. */
+	s32 NotUsedCCID; /**< Lowest CCID number not allocated */
 } XDfeCcf_CCSequence;
 
 /*********** end - common code to all Logiccores ************/
@@ -206,6 +210,7 @@ typedef struct {
 	u32 NumAntenna; /**< [1-8] Number of antennas */
 	u32 NumCCPerAntenna; /**< [1-16] Number of CCs per antenna */
 	u32 AntennaInterleave; /**< [1-8] Number of Antenna slots */
+	u32 Switchable; /**< [0,1] If true DL/UL switching is supported */
 } XDfeCcf_ModelParameters;
 
 /**
@@ -223,6 +228,7 @@ typedef struct {
 typedef struct {
 	XDfeCcf_CCSequence Sequence; /**< CCID sequence. */
 	u32 GainStage; /**< [0,1] Enable gain stage */
+	u32 TuserSelect; /**< [0,1] Select DL or UL TUSER */
 } XDfeCcf_Init;
 
 /**
@@ -334,6 +340,7 @@ typedef struct {
 	u32 NumAntenna; /**< Number of antennas */
 	u32 NumCCPerAntenna; /**< Number of CCs per antenna */
 	u32 AntennaInterleave; /**< Number of Antenna slots */
+	u32 Switchable; /**< [0,1] If true DL/UL switching is supported */
 } XDfeCcf_Config;
 
 /**
@@ -342,7 +349,10 @@ typedef struct {
 typedef struct {
 	XDfeCcf_Config Config; /**< Config Structure */
 	XDfeCcf_StateId StateId; /**< StateId */
-	s32 NotUsedCCID; /**< Not used CCID */
+	s32 NotUsedCCID; /**< Lowest CCID number not allocated, in
+		non-switchable mode, also for DL in switchable mode */
+	s32 NotUsedCCID_UL; /**< Lowest CCID number not allocated for UL in
+		switchable mode */
 	u32 SequenceLength; /**< Exact sequence length */
 	char NodeName[XDFECCF_NODE_NAME_MAX_LENGTH]; /**< Node name */
 	struct metal_io_region *Io; /**< Libmetal IO structure */
@@ -374,6 +384,9 @@ XDfeCcf_StateId XDfeCcf_GetStateID(XDfeCcf *InstancePtr);
 
 /* User APIs */
 void XDfeCcf_GetCurrentCCCfg(const XDfeCcf *InstancePtr, XDfeCcf_CCCfg *CCCfg);
+void XDfeCcf_GetCurrentCCCfgSwitchable(const XDfeCcf *InstancePtr,
+				       XDfeCcf_CCCfg *CCCfgDownlink,
+				       XDfeCcf_CCCfg *CCCfgUplink);
 void XDfeCcf_GetEmptyCCCfg(const XDfeCcf *InstancePtr, XDfeCcf_CCCfg *CCCfg);
 void XDfeCcf_GetCarrierCfg(const XDfeCcf *InstancePtr, XDfeCcf_CCCfg *CCCfg,
 			   s32 CCID, u32 *CCSeqBitmap,
@@ -387,8 +400,10 @@ void XDfeCcf_RemoveCCfromCCCfg(XDfeCcf *InstancePtr, XDfeCcf_CCCfg *CCCfg,
 			       s32 CCID);
 void XDfeCcf_UpdateCCinCCCfg(const XDfeCcf *InstancePtr, XDfeCcf_CCCfg *CCCfg,
 			     s32 CCID, const XDfeCcf_CarrierCfg *CarrierCfg);
-u32 XDfeCcf_SetNextCCCfgAndTrigger(const XDfeCcf *InstancePtr,
-				   XDfeCcf_CCCfg *CCCfg);
+u32 XDfeCcf_SetNextCCCfgAndTrigger(XDfeCcf *InstancePtr, XDfeCcf_CCCfg *CCCfg);
+u32 XDfeCcf_SetNextCCCfgAndTriggerSwitchable(XDfeCcf *InstancePtr,
+					     XDfeCcf_CCCfg *CCCfgDownlink,
+					     XDfeCcf_CCCfg *CCCfgUplink);
 u32 XDfeCcf_AddCC(XDfeCcf *InstancePtr, s32 CCID, u32 CCSeqBitmap,
 		  const XDfeCcf_CarrierCfg *CarrierCfg);
 u32 XDfeCcf_RemoveCC(XDfeCcf *InstancePtr, s32 CCID);
@@ -397,6 +412,9 @@ u32 XDfeCcf_UpdateCC(const XDfeCcf *InstancePtr, s32 CCID,
 u32 XDfeCcf_UpdateAntenna(const XDfeCcf *InstancePtr, u32 Ant, bool Enabled);
 u32 XDfeCcf_UpdateAntennaCfg(XDfeCcf *InstancePtr,
 			     XDfeCcf_AntennaCfg *AntennaCfg);
+u32 XDfeCcf_UpdateAntennaCfgSwitchable(XDfeCcf *InstancePtr,
+				       XDfeCcf_AntennaCfg *AntennaCfgDownlink,
+				       XDfeCcf_AntennaCfg *AntennaCfgUplink);
 void XDfeCcf_GetTriggersCfg(const XDfeCcf *InstancePtr,
 			    XDfeCcf_TriggerCfg *TriggerCfg);
 void XDfeCcf_SetTriggersCfg(const XDfeCcf *InstancePtr,
@@ -422,6 +440,7 @@ u32 XDfeCcf_GetTDataDelay(XDfeCcf *InstancePtr, u32 Tap, s32 CCID,
 u32 XDfeCcf_GetTDataDelayFromCCCfg(XDfeCcf *InstancePtr, u32 Tap, s32 CCID,
 				   XDfeCcf_CCCfg *CCCfg, u32 Symmetric, u32 Num,
 				   u32 *TDataDelay);
+void XDfeCcf_SetRegBank(const XDfeCcf *InstancePtr, u32 RegBank);
 void XDfeCcf_GetVersions(const XDfeCcf *InstancePtr, XDfeCcf_Version *SwVersion,
 			 XDfeCcf_Version *HwVersion);
 

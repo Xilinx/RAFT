@@ -11,19 +11,33 @@ def usage():
     # sys.argv[2] - host/board
     # sys.argv[3] - ip_address
     # sys.argv[4] - port
+    # sys.argv[5] - "switchable" option integrated in xsa
     print(f"Usage: The application work in three modes xclient, xcffi and xpyro\n"
-          f"python3 {sys.argv[0]} xclient host/board ip_address port => Runs at host or board with xclient\n"
-          f"sudo python3 {sys.argv[0]} xcffi => Runs at board with xcffi\n"
-          f"python3 {sys.argv[0]} xpyro host/board ip_address port => Runs at host or board with xpyro\n"
-          f"Example: python3 {sys.argv[0]} xclient host 169.254.10.2 9090")
+          f"python3 {sys.argv[0]} xclient host/board ip_address port switchable => Runs at host or board with xclient\n"
+          f"sudo python3 {sys.argv[0]} xcffi switchable => Runs at board with xcffi\n"
+          f"python3 {sys.argv[0]} xpyro host/board ip_address port switchable => Runs at host or board with xpyro\n"
+          f"Example1: python3 {sys.argv[0]} xclient host 169.254.10.2 9090\n"
+          f"Example2: python3 {sys.argv[0]} xclient host 169.254.10.2 9090 switchable ")
+
+switchable_flag = False
 
 # 'xcffi' option will run only in the board
 if (len(sys.argv) ==  2):
     if (sys.argv[1] != 'xcffi'):
         usage()
         sys.exit()
-
-elif (len(sys.argv) !=  5):
+elif (len(sys.argv) ==  3):
+    if (sys.argv[1] != 'xcffi'):
+        usage()
+        sys.exit()
+    elif (sys.argv[2] == 'switchable'):
+            switchable_flag = True
+elif (len(sys.argv) ==  5):
+    pass
+elif (len(sys.argv) ==  6):
+    if (sys.argv[5] == 'switchable'):
+        switchable_flag = True
+else:
     usage()
     sys.exit()
 
@@ -279,6 +293,26 @@ CurrCCCfg = handle.GetStruct_XDfeCcf_CCCfg()
 CurrentCCCfg = handle.XDfeCcf_GetCurrentCCCfg(device_id, CurrCCCfg)
 
 #Description:
+#   Returns the current CC configuration for DL and UL in switchable mode.
+#   Not used slot ID in a sequence (Sequence.CCID[Index]) are represented
+#   as (-1), not the value in registers.
+#C header declaration:
+#   void XDfeCcf_GetCurrentCCCfgSwitchable(const XDfeCcf *InstancePtr,
+#			     XDfeCcf_CCCfg *CCCfgDownlink,
+#			     XDfeCcf_CCCfg *CCCfgUplink);
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CCCfgDownlink: Downlink CC configuration container.
+#   CCCfgUplink: Uplink CC configuration container.
+#Return:
+#   CCCfgDownlink, CCCfgUplink: CC configuration container
+
+if (switchable_flag == True):
+	CCCfgDownlink = handle.GetStruct_XDfeCcf_CCCfg()
+	CCCfgUplink = handle.GetStruct_XDfeCcf_CCCfg()
+	CCCfgDownlink, CCCfgUplink = handle.XDfeCcf_GetCurrentCCCfgSwitchable(device_id, CCCfgDownlink, CCCfgUplink)
+
+#Description:
 #   Returns configuration structure CCCfg with CCCfg->Sequence.Length value set
 #   in XDfeCcf_Configure(), array CCCfg->Sequence.CCID[] members are set to not
 #   used value (-1) and the other CCCfg members are set to 0.
@@ -342,6 +376,29 @@ AntennaCfg = {
 	"Enable": [1,1,1,1,1,1,0,0],
 }
 ret = handle.XDfeCcf_UpdateAntennaCfg(device_id, AntennaCfg)
+
+#Description:
+#   Updates antenna configuration of all antennas. Applies gain to downlink only
+#   in switchable mode.
+#C header declaration:
+#   u32 XDfeCcf_UpdateAntennaCfgSwitchable(XDfeCcf *InstancePtr,
+#				       XDfeCcf_AntennaCfg *AntennaCfgDownlink,
+#				       XDfeCcf_AntennaCfg *AntennaCfgUplink)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   AntennaCfgDownlink: Array of all downlink antenna configurations.
+#   AntennaCfgUplink: Array of all uplink antenna configurations.
+#Return:
+#   ret - XST_SUCCESS if successful, XST_FAILURE if error occurs.
+#Note:
+#   Clear event status with XDfeCcf_ClearEventStatus() before running this API.
+
+if (switchable_flag == True):
+	AntennaCfgDL = handle.GetStruct_XDfeCcf_AntennaCfg()
+	AntennaCfgDL = {"Enable": [1,1,1,1,1,1,0,0]}
+	AntennaCfgUL = handle.GetStruct_XDfeCcf_AntennaCfg()
+	AntennaCfgUL = {"Enable": [1,1,1,1,1,1,0,0]}
+	ret = handle.XDfeCcf_UpdateAntennaCfgSwitchable(device_id, AntennaCfgDL, AntennaCfgUL)
 
 #Description:
 #   Adds specified CCID, with specified configuration, to a local CC
@@ -430,6 +487,27 @@ CCCfg = handle.XDfeCcf_UpdateCCinCCCfg(device_id, CCCfg, 0, CarrierCfg)
 
 CCCfg = handle.GetStruct_XDfeCcf_CCCfg()
 ret, CCCfg = handle.XDfeCcf_SetNextCCCfgAndTrigger(device_id, CCCfg)
+
+#Description:
+#   Writes local CC configuration to the shadow (NEXT) registers and triggers
+#   copying from shadow to operational (CURRENT) registers.
+#C header declaration:
+#   u32 XDfeCcf_SetNextCCCfgAndTriggerSwitchable(const XDfeCcf *InstancePtr,
+#					     XDfeCcf_CCCfg *CCCfgDownlink,
+#					     XDfeCcf_CCCfg *CCCfgUplink)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CCCfgDownlink: Downlink CC configuration container.
+#   CCCfgUplink: Uplink CC configuration container.
+#Return:
+#   ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
+#   CCCfgDownlink: Downlink CC configuration container.
+#   CCCfgUplink: Uplink CC configuration container.
+
+if (switchable_flag == True):
+	CCCfgDownlink = handle.GetStruct_XDfeCcf_CCCfg()
+	CCCfgUplink = handle.GetStruct_XDfeCcf_CCCfg()
+	ret, CCCfgDownlink, CCCfgUplink = handle.XDfeCcf_SetNextCCCfgAndTriggerSwitchable(device_id, CCCfgDownlink, CCCfgUplink)
 
 #Description:
 #   Adds specified CCID, with specified configuration.
@@ -577,7 +655,24 @@ Coeffs_out = handle.XDfeCcf_LoadCoefficients(device_id, 0, 8, Coeffs_in)
 OverflowStatus = handle.XDfeCcf_GetOverflowStatus(device_id)
 
 #Description:
-#   Get event status
+#   Sets uplink/downlink register bank.
+#C header declaration:
+#   void XDfeCcf_SetRegBank(const XDfeCcf *InstancePtr,
+#                  u32 RegBank)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   RegBank: Register bank value to be set.
+#Return:
+#   None
+
+if (switchable_flag == True):
+	RegBank = 1
+	handle.XDfeCcf_SetRegBank(device_id, RegBank)
+	RegBank = 0
+	handle.XDfeCcf_SetRegBank(device_id, RegBank)
+
+#Description:
+#   Gets event status.
 #C header declaration:
 #   void XDfeCcf_GetEventStatus(const XDfeCcf *InstancePtr, XDfeCcf_Status *Status);
 #Input Arguments:
