@@ -152,8 +152,8 @@ SUMMARY = "RAFT python application"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
-SRC_URI = "git://gitenterprise.xilinx.com/xirssw/RAFT;protocol=https;branch=master"
-SRCREV = "0e71cb380bf5cbd62d8a13bddaae804ebb99d1f6"
+SRC_URI = "git://github.com/Xilinx/RAFT;protocol=https;branch=main"
+SRCREV = "6ecd0d0d0c8b586fb0ba8ab6fedd34dd9fe7c60b"
 
 RDEPENDS_${PN} += "bash"
 S = "${WORKDIR}/git"
