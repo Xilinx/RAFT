@@ -1,0 +1,76 @@
+COPYRIGHT TEXT:
+---------------
+
+Copyright (c) 2021 - 2022, Xilinx Inc. and Contributors. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause
+
+FILES:
+./examples/python/pat/pat20.py
+./examples/python/ug1530/ccf_example1.py
+./examples/python/ug1530/ccseq_example1.py
+./examples/python/ug1530/common_example1.py
+./examples/python/ug1530/equ_example1.py
+./examples/python/ug1530/mix_example1.py
+./examples/python/ug1530/rfdc_example1.py
+./examples/python/ug1530/stimcap_example1.py
+./examples/python/ug1530/vmux_example1.py
+./examples/python/usage/python_usage_axi_memmap.py
+./examples/python/usage/python_usage_ccf.py
+./examples/python/usage/python_usage_console.py
+./examples/python/usage/python_usage_equ.py
+./examples/python/usage/python_usage_mixer.py
+./examples/python/usage/python_usage_ofdm.py
+./examples/python/usage/python_usage_prach.py
+./examples/python/usage/python_usage_rfclk.py
+./examples/python/usage/python_usage_rfdc.py
+./examples/python/rftool/mixer.py
+./examples/python/rftool/rftool.py
+./xclient/data_stream/data_transfer_no_dma/axi_memmap_client.py
+./xclient/dfe/ccf_client.py
+./xclient/dfe/equ_client.py
+./xclient/dfe/mix_client.py
+./xclient/dfe/prach_client.py
+./xclient/dfe/ofdm_client.py
+./xclient/rfdc/rfdc_client.py
+./xclient/rfdc/rfclk_client.py
+./xclient/utils/console_client.py
+./xserver/init/xpyro-prj1/__init__.py
+./xserver/init/xpyro-prj2/__init__.py
+./xserver/init/xpyro-prj3/__init__.py
+./xserver/init/xpyro-prj4/__init__.py
+./xserver/init/xpyro-prj5/__init__.py
+./xserver/utils/utils.py
+./xserver/utils/console_server.py
+./xserver/xcffi/drv_api/data_stream/data_transfer_no_dma/axi_memmap_c.py
+./xserver/xcffi/drv_api/dfe/ccf_server.py
+./xserver/xcffi/drv_api/dfe/equ_server.py
+./xserver/xcffi/drv_api/dfe/mix_server.py
+./xserver/xcffi/drv_api/dfe/prach_server.py
+./xserver/xcffi/drv_api/dfe/ofdm_server.py
+./xserver/xcffi/drv_api/rfdc/rfclk_server.py
+./xserver/xcffi/drv_api/rfdc/rfdc_server.py
+./xserver/xpyro/data_stream/data_transfer_no_dma/axi_memmap.py
+./c_lib/libaximemmap/axi_memmap.c
+./c_lib/libxhelper/xhelper.c
+--------------------------------------------------------------------------------
+
+COPYRIGHT TEXT:
+---------------
+
+Copyright (c) 2021 - 2022 Xilinx, Inc. All rights reserved.
+SPDX-License-Identifier: MIT
+
+FILES:
+./c_lib/libaximemmap/axi_memmap.h
+./c_lib/libxhelper/xhelper.h
+./xserver/xcffi/drv_header/board_common/xhelper.h
+./xserver/xcffi/drv_header/data_stream/data_transfer_no_dma/axi_memmap.h
+./xserver/xcffi/drv_header/dfe/xdfeccf_python.h
+./xserver/xcffi/drv_header/dfe/xdfeequ_python.h
+./xserver/xcffi/drv_header/dfe/xdfemix_python.h
+./xserver/xcffi/drv_header/dfe/xdfeprach_python.h
+./xserver/xcffi/drv_header/dfe/xdfeofdm_python.h
+./xserver/xcffi/drv_header/rfdc/xrfclk_h_python.h
+./xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h
+--------------------------------------------------------------------------------
+

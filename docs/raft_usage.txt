@@ -1,0 +1,24 @@
+The steps to build and run RAFT at startup of the board is available at build_petalinux_with_raft.txt
+This document illustrates the usage options of RAFT at server and client
+
+RAFT can be used in three modes
+xclient - At host PC or at board communicating to server with xclient
+xcffi - At board directly communicating with xcffi without pyro
+xpyro - At host PC or at board communicating with pyro server
+
+The usage of all three modes are described in the README.md at examples/python/usage folder.
+
+RAFT usage at board
+===================
+Copy xserver, xclient and examples in RAFT repository to /usr/share/raft folder. This can be done through recipe method as mentioned in build_petalinux_with_raft.txt
+Projects are created in xserver/init/ directory. The desired server items are grouped together in the sub-directories.
+Change to the desired project directory.
+cd xserver/init/xpyro-prj1
+sudo python3 __init__.py
+Note: By default __init__.py will take the ipaddress of eth0 and port number 9090. If another IP address and port is required, it can be passed over commandline. Usage: __init__.py ipaddress portnumber
+
+RAFT usage at client
+===================
+Each item in xclient client folder can communicate with the corresponding server independently.
+The client can be accessed with any tool that can work with python (MATLAB, LabView, GNU Radio etc.).
+The IP address of the server can be set at client side using a client API SetIpAndPort(ipaddr, port).

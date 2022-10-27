@@ -1,0 +1,61 @@
+Follow the below steps to add a new library to RAFT 
+
+Step 1: Compile the C code as a linux shared object.
+- Avoid external dependencies in the library.
+- libmetal library support is available in the RAFT framework.
+- For more details check the link - https://cffi.readthedocs.io/en/latest/cdef.html#loading-libraries
+
+Step 2: Keep all the APIs that need to be exposed to python in one header file.
+- Ensure the header file is compatible with ffi cdef https://cffi.readthedocs.io/en/latest/cdef.html#ffi-cdef-limitations
+
+Step 3: Add the header file to RAFT
+- At location xserver/xcffi/drv_header/ under a directory related to the library
+
+Step 4: Prepare a server file
+- At location xserver/xcffi/drv_api/ in a directory with the same name as in Step 3.
+- Use the CCF server file as example. xserver/xcffi/drv_api/dfe/ccf_server.py
+- open_c_library() function in utils/utils.py can be used for opening the shared object with the header
+- A class need to be present with the module name as class name
+- All server class constructors in RAFT should be maintained in the same way.
+- Log handling should be done in the same way in all RAFT servers
+- Add dictionary equivalent of all enums
+	- Function name begin with "GetEnum_", and follow by enum name as in header file.
+	- The dictionary is supposed to be a key value pair with key as the string equivalent of enum members and the its numerical representations as value.
+- Add dictionary equivalent of all structures
+	- Function name begin with "GetStruct_", and follow by structure name as in header file.
+	- The dictionary is supposed to be a key value pair with key as the string equivalent of structure member and 0 as its value.
+- All python APIs should carry the same name as corresponding C function.
+- The naming convention of variable names passed to functions should also be same as in C header file.
+- For other variables pep8 standard should be used.
+- InstanceInit API should support multiple instances in all server files.
+	- InstanceInit should keep the instance pointers in a dictionary as shown in xserver/xcffi/drv_api/dfe/ccf_server.py
+-  InstanceClose API should delete the dictionary created in InstanceInit
+	- Refer xserver/xcffi/drv_api/dfe/ccf_server.py for example
+- The required support function can be exported from utils/utils.py for conversion from python to C
+- Logs at Debug level should be added in all functions.
+
+Step 5: Add server class name to the init script
+- Different project can be added in xserver/init/ directory
+- Create a new project or add to the existing project according to the requirement
+- Always keep all the projects in the same way
+- Use xserver/init/xpyro-prj1/__init__.py for reference
+
+Step 6: Prepare a client file
+- At location xclient/ in a directory with the same name as in Step 3.
+- Use CCF client file as example xclient/dfe/ccf_client.py
+- A class need to be present with the module name followed by "_Client" as suffix
+- All client class constructors in RAFT should be maintained in the same way.
+- Log handling should be done in the same way in all RAFT clients
+- There should be a SetIpAndPort() function which creates the Pyro object as shown in xclient/dfe/ccf_client.py
+- There should be an equivalent API in client for all server APIs as in xclient/dfe/ccf_client.py
+- An object of the class should be available in the client file.
+
+Step 7: Create a python usage file
+- All python usage files in RAFT should carry a common format of taking arguments
+- Use examples/python/usage/python_usage_ccf.py as an example
+- Sample usage of all APIs in client/server should be shown in python usage script.
+
+Step 8: Create a MATLAB usage file
+- All MATLAB usage files in RAFT should carry a common format
+- Use examples/matlab/matlab_ccf_usage.m as an example
+- Sample usage of all APIs in client/server should be shown in MATLAB usage script.         

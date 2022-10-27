@@ -1,0 +1,585 @@
+To build petalinux with jupyter notebook and RAFT, follow the below steps.
+Use this document only if jupyter notebook is also required.
+The final file system size will be higher in comparison.
+
+For usage without jupyter notebook, use <RAFT>/docs/build_petalinux_with_raft.txt
+
+BSPs are available at https://www.xilinx.com/support/download/index.html/content/xilinx/en/downloadNav/embedded-design-tools.html
+For the tools, see the corresponding version of the PetaLinux Tools Documentation: PetaLinux Command Line Reference (UG1157).
+
+Step 1: petalinux-create
+petalinux-create -t project -s <bsp_name> -n <proj_name>
+
+Step 2: petalinux-config
+cd <proj_name>
+petalinux-config --silentconfig
+
+Step 3: Create pyro folder in recipes-apps
+cd <proj_name>/project-spec/meta-user/recipes-apps/
+mkdir python3-pyro4
+cd python3-pyro4
+
+Copy python3-pyro4_4.73.bb (given below) to <proj_name>/project-spec/meta-user/recipes-apps/python3-pyro4 folder.
+
+Create python3-pyro4_4.73.bb file with the below content
+========================================================
+SUMMARY = "Python Remote Objects"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=cd13dafd4eeb0802bb6efea6b4a4bdbc"
+
+SRC_URI[md5sum] = "0375c061b93411feb86da01e801df888"
+SRC_URI[sha256sum] = "536b07a097d0619e7ab1effa3747fda177a24168d17a07a93ca9ac30977608f7"
+
+PYPI_PACKAGE = "Pyro4"
+
+inherit pypi setuptools3
+
+RDEPENDS_${PN} += " \
+    ${PYTHON_PN}-logging \
+    ${PYTHON_PN}-json \
+    ${PYTHON_PN}-pickle \
+    ${PYTHON_PN}-fcntl \
+    ${PYTHON_PN}-netserver \
+    ${PYTHON_PN}-numbers \
+    ${PYTHON_PN}-serpent \
+    ${PYTHON_PN}-threading \
+    "
+========================================================
+Note: LIC_FILES_CHKSUM below is the checksum of LICENSE file in the Pyro4-4.73.tar.gz
+(https://pypi.org/project/Pyro4/4.73/#files)
+SRC_URI md5sum and sha256sum are available in the same page under 'view hashes'
+of Source Distribution
+
+cd ../../../../
+
+Step 4: Create libxhelper library recipe
+petalinux-create -t apps --template c --name libxhelper --enable
+cd project-spec/meta-user/recipes-apps/libxhelper/files
+rm -f *
+Copy the contents from <RAFT>/c_lib/libxhelper to this folder.
+cd ..
+Edit the file libxhelper.bb. It should look as follows
+============================================================================
+#
+# This file is the libxhelper recipe.
+#
+
+SUMMARY = "libxhelper application"
+SECTION = "libs"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://xhelper.c \
+           file://xhelper.h \
+           file://Makefile \
+        "
+
+S = "${WORKDIR}"
+
+DEPENDS += "libmetal"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+PROVIDES = "xhelper"
+TARGET_CC_ARCH += "${LDFLAGS}"
+
+do_install() {
+    install -d ${D}${libdir}
+    install -d ${D}${includedir}
+    oe_libinstall -so libxhelper ${D}${libdir}
+    install -d -m 0755 ${D}${includedir}/
+    install -m 0644 ${S}/xhelper.h ${D}${includedir}/
+}
+
+FILES:${PN} = "${libdir}/*.so.* ${includedir}/*"
+FILES:${PN}-dev = "${libdir}/*.so"
+============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Step 5: Create libaximemmap library recipe
+petalinux-create -t apps --template c --name libaximemmap --enable
+cd project-spec/meta-user/recipes-apps/libaximemmap/files
+rm -f *
+Copy the contents from <RAFT>/c_lib/libaximemmap to this folder.
+cd ..
+Edit the file libaximemmap.bb. It should look as follows
+============================================================================
+#
+# This file is the libaximemmap recipe.
+#
+
+SUMMARY = "libaximemmap application"
+SECTION = "libs"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://axi_memmap.c \
+           file://axi_memmap.h \
+           file://Makefile \
+        "
+
+S = "${WORKDIR}"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+PROVIDES = "aximemmap"
+TARGET_CC_ARCH += "${LDFLAGS}"
+
+do_install() {
+    install -d ${D}${libdir}
+    install -d ${D}${includedir}
+    oe_libinstall -so libaximemmap ${D}${libdir}
+    install -d -m 0755 ${D}${includedir}/
+    install -m 0644 ${S}/axi_memmap.h ${D}${includedir}/
+}
+
+FILES:${PN} = "${libdir}/*.so.* ${includedir}/*"
+FILES:${PN}-dev = "${libdir}/*.so"
+============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Step 6: Create raft library recipe
+petalinux-create -t apps --template c --name raft --enable
+cd project-spec/meta-user/recipes-apps/raft
+Edit the file raft.bb as shown below
+SRC_URI and SRCREV should be updated as per the build requirements.
+Note that appropriate __init__.py project in raft/xserver/init should be used.
+In the below example, raft/xserver/init/xpyro-prj1 is used.
+The same file should be used in raft-startup.service (Step 7)
+This is a generic document for all boards.
+User need to ensure all the driver shared objects needed for the __init__.py is available in the petalinux filesystem.
+============================================================================
+SUMMARY = "RAFT python application"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "git://gitenterprise.xilinx.com/xirssw/RAFT;protocol=https;branch=master"
+SRCREV = "0e71cb380bf5cbd62d8a13bddaae804ebb99d1f6"
+
+
+RDEPENDS_${PN} += "bash"
+S = "${WORKDIR}/git"
+
+do_install() {
+	install -d -m 0755 ${D}${datadir}/raft
+	install -d -m 0755 ${D}${datadir}/raft/examples
+	install -d -m 0755 ${D}${datadir}/raft/examples/usage
+	install -d -m 0755 ${D}${datadir}/raft/examples/ug1530
+	install -d -m 0755 ${D}${datadir}/raft/examples/rftool
+	install -d -m 0755 ${D}${datadir}/raft/xclient
+	install -d -m 0755 ${D}${datadir}/raft/xclient/data_stream
+	install -d -m 0755 ${D}${datadir}/raft/xclient/data_stream/data_transfer_no_dma
+	install -d -m 0755 ${D}${datadir}/raft/xclient/dfe
+	install -d -m 0755 ${D}${datadir}/raft/xclient/rfdc
+	install -d -m 0755 ${D}${datadir}/raft/xserver
+	install -d -m 0755 ${D}${datadir}/raft/xserver/init
+	install -d -m 0755 ${D}${datadir}/raft/xserver/init/xpyro-prj2
+	install -d -m 0755 ${D}${datadir}/raft/xserver/utils
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/data_stream
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/data_stream/data_transfer_no_dma
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/dfe
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/rfdc
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/board_common
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/data_stream
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/data_stream/data_transfer_no_dma
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/dfe
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/rfdc
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xpyro
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xpyro/data_stream
+	install -d -m 0755 ${D}${datadir}/raft/xserver/xpyro/data_stream/data_transfer_no_dma
+	install -m 0755 ${S}/examples/python/usage/*.py ${D}${datadir}/raft/examples/usage
+	install -m 0755 ${S}/examples/python/usage/README.md ${D}${datadir}/raft/examples/usage
+	install -m 0755 ${S}/examples/python/ug1530/*.py ${D}${datadir}/raft/examples/ug1530
+	install -m 0755 ${S}/examples/python/ug1530/README.md ${D}${datadir}/raft/examples/ug1530
+	install -m 0755 ${S}/examples/python/rftool/*.* ${D}${datadir}/raft/examples/rftool
+	install -m 0755 ${S}/xserver/init/xpyro-prj2/*.py ${D}${datadir}/raft/xserver/init/xpyro-prj2
+	install -m 0755 ${S}/xserver/utils/*.py ${D}${datadir}/raft/xserver/utils
+	install -m 0755 ${S}/xclient/data_stream/data_transfer_no_dma/*.py ${D}${datadir}/raft/xclient/data_stream/data_transfer_no_dma
+	install -m 0755 ${S}/xclient/dfe/*.py ${D}${datadir}/raft/xclient/dfe
+	install -m 0755 ${S}/xclient/rfdc/*.py ${D}${datadir}/raft/xclient/rfdc
+	install -m 0755 ${S}/xserver/xcffi/drv_api/data_stream/data_transfer_no_dma/*.py ${D}${datadir}/raft/xserver/xcffi/drv_api/data_stream/data_transfer_no_dma
+	install -m 0755 ${S}/xserver/xcffi/drv_api/dfe/*.py ${D}${datadir}/raft/xserver/xcffi/drv_api/dfe
+	install -m 0755 ${S}/xserver/xcffi/drv_api/rfdc/*.py ${D}${datadir}/raft/xserver/xcffi/drv_api/rfdc
+	install -m 0755 ${S}/xserver/xcffi/drv_header/board_common/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/board_common
+	install -m 0755 ${S}/xserver/xcffi/drv_header/data_stream/data_transfer_no_dma/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/data_stream/data_transfer_no_dma
+	install -m 0755 ${S}/xserver/xcffi/drv_header/dfe/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/dfe
+	install -m 0755 ${S}/xserver/xcffi/drv_header/rfdc/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/rfdc
+	install -m 0755 ${S}/xserver/xpyro/data_stream/data_transfer_no_dma/*.py ${D}${datadir}/raft/xserver/xpyro/data_stream/data_transfer_no_dma
+}
+
+FILES_${PN} += "${datadir}/raft"
+============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Step 7: Create raft-startup recipe
+This is a simple autostart recipe. Modifications can be done as per requirements.
+petalinux-create -t apps --template c --name raft-startup --enable
+cd project-spec/meta-user/recipes-apps/raft-startup
+Edit the file raft-startup.bb. It can be written as follows
+============================================================================
+# This file is the raft-startup recipe.
+#
+
+SUMMARY = "Simple raft-startup application"
+SECTION = "PETALINUX/apps"
+LICENSE = "MIT"
+
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://raft-startup \
+        file://raft-startup.service \
+"
+
+S = "${WORKDIR}"
+
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+inherit update-rc.d systemd
+
+INITSCRIPT_NAME = "raft-startup"
+INITSCRIPT_PARAMS = "start 99 S ."
+
+SYSTEMD_PACKAGES = "${PN}"
+SYSTEMD_SERVICE:${PN} = "raft-startup.service"
+SYSTEMD_AUTO_ENABLE:${PN}="enable"
+
+do_install() {
+        if ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'true', 'false', d)}; then
+                install -d ${D}${sysconfdir}/init.d/
+                install -m 0755 ${WORKDIR}/raft-startup ${D}${sysconfdir}/init.d/
+        fi
+
+        install -d ${D}${bindir}
+        install -m 0777 ${WORKDIR}/raft-startup ${D}${bindir}/
+        install -d ${D}${systemd_system_unitdir}
+        install -m 0644 ${WORKDIR}/raft-startup.service ${D}${systemd_system_unitdir}
+}
+
+FILES:${PN} += "${@bb.utils.contains('DISTRO_FEATURES','sysvinit','${sysconfdir}/*', '', d)}"
+=============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Create raft-startup.service in files directory.
+cd files
+rm -rf *
+Create raft-startup.service as below
+=============================================================================
+[Unit]
+Description=raft-startup
+After=systemd-networkd.service
+Requires=systemd-networkd.service
+
+[Service]
+StandardOutput=journal+console
+ExecStart=/usr/bin/python3 /usr/share/raft/xserver/init/xpyro-prj2/__init__.py 127.0.0.1
+WorkingDirectory=/usr/share/raft/xserver/init/xpyro-prj2
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+=============================================================================
+Add raft-startup file here. This is just for demonstration..
+=============================================================================
+# Start up
+=============================================================================
+Step 8: Create app-startup recipe
+This is a simple autostart  intended to start applications along with RAFT.
+IP Address can be set here, if needed.
+Modifications can be done as per requirements.
+petalinux-create -t apps --template c --name app-startup --enable
+cd project-spec/meta-user/recipes-apps/app-startup
+Edit the file app-startup.bb. It can be modified as below
+============================================================================
+# This file is the app-startup recipe.
+#
+
+SUMMARY = "Simple app-startup application"
+SECTION = "PETALINUX/apps"
+LICENSE = "MIT"
+
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://app-startup \
+           file://app-startup.service \
+"
+
+S = "${WORKDIR}"
+
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+inherit update-rc.d systemd
+
+INITSCRIPT_NAME = "app-startup"
+INITSCRIPT_PARAMS = "start 99 S ."
+
+SYSTEMD_PACKAGES = "${PN}"
+SYSTEMD_SERVICE:${PN} = "app-startup.service"
+SYSTEMD_AUTO_ENABLE:${PN}="enable"
+
+do_install() {
+        if ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'true', 'false', d)}; then
+                install -d ${D}${sysconfdir}/init.d/
+                install -m 0755 ${WORKDIR}/app-startup ${D}${sysconfdir}/init.d/
+        fi
+
+        install -d ${D}${bindir}
+        install -m 0777 ${WORKDIR}/app-startup ${D}${bindir}/
+        install -d ${D}${systemd_system_unitdir}
+        install -m 0644 ${WORKDIR}/app-startup.service ${D}${systemd_system_unitdir}
+}
+
+FILES:${PN} += "${@bb.utils.contains('DISTRO_FEATURES','sysvinit','${sysconfdir}/*', '', d)}"
+=============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Create app-startup.service in files directory.
+cd files
+rm -rf *
+Create app-startup.service
+=============================================================================
+[Unit]
+Description=app-startup
+
+[Service]
+Type=oneshot
+StandardOutput=journal+console
+ExecStart=/usr/bin/app-startup start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
+=============================================================================
+Create app-startup file. An example is given below.
+=============================================================================
+#!/bin/sh
+#
+# APP Start-Up Script
+#
+# Applications inteded to start with RAFT can be initialized here
+#
+
+start ()
+{
+    echo "Set IP address on eth0"
+    sudo ifconfig -a | grep eth0
+    RESULT=$?
+    if [ $RESULT -eq 0 ]; then
+        sudo ifconfig eth0 169.254.10.2 up
+    fi
+}
+
+stop ()
+{
+    echo "Stopping Applications"
+}
+
+restart()
+{
+    stop
+    start
+}
+
+
+case "$1" in
+    start)
+        start; ;;
+    stop)
+        stop; ;;
+    restart)
+        restart; ;;
+    *)
+        echo "Usage: $0 {start|stop|restart}"
+        exit 1
+esac
+
+exit $?
+=============================================================================
+Step 9: Create jupyter-autostart recipe
+This is a simple jupyter autostart recipe. Modifications can be done as per requirements.
+petalinux-create -t apps --template c --name jupyter-autostart --enable
+cd project-spec/meta-user/recipes-apps/jupyter-autostart
+Edit the file jupyter-autostart.bb as show below.
+============================================================================
+#this file is the jupyter-autostart recipe.
+#
+
+SUMMARY = "jupyter-autostart application"
+SECTION = "PETALINUX/apps"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://jupyter-autostart.sh \
+        file://jupyter-autostart.service \
+"
+
+S = "${WORKDIR}"
+
+FILESEXTRAPATHS:prepend := "${THISDIR}/files:"
+
+inherit update-rc.d systemd
+
+INITSCRIPT_NAME = "jupyter-autostart.sh"
+INITSCRIPT_PARAMS = "start 99 S ."
+
+SYSTEMD_PACKAGES = "${PN}"
+SYSTEMD_SERVICE:${PN} = "jupyter-autostart.service"
+SYSTEMD_AUTO_ENABLE:${PN}="enable"
+
+do_install() {
+        if ${@bb.utils.contains('DISTRO_FEATURES', 'sysvinit', 'true', 'false', d)}; then
+                install -d ${D}${sysconfdir}/init.d/
+                install -m 0755 ${WORKDIR}/jupyter-autostart.sh ${D}${sysconfdir}/init.d/
+        fi
+
+        install -d ${D}${bindir}
+        install -m 0777 ${WORKDIR}/jupyter-autostart.sh ${D}${bindir}/
+        install -d ${D}${systemd_system_unitdir}
+        install -m 0644 ${WORKDIR}/jupyter-autostart.service ${D}${systemd_system_unitdir}
+}
+FILES:${PN} += "${@bb.utils.contains('DISTRO_FEATURES','sysvinit','${sysconfdir}/*', '', d)}"
+=============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Create jupyter-autostart.service and jupyter-autostart in files directory.
+cd files
+rm -rf *
+Create jupyter-autostart.service as below
+=============================================================================
+[Unit]
+Description=jupyter-autostart
+After=raft-startup.service
+
+[Service]
+ExecStart=/usr/bin/jupyter-autostart.sh
+StandardOutput=journal+console
+
+[Install]
+WantedBy=multi-user.target
+=============================================================================
+
+Create jupyter-autostart.sh. A simple example is shown below.
+This can be modified as per requirements.
+=============================================================================
+#!/bin/sh
+
+cd /usr/share/notebooks/
+jupyter nbextension enable --py widgetsnbextension
+jupyter nbextension enable --py --sys-prefix bqplot
+export PYTHONPATH=.:/usr/share/raft/xclient/pat:$PYTHONPATH
+echo "c.NotebookApp.token = ''" >> /etc/jupyter/jupyter_notebook_config.py
+echo "c.NotebookApp.password = ''" >> /etc/jupyter/jupyter_notebook_config.py
+echo "c.NotebookApp.disable_check_xsrf = True" >> /etc/jupyter/jupyter_notebook_config.py
+jupyter notebook --ip=0.0.0.0 --no-browser --notebook-dir=/usr/share/notebooks --allow-root
+=============================================================================
+Step 10: Mixer Notebook Recipe
+This is a simple recipe to demonstrate addition of a notebook application to petalinux.
+Modifications can be done as per requirements.
+petalinux-create -t apps --template c --name mixer-notebook --enable
+cd project-spec/meta-user/recipes-apps/mixer-notebook/files
+rm -f *
+Copy <RAFT>/examples/python/rftool/mixer.ipynb and <RAFT>/examples/python/rftool/rftool.py to here.
+cd ..
+Edit the file mixer-notebook.bb as below.
+ ============================================================================
+SUMMARY = "Mixer notebook application"
+SECTION = "PETALINUX/apps"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://mixer.ipynb \
+           file://rftool.py \
+          "
+#inherit xilinx-pynq setuptools3
+S = "${WORKDIR}"
+
+do_compile() {
+}
+
+do_install() {
+       echo ${S}
+       install -d -m 0755 ${D}${datadir}/notebooks
+       install -d -m 0755 ${D}${datadir}/notebooks/
+       install -m 0755 ${S}/mixer.ipynb ${D}${datadir}/notebooks/
+       install -m 0755 ${S}/rftool.py ${D}${datadir}/notebooks/
+}
+FILES:${PN} += "${datadir}/notebooks"
+
+=============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+cd files
+rm -rf *
+Copy rftool.py and mixer.ipynb from <RAFT>/examples/python/rftool folder to files directory.
+
+Step 11: Edit <proj_name>/project-spec/configs/rootfs_config
+Add the below lines.
+CONFIG_libsysfs=y
+CONFIG_sysfsutils=y
+CONFIG_sysfsutils-dev=y
+CONFIG_libmetal=y
+CONFIG_libmetal-dev=y
+CONFIG_rfdc=y
+CONFIG_rfdc-dev=y
+CONFIG_rfclk=y
+CONFIG_dtc=y
+CONFIG_python3-async=y
+CONFIG_python3-pyro4=y
+CONFIG_python3-cffi=y
+CONFIG_python3-logging=y
+CONFIG_python3-json=y
+CONFIG_python3-pickle=y
+CONFIG_python3-fcntl=y
+CONFIG_python3-netserver=y
+CONFIG_python3-numbers=y
+CONFIG_python3-serpent=y
+CONFIG_python3-threading=y
+CONFIG_python3-bqplot=y
+CONFIG_packagegroup-petalinux-jupyter=y
+CONFIG_nodejs=y
+CONFIG_nodejs-dev=y
+CONFIG_nodejs-npm=y
+CONFIG_ADD_EXTRA_USERS="root:root;petalinux:plnx;"
+CONFIG_ADD_USERS_TO_GROUPS="petalinux:audio,video;"
+CONFIG_ADD_USERS_TO_SUDOERS="petalinux"
+
+Step 12: Edit <proj_name>/project-spec/meta-user/conf/user-rootfsconfig
+Add the below lines.
+CONFIG_python3-pyro4
+CONFIG_python3-cffi
+CONFIG_python3-bqplot
+CONFIG_packagegroup-petalinux-jupyter
+CONFIG_nodejs
+CONFIG_nodejs-dev
+CONFIG_nodejs-npm
+CONFIG_python3-async
+
+Step 13: Edit <proj_name>/project-spec/meta-user/conf/petalinuxbsp.conf
+IMAGE_INSTALL:append = " libmetal-dev"
+IMAGE_INSTALL:append += " rfdc-dev"
+
+Note: Build options can be given as per requirements.
+
+Step 14: Config rootfs
+petalinux-config -c rootfs --silentconfig
+
+Step 15: Build
+petalinux-build
+
+For boot options please refer UG1444.
+
