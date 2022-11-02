@@ -10,7 +10,6 @@ FILES:
 ./examples/python/usage/python_usage_console.py
 ./examples/python/usage/python_usage_equ.py
 ./examples/python/usage/python_usage_mixer.py
-./examples/python/usage/python_usage_ofdm.py
 ./examples/python/usage/python_usage_prach.py
 ./examples/python/usage/python_usage_rfclk.py
 ./examples/python/usage/python_usage_rfdc.py
@@ -21,7 +20,6 @@ FILES:
 ./xclient/dfe/equ_client.py
 ./xclient/dfe/mix_client.py
 ./xclient/dfe/prach_client.py
-./xclient/dfe/ofdm_client.py
 ./xclient/rfdc/rfdc_client.py
 ./xclient/rfdc/rfclk_client.py
 ./xclient/utils/console_client.py
@@ -37,7 +35,6 @@ FILES:
 ./xserver/xcffi/drv_api/dfe/equ_server.py
 ./xserver/xcffi/drv_api/dfe/mix_server.py
 ./xserver/xcffi/drv_api/dfe/prach_server.py
-./xserver/xcffi/drv_api/dfe/ofdm_server.py
 ./xserver/xcffi/drv_api/rfdc/rfclk_server.py
 ./xserver/xcffi/drv_api/rfdc/rfdc_server.py
 ./xserver/xpyro/data_stream/data_transfer_no_dma/axi_memmap.py
@@ -60,7 +57,6 @@ FILES:
 ./xserver/xcffi/drv_header/dfe/xdfeequ_python.h
 ./xserver/xcffi/drv_header/dfe/xdfemix_python.h
 ./xserver/xcffi/drv_header/dfe/xdfeprach_python.h
-./xserver/xcffi/drv_header/dfe/xdfeofdm_python.h
 ./xserver/xcffi/drv_header/rfdc/xrfclk_h_python.h
 ./xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h
 --------------------------------------------------------------------------------
