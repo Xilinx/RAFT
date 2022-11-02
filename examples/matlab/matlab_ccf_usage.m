@@ -401,7 +401,9 @@ ret = CCF.ccf.XDfeCcf_GetCarrierCfg(device_id, CCCfg, uint32(0))
 %   CCCfg: component carrier (CC) configuration container.
 CCCfg = CCF.ccf.GetStruct_XDfeCcf_CCCfg()
 CCCfg = CCF.ccf.XDfeCcf_GetCurrentCCCfg(device_id, CCCfg)
-CCF.ccf.XDfeCcf_ClearEventStatus(device_id)
+Status = CCF.ccf.GetStruct_XDfeCcf_Status()
+update(Status,py.dict(pyargs('CCUpdate', uint32(1))));
+CCF.ccf.XDfeCcf_ClearEventStatus(device_id, Status)
 CCID = int32(1)
 CCSeqBitmap = uint32(2)
 CarrierCfg = CCF.ccf.GetStruct_XDfeCcf_CarrierCfg()
@@ -758,7 +760,7 @@ IsActive = CCF.ccf.XDfeCcf_GetActiveSets(device_id)
 %                                             int16(0), ...
 %                                             int16(0), ...
 %                                             int16(0)})));
-                                         
+
 Coeffs_in = CCF.ccf.GetStruct_XDfeCcf_Coefficients()
 update(Coeffs_in, py.dict(pyargs('Num', uint32(7))))
 ret = CCF.ccf.XDfeCcf_LoadCoefficients(device_id, uint32(0), ...
@@ -795,7 +797,9 @@ Status = CCF.ccf.XDfeCcf_GetEventStatus(device_id)
 %       1 - clears corresponding event status
 %Return:
 %   None
-CCF.ccf.XDfeCcf_ClearEventStatus(device_id)
+Status = CCF.ccf.GetStruct_XDfeCcf_Status()
+update(Status,py.dict(pyargs('CCUpdate', uint32(1))));
+CCF.ccf.XDfeCcf_ClearEventStatus(device_id, Status)
 
 %XDfeCcf_SetInterruptMask
 %Description:
@@ -819,7 +823,7 @@ CCF.ccf.XDfeCcf_ClearEventStatus(device_id)
 
 % Mask = py.dict(pyargs('Overflow', uint32(0), ...
 %                      'CCUpdate', uint32(0), ...
-%                      'CCSequenceError', uint32(0)));                 
+%                      'CCSequenceError', uint32(0)));
 MaskStruct = CCF.ccf.GetStruct_XDfeCcf_InterruptMask()
 Mask = CCF.ccf.XDfeCcf_SetInterruptMask(device_id, MaskStruct)
 

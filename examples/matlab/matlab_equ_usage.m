@@ -418,15 +418,13 @@ TriggerCfg = EQU.equ.XDfeEqu_GetTriggersCfg(device_id)
 %   EqCoeffs: is equalizer coefficients container.
 
 %typedef struct {
-%	u32 NUnits; /**< [1-6] Number of active units. 1 - 6 in real mode.
+%	u32 Num; /**< [1-6] Number of active units. 1 - 6 in real mode.
 %		1 - 3 in complex and matrix mode. */
 %	u32 Set; /**< [0-3] Co-efficient set that the co-efficients apply to */
 %	s16 Coefficients[24]; /**< Signed real numbers. Array of
 %		Co-efficients */
-%	u32 Shift; /**< [0-7] Shift value. Set by the formula given in
-%		specification item 10 in complex equalizer */
 %} XDfeEqu_Coefficients;
-Equ_Coeff = py.dict(pyargs('NUnits', uint32(1), ...
+Equ_Coeff = py.dict(pyargs('Num', uint32(1), ...
                            'Set', uint32(3), ...
                            'Coefficients', py.list({int16(0), ...
                                                     int16(0), ...
@@ -441,8 +439,7 @@ Equ_Coeff = py.dict(pyargs('NUnits', uint32(1), ...
                                                     int16(0), ...
                                                     int16(0), ...
                                                     int16(0), ...
-                                                    int16(0)}), ...
-						   'Shift',uint32(1) ...
+                                                    int16(0)}) ...
 					))
 
 Equ_Coeff = EQU.equ.XDfeEqu_LoadCoefficients(device_id, ...
@@ -458,7 +455,7 @@ Equ_Coeff = EQU.equ.XDfeEqu_LoadCoefficients(device_id, ...
 %Return:
 %   Status: event status
 
-Status = EQU.equ.XDfeEqu_GetEventStatus(device_id, uint32(0))
+Status = EQU.equ.XDfeEqu_GetEventStatus(device_id)
 
 %%%%%% XDfeEqu_ClearEventStatus
 %Description:
@@ -472,8 +469,7 @@ Status = EQU.equ.XDfeEqu_GetEventStatus(device_id, uint32(0))
 %   Status: event status.
 %Return:
 %   None
-
-EQU.equ.XDfeEqu_ClearEventStatus(device_id, uint32(0))
+EQU.equ.XDfeEqu_ClearEventStatus(device_id, Status)
 
 %%%%%% XDfeEqu_SetInterruptMask
 %Description:
@@ -488,7 +484,7 @@ EQU.equ.XDfeEqu_ClearEventStatus(device_id, uint32(0))
 %   None
 
 Mask = EQU.equ.GetStruct_XDfeEqu_InterruptMask()
-Mask = EQU.equ.XDfeEqu_SetInterruptMask(device_id, uint32(0), Mask)
+Mask = EQU.equ.XDfeEqu_SetInterruptMask(device_id, Mask)
 
 %%%%%% XDfeEqu_GetActiveSets
 %Description:

@@ -391,7 +391,7 @@ CCCfg = MIX.mix.XDfeMix_RemoveCCfromCCCfg(device_id, CCCfg, int32(0))
 
 CCCfg = MIX.mix.GetStruct_XDfeMix_CCCfg()
 CarrierCfg = MIX.mix.GetStruct_XDfeMix_CarrierCfg()
-ret = MIX.mix.XDfeMix_UpdateCCinCCCfg(device_id, CCCfg, int32(0), uint32(0xb), CarrierCfg)
+ret = MIX.mix.XDfeMix_UpdateCCinCCCfg(device_id, CCCfg, int32(0), CarrierCfg)
 
 %%%%%% XDfeMix_SetNextCCCfgAndTrigger
 %Description:
@@ -499,8 +499,7 @@ ret = MIX.mix.XDfeMix_MoveCC(device_id, uint32(0), uint32(0), uint32(0), ...
 
 %%% CarrierCfg python dictionary
 CarrierCfg_in = MIX.mix.GetStruct_XDfeMix_CarrierCfg()
-BitSequence = 0xb
-ret = MIX.mix.XDfeMix_UpdateCC(device_id, int32(0), BitSequence, CarrierCfg_in)
+ret = MIX.mix.XDfeMix_UpdateCC(device_id, int32(0), CarrierCfg_in)
 
 %%%%%% XDfeMix_SetAntennaGain
 %Description:
@@ -707,105 +706,6 @@ Flags = MIX.mix.XDfeMix_GetInterruptMask(device_id)
 InterruptMask_in = MIX.mix.GetStruct_XDfeMix_InterruptMask()
 Flags = MIX.mix.XDfeMix_SetInterruptMask(device_id, InterruptMask_in)
 
-%%%%%% XDfeMix_InterruptEnable
-%Input Arguments:
-%    arg1: device_id
-%    arg2: XDfeMix_InterruptMask
-%Return:
-%    value1: XDfeMix_InterruptMask
-
-%%% XDfeMix_InterruptMask python dictionary
-%typedef struct {
-%	u32 DUCDDCOverflow; /**< [0,1] Mask overflow in DUC/DDC */
-%	u32 MixerOverflow; /**< [0,1] Mask overflow in mixer */
-%	u32 DLCCUpdate; /**< [0,1] Mask downlink update interrupt */
-%	u32 DLCCSequenceError; /**< [0,1] Mask downlink sequence error */
-%	u32 ULCCUpdate; /**< [0,1] Mask uplink update interrupt */
-%	u32 ULCCSequenceError; /**< [0,1] Mask uplink sequence error */
-%} XDfeMix_InterruptMask;
-
-% InterruptMask_in = py.dict(pyargs('DUCDDCOverflow', uint32(0), ...
-%                        'MixerOverflow',uint32(0), ...
-%                        'DLCCUpdate', uint32(0), ...
-%                        'DLCCSequenceError',uint32(0), ...
-%                        'ULCCUpdate', uint32(0), ...
-%                        'ULCCSequenceError', uint32(0)))
-InterruptMask_in = MIX.mix.GetStruct_XDfeMix_InterruptMask()
-Flags = MIX.mix.XDfeMix_InterruptEnable(device_id, InterruptMask_in)
-
-%%%%%% XDfeMix_InterruptDisable
-%Input Arguments:
-%    arg1: device_id
-%    arg2: XDfeMix_InterruptMask
-%Return:
-%    value1: XDfeMix_InterruptMask
-
-%%% XDfeMix_InterruptMask python dictionary
-%typedef struct {
-%	u32 DUCDDCOverflow; /**< [0,1] Mask overflow in DUC/DDC */
-%	u32 MixerOverflow; /**< [0,1] Mask overflow in mixer */
-%	u32 DLCCUpdate; /**< [0,1] Mask downlink update interrupt */
-%	u32 DLCCSequenceError; /**< [0,1] Mask downlink sequence error */
-%	u32 ULCCUpdate; /**< [0,1] Mask uplink update interrupt */
-%	u32 ULCCSequenceError; /**< [0,1] Mask uplink sequence error */
-%} XDfeMix_InterruptMask;
-
-% InterruptMask_in = py.dict(pyargs('DUCDDCOverflow', uint32(0), ...
-%                        'MixerOverflow',uint32(0), ...
-%                        'DLCCUpdate', uint32(0), ...
-%                        'DLCCSequenceError',uint32(0), ...
-%                        'ULCCUpdate', uint32(0), ...
-%                        'ULCCSequenceError', uint32(0)))
-InterruptMask_in = MIX.mix.GetStruct_XDfeMix_InterruptMask()
-Flags = MIX.mix.XDfeMix_InterruptDisable(device_id, InterruptMask_in)
-
-%%% XDfeMix_GetInterruptStatus python dictionary
-%Input Arguments:
-%    arg1: device_id
-%    arg2: XDfeMix_InterruptMask
-%Return:
-%    value1: XDfeMix_InterruptMask
-%typedef struct {
-%	u32 DUCDDCOverflow; /**< [0,1] Mask overflow in DUC/DDC */
-%	u32 MixerOverflow; /**< [0,1] Mask overflow in mixer */
-%	u32 DLCCUpdate; /**< [0,1] Mask downlink update interrupt */
-%	u32 DLCCSequenceError; /**< [0,1] Mask downlink sequence error */
-%	u32 ULCCUpdate; /**< [0,1] Mask uplink update interrupt */
-%	u32 ULCCSequenceError; /**< [0,1] Mask uplink sequence error */
-%} XDfeMix_InterruptMask;
-
-% Flags = py.dict(pyargs('DUCDDCOverflow', uint32(0), ...
-%                        'MixerOverflow',uint32(0), ...
-%                        'DLCCUpdate', uint32(0), ...
-%                        'DLCCSequenceError',uint32(0), ...
-%                        'ULCCUpdate', uint32(0), ...
-%                        'ULCCSequenceError', uint32(0)))
-Flags = MIX.mix.XDfeMix_GetInterruptStatus(device_id)
-
-%%% XDfeMix_ClearInterruptStatus python dictionary
-%Input Arguments:
-%    arg1: device_id
-%    arg2: XDfeMix_InterruptMask
-%Return:
-%    value1: XDfeMix_InterruptMask
-%typedef struct {
-%	u32 DUCDDCOverflow; /**< [0,1] Mask overflow in DUC/DDC */
-%	u32 MixerOverflow; /**< [0,1] Mask overflow in mixer */
-%	u32 DLCCUpdate; /**< [0,1] Mask downlink update interrupt */
-%	u32 DLCCSequenceError; /**< [0,1] Mask downlink sequence error */
-%	u32 ULCCUpdate; /**< [0,1] Mask uplink update interrupt */
-%	u32 ULCCSequenceError; /**< [0,1] Mask uplink sequence error */
-%} XDfeMix_InterruptMask;
-
-% InterruptMask_in = py.dict(pyargs('DUCDDCOverflow', uint32(0), ...
-%                        'MixerOverflow',uint32(0), ...
-%                        'DLCCUpdate', uint32(0), ...
-%                        'DLCCSequenceError',uint32(0), ...
-%                        'ULCCUpdate', uint32(0), ...
-%                        'ULCCSequenceError', uint32(0)))
-InterruptMask_in = MIX.mix.GetStruct_XDfeMix_InterruptMask()
-Flags = MIX.mix.XDfeMix_ClearInterruptStatus(device_id, InterruptMask_in)
-
 %%%%%% XDfeMix_GetVersions
 %Description:
 %   Deactivates Mixer and moves the state machine to Initialised state.
@@ -815,8 +715,8 @@ Flags = MIX.mix.XDfeMix_ClearInterruptStatus(device_id, InterruptMask_in)
 %Input Arguments:
 %   device_id: id of the opened device.
 %Return:
-    SwVersion: driver version numbers.
-    HwVersion: HW version numbers.
+%   SwVersion: driver version numbers.
+%   HwVersion: HW version numbers.
 
 %SwVersion_in = {
 %    "Major": 0,

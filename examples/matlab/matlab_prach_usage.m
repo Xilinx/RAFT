@@ -90,7 +90,7 @@ XDfePrach_StateId = PRACH.prach.GetEnum_XDfePrach_StateId()
 %   device_id - integer handle to initalized instance
 %   DeviceNodeNameRet - device node name returned from driver
 %                       which will be same as the passed value
-str = "a7d40000.xdfe_nr_prach"
+str = "a7e00000.xdfe_nr_prach"
 ret = PRACH.prach.XDfePrach_InstanceInit(str)
 S= cell(ret)
 device_id = ret{2}
@@ -177,8 +177,10 @@ Init_out = PRACH.prach.XDfePrach_Initialize(device_id, Init_in)
 %   TriggerCfg: Trigger configuration container.
 %Return:
 %   TriggerCfg: Trigger configuration container.
-
+Mode = PRACH.prach.GetStruct_XDfePrach_Trigger()
+update(Mode, py.dict(pyargs('Mode', uint32(1))))
 TriggerCfg_in = PRACH.prach.GetStruct_XDfePrach_TriggerCfg()
+update(TriggerCfg_in, py.dict(pyargs('FrameInit', Mode)))
 TriggerCfg_out = PRACH.prach.XDfePrach_SetTriggersCfg(device_id, TriggerCfg_in)
 
 %%%%%% XDfePrach_Activate
@@ -298,17 +300,7 @@ CCCfg = PRACH.prach.XDfePrach_RemoveCCfromCCCfg(device_id, CCCfg, int32(0))
 CCCfg = PRACH.prach.GetStruct_XDfePrach_CCCfg()
 CarrierCfg = PRACH.prach.GetStruct_XDfePrach_CarrierCfg()
 ret = PRACH.prach.XDfePrach_UpdateCCinCCCfg(device_id, CCCfg, uint32(0), ...
-                uint32(0xb), CarrierCfg)
-
-%%%%%% XDfePrach_SetNextCCCfgAndTrigger
-%Input Arguments:
-%    arg1: device_id
-%    arg2: component carrier (CC) configuration container.
-%Return:
-%    value1: Returned Error code.
-%    value2: CarrierCfg container.
-CCCfg = PRACH.prach.GetStruct_XDfePrach_CCCfg()
-ret = PRACH.prach.XDfePrach_SetNextCCCfgAndTrigger(device_id, CCCfg)
+                CarrierCfg)
 
 %%%%%% XDfePrach_AddCC
 %Description:
@@ -350,14 +342,6 @@ CarrierCfg_out = PRACH.prach.XDfePrach_AddCC(device_id, uint32(0), BitSequence, 
 
 CarrierCfg_in = PRACH.prach.GetStruct_XDfePrach_CarrierCfg()
 ret = PRACH.prach.XDfePrach_UpdateCC(device_id, uint32(0), CarrierCfg_in)
-
-
-%%%%%% XDfePrach_CloneCC
-%Input Arguments:
-%    arg1: device_id
-%Return:
-%    void.
-PRACH.prach.XDfePrach_CloneCC(device_id)
 
 %%%%%% XDfePrach_AddRCCfg
 %Description:
@@ -526,36 +510,6 @@ Flags = PRACH.prach.XDfePrach_GetInterruptMask(device_id)
 
 Flags_in = PRACH.prach.GetStruct_XDfePrach_InterruptMask()
 PRACH.prach.XDfePrach_SetInterruptMask(device_id, Flags_in)
-
-%%%%%% XDfePrach_InterruptEnable
-%Input Arguments:
-%    arg1: device_id
-%    arg2: Flags_in
-%Return: None
-Flags_in = PRACH.prach.GetStruct_XDfePrach_InterruptMask()
-PRACH.prach.XDfePrach_InterruptEnable(device_id, Flags_in)
-
-%%%%%% XDfePrach_InterruptDisable
-%Input Arguments:
-%    arg1: device_id
-%    arg2: Flags_in
-%Return: None
-Flags_in = PRACH.prach.GetStruct_XDfePrach_InterruptMask()
-PRACH.prach.XDfePrach_InterruptDisable(device_id, Flags_in)
-
-%%%%%% XDfePrach_GetInterruptStatus
-%Input Arguments:
-%    arg1: device_id
-%Return:
-%    Interrupt status
-Flags_out = PRACH.prach.XDfePrach_GetInterruptStatus(device_id)
-
-%%%%%% XDfePrach_ClearInterruptStatus
-%Input Arguments:
-%    arg1: device_id
-%Return: None
-Flags_in = PRACH.prach.GetStruct_XDfePrach_InterruptMask()
-PRACH.prach.XDfePrach_ClearInterruptStatus(device_id, Flags_in)
 
 %%%%%% XDfePrach_RemoveCC
 %Description:
