@@ -5,15 +5,6 @@ Copyright (c) 2021 - 2022, Xilinx Inc. and Contributors. All rights reserved.
 SPDX-License-Identifier: BSD-3-Clause
 
 FILES:
-./examples/python/pat/pat20.py
-./examples/python/ug1530/ccf_example1.py
-./examples/python/ug1530/ccseq_example1.py
-./examples/python/ug1530/common_example1.py
-./examples/python/ug1530/equ_example1.py
-./examples/python/ug1530/mix_example1.py
-./examples/python/ug1530/rfdc_example1.py
-./examples/python/ug1530/stimcap_example1.py
-./examples/python/ug1530/vmux_example1.py
 ./examples/python/usage/python_usage_axi_memmap.py
 ./examples/python/usage/python_usage_ccf.py
 ./examples/python/usage/python_usage_console.py
