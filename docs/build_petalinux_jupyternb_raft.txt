@@ -156,7 +156,7 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI = "git://github.com/Xilinx/RAFT;protocol=https;branch=main"
-SRCREV = "ba31ea1246af02a19597e32ed3db6a72f9fa7e7b"
+SRCREV = "e14d6650de42be1df612add94ee01479b60c12f5"
 
 RDEPENDS_${PN} += "bash"
 S = "${WORKDIR}/git"
