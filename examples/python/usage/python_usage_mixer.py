@@ -11,19 +11,41 @@ def usage():
     # sys.argv[2] - host/board
     # sys.argv[3] - ip_address
     # sys.argv[4] - port
+    # sys.argv[5] - "switchable" - switchable option integrated in xsa
+    # sys.argv[6] - "auxiliary" - auxiliary option integrated in xsa
     print(f"Usage: The application work in three modes xclient, xcffi and xpyro\n"
-          f"python3 {sys.argv[0]} xclient host/board ip_address port => Runs at host or board with xclient\n"
-          f"sudo python3 {sys.argv[0]} xcffi => Runs at board with xcffi\n"
-          f"python3 {sys.argv[0]} xpyro host/board ip_address port => Runs at host or board with xpyro\n"
-          f"Example: python3 {sys.argv[0]} xclient host 169.254.10.2 9090")
+          f"python3 {sys.argv[0]} xclient host/board ip_address port switchable auxiliary => Runs at host or board with xclient\n"
+          f"sudo python3 {sys.argv[0]} xcffi switchable auxiliary => Runs at board with xcffi\n"
+          f"python3 {sys.argv[0]} xpyro host/board ip_address port switchable auxiliary => Runs at host or board with xpyro\n"
+          f"Example1: python3 {sys.argv[0]} xclient host 169.254.10.2 9090 \n"
+          f"Example2: python3 {sys.argv[0]} xclient host 169.254.10.2 9090 no auxiliary\n"
+          f"Example3: python3 {sys.argv[0]} xclient host 169.254.10.2 9090 switchable auxiliary")
+
+switchable_flag = False
+auxiliary_flag = False
 
 # 'xcffi' option will run only in the board
 if (len(sys.argv) ==  2):
     if (sys.argv[1] != 'xcffi'):
         usage()
         sys.exit()
-
-elif (len(sys.argv) !=  5):
+elif (len(sys.argv) ==  4):
+    if (sys.argv[1] != 'xcffi'):
+        usage()
+        sys.exit()
+    else:
+        if (sys.argv[2] == 'switchable'):
+            switchable_flag = True
+        if (sys.argv[3] == 'auxiliary'):
+            auxiliary_flag = True
+elif (len(sys.argv) ==  5):
+    pass
+elif (len(sys.argv) ==  7):
+    if (sys.argv[5] == 'switchable'):
+        switchable_flag = True
+    if (sys.argv[6] == 'auxiliary'):
+        auxiliary_flag = True
+else:
     usage()
     sys.exit()
 
@@ -261,6 +283,26 @@ CurrCCCfg = handle.GetStruct_XDfeMix_CCCfg()
 CurrentCCCfg = handle.XDfeMix_GetCurrentCCCfg(device_id, CurrCCCfg)
 
 #Description:
+#   Returns the current CC configuration for DL and UL in switchable mode.
+#   Not used slot ID in a sequence (Sequence.CCID[Index]) are represented
+#   as (-1), not the value in registers.
+#C header declaration:
+#   void XDfeMix_GetCurrentCCCfgSwitchable(const XDfeMix *InstancePtr,
+#                 XDfeMix_CCCfg *CCCfgDownlink,
+#                 XDfeMix_CCCfg *CCCfgUplink);
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CCCfgDownlink: Downlink CC configuration container.
+#   CCCfgUplink: Uplink CC configuration container.
+#Return:
+#   CCCfgDownlink, CCCfgUplink: CC configuration container
+
+if (switchable_flag == True):
+    CCCfgDownlink = handle.GetStruct_XDfeMix_CCCfg()
+    CCCfgUplink = handle.GetStruct_XDfeMix_CCCfg()
+    CCCfgDownlink, CCCfgUplink = handle.XDfeMix_GetCurrentCCCfgSwitchable(device_id, CCCfgDownlink, CCCfgUplink)
+
+#Description:
 #   Returns configuration structure CCCfg with CCCfg->Sequence.Length value set
 #   in XDfeMix_Configure(), array CCCfg->Sequence.CCID[] members are set to not
 #   used value (-1) and the other CCCfg members are set to 0.
@@ -305,7 +347,7 @@ CCSeqBitmap, CarrierCfg, NCO = handle.XDfeMix_GetCarrierCfgAndNCO(device_id, CCC
 #   Set antenna configuration in CC configuration container.
 #C header declaration:
 #   void XDfeMix_SetAntennaCfgInCCCfg(const XDfeMix *InstancePtr,
-#	XDfeMix_CCCfg *CCCfg, u32 *AntennaCfg);
+#    XDfeMix_CCCfg *CCCfg, u32 *AntennaCfg);
 #Input Arguments:
 #   device_id: id of the opened device.
 #   CCCfg: component carrier (CC) configuration container.
@@ -315,7 +357,7 @@ CCSeqBitmap, CarrierCfg, NCO = handle.XDfeMix_GetCarrierCfgAndNCO(device_id, CCC
 
 AntennaCfg = handle.GetStruct_XDfeMix_AntennaCfg()
 AntennaCfg = {
-	"Gain": [1,1,1,1,1,1,0,0],
+    "Gain": [1,1,1,1,1,1,0,0],
 }
 CCCfg = handle.XDfeMix_SetAntennaCfgInCCCfg(device_id, CCCfg, AntennaCfg)
 
@@ -334,7 +376,7 @@ CCCfg = handle.XDfeMix_SetAntennaCfgInCCCfg(device_id, CCCfg, AntennaCfg)
 
 AntennaCfg = handle.GetStruct_XDfeMix_AntennaCfg()
 AntennaCfg = {
-	"Gain": [1,1,1,1,1,1,0,0],
+    "Gain": [1,1,1,1,1,1,0,0],
 }
 ret = handle.XDfeMix_UpdateAntennaCfg(device_id, AntennaCfg)
 
@@ -415,7 +457,7 @@ ret, CCCfg = handle.XDfeMix_UpdateCCinCCCfg(device_id, CCCfg, 0, CarrierCfg)
 #   copying from shadow to operational registers.
 #C header declaration:
 #   u32 XDfeMix_SetNextCCCfgAndTrigger(const XDfeMix *InstancePtr,
-#	XDfeMix_CCCfg *CCCfg);
+#    XDfeMix_CCCfg *CCCfg);
 #Input Arguments:
 #   device_id: id of the opened device.
 #   CCCfg: component carrier (CC) configuration container.
@@ -427,13 +469,34 @@ CCCfg = handle.GetStruct_XDfeMix_CCCfg()
 ret, CCCfg = handle.XDfeMix_SetNextCCCfgAndTrigger(device_id, CCCfg)
 
 #Description:
+#   Writes local CC configuration to the shadow (NEXT) registers and triggers
+#   copying from shadow to operational (CURRENT) registers.
+#C header declaration:
+#   u32 XDfeMix_SetNextCCCfgAndTriggerSwitchable(const XDfeMix *InstancePtr,
+#                         XDfeMix_CCCfg *CCCfgDownlink,
+#                         XDfeMix_CCCfg *CCCfgUplink)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CCCfgDownlink: Downlink CC configuration container.
+#   CCCfgUplink: Uplink CC configuration container.
+#Return:
+#   ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
+#   CCCfgDownlink: Downlink CC configuration container.
+#   CCCfgUplink: Uplink CC configuration container.
+
+if (switchable_flag == True):
+    CCCfgDownlink = handle.GetStruct_XDfeMix_CCCfg()
+    CCCfgUplink = handle.GetStruct_XDfeMix_CCCfg()
+    ret, CCCfgDownlink, CCCfgUplink = handle.XDfeMix_SetNextCCCfgAndTriggerSwitchable(device_id, CCCfgDownlink, CCCfgUplink)
+
+#Description:
 #   Adds specified CCID, with specified configuration.
 #   If there is insufficient capacity for the new CC the function will return
 #   an error.
 #   Initiates CC update (enable CCUpdate trigger TUSER Single Shot).
 #C header declaration:
 #   u32 XDfeMix_AddCC(XDfeMix *InstancePtr, s32 CCID, u32 CCSeqBitmap,
-#	const XDfeMix_CarrierCfg *CarrierCfg, const XDfeMix_NCO *NCO);
+#    const XDfeMix_CarrierCfg *CarrierCfg, const XDfeMix_NCO *NCO);
 #Input Arguments:
 #   device_id: id of the opened device.
 #   CCID: is a Channel ID.
@@ -499,7 +562,7 @@ ret = handle.XDfeMix_MoveCC(device_id, 0, 0, 0, 0)
 #   an error.
 #C header declaration:
 #   u32 XDfeMix_UpdateCC(const XDfeMix *InstancePtr, s32 CCID,
-#	const XDfeMix_CarrierCfg *CarrierCfg);
+#    const XDfeMix_CarrierCfg *CarrierCfg);
 #Input Arguments:
 #   device_id: id of the opened device.
 #   CCID: is a Channel ID.
@@ -595,6 +658,23 @@ InterruptMask_in['CCSequenceError'] = 1
 handle.XDfeMix_SetInterruptMask(device_id, InterruptMask_in)
 
 #Description:
+#   Sets uplink/downlink register bank.
+#C header declaration:
+#   void XDfeMix_SetRegBank(const XDfeMix *InstancePtr,
+#                  u32 RegBank)
+#Input Arguments:
+#   device_id: id of the opened device.
+#   RegBank: Register bank value to be set.
+#Return:
+#   None
+
+if (switchable_flag == True):
+    RegBank = 1
+    handle.XDfeMix_SetRegBank(device_id, RegBank)
+    RegBank = 0
+    handle.XDfeMix_SetRegBank(device_id, RegBank)
+
+#Description:
 #   Gets event status.
 #C header declaration:
 #   void XDfeMix_GetEventStatus(const XDfeMix *InstancePtr, XDfeMix_Status *Status);
@@ -668,7 +748,7 @@ ret, CenterTap = handle.XDfeMix_GetCenterTap(device_id, Rate)
 #   Deactivates Mixer and moves the state machine to Initialised state.
 #C header declaration:
 #   void XDfeMix_GetVersions(const XDfeMix *InstancePtr, XDfeMix_Version *SwVersion,
-#	XDfeMix_Version *HwVersion);
+#    XDfeMix_Version *HwVersion);
 #Input Arguments:
 #   device_id: id of the opened device.
 #Return:
@@ -680,8 +760,8 @@ SwVersion_out, HwVersion_out = handle.XDfeMix_GetVersions(device_id)
 #   Adds specified auxiliary NCO, with specified configuration, to a local CCCfg.
 #C header declaration:
 #   void XDfeMix_AddAuxNCOtoCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
-#			      const s32 AuxId, const XDfeMix_NCO *NCO,
-#			      const XDfeMix_AuxiliaryCfg *AuxCfg)
+#                  const s32 AuxId, const XDfeMix_NCO *NCO,
+#                  const XDfeMix_AuxiliaryCfg *AuxCfg)
 #Input Arguments:
 #   device_id: id of the opened device.
 #   CCCfg: component carrier (CC) configuration container.
@@ -690,28 +770,30 @@ SwVersion_out, HwVersion_out = handle.XDfeMix_GetVersions(device_id)
 #   AuxCfg: Auxiliary NCO configuration container.
 #Return:
 #   CCCfg: component carrier (CC) configuration container.
-CurrCCCfg = handle.GetStruct_XDfeMix_CCCfg()
-CurrentCCCfg = handle.XDfeMix_GetCurrentCCCfg(int(device_id), CurrCCCfg)
-NCO = handle.GetStruct_XDfeMix_NCO()
-AuxiliaryCfg = handle.GetStruct_XDfeMix_AuxiliaryCfg()
-AuxId = 1
-CurrentCCCfg = handle.XDfeMix_AddAuxNCOtoCCCfg(device_id, CurrentCCCfg, AuxId, NCO, AuxiliaryCfg)
-AuxId = 2
-CurrentCCCfg = handle.XDfeMix_AddAuxNCOtoCCCfg(device_id, CurrentCCCfg, AuxId, NCO, AuxiliaryCfg)
+if (auxiliary_flag == True):
+    CurrCCCfg = handle.GetStruct_XDfeMix_CCCfg()
+    CurrentCCCfg = handle.XDfeMix_GetCurrentCCCfg(int(device_id), CurrCCCfg)
+    NCO = handle.GetStruct_XDfeMix_NCO()
+    AuxiliaryCfg = handle.GetStruct_XDfeMix_AuxiliaryCfg()
+    AuxId = 1
+    CurrentCCCfg = handle.XDfeMix_AddAuxNCOtoCCCfg(device_id, CurrentCCCfg, AuxId, NCO, AuxiliaryCfg)
+    AuxId = 2
+    CurrentCCCfg = handle.XDfeMix_AddAuxNCOtoCCCfg(device_id, CurrentCCCfg, AuxId, NCO, AuxiliaryCfg)
 
 #Description:
 #   Disables specified auxiliary NCO configuration structure.
 #C header declaration:
 #   void XDfeMix_RemoveAuxNCOfromCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
-#			      const s32 AuxId)
+#                  const s32 AuxId)
 #Input Arguments:
 #   device_id: id of the opened device.
 #   CCCfg: component carrier (CC) configuration container.
 #   AuxId: Channel ID.
 #Return:
 #   CCCfg: component carrier (CC) configuration container.
-AuxId = 1
-CurrentCCCfg = handle.XDfeMix_RemoveAuxNCOfromCCCfg(device_id, CurrentCCCfg, AuxId)
+if (auxiliary_flag == True):
+    AuxId = 1
+    CurrentCCCfg = handle.XDfeMix_RemoveAuxNCOfromCCCfg(device_id, CurrentCCCfg, AuxId)
 
 #Description:
 #   Deactivates Mixer and moves the state machine to Initialised state.

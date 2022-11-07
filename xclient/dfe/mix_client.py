@@ -559,6 +559,25 @@ class MIX_Client(object):
         self.logger.debug(f"CurrCCCfg = {json.dumps(CurrCCCfg, indent=2)}")
         return CurrCCCfg
 
+    def XDfeMix_GetCurrentCCCfgSwitchable(self, device_id, CCCfgDownlink, CCCfgUplink):
+        """
+		Returns the current CC configuration for DL and UL in switchable mode.
+		Not used slot ID in a sequence (Sequence.CCID[Index]) are represented
+		as (-1), not the value in registers.
+
+        :param device_id: id of the opened device.
+		:param CCCfgDownlink: Downlink CC configuration container.
+		:param CCCfgUplink: Uplink CC configuration container.
+        :return: CCCfgDownlink, CCCfgUplink: CC configuration containers
+        """
+        self.logger.debug(f"XDfeMix_GetCurrentCCCfgSwitchable({device_id}, "
+						  f"{json.dumps(CCCfgDownlink, indent=2)}, "
+						  f"{json.dumps(CCCfgUplink, indent=2)})")
+        CCCfgDownlink, CCCfgUplink = self.MIX.XDfeMix_GetCurrentCCCfgSwitchable(device_id, CCCfgDownlink, CCCfgUplink)
+        self.logger.debug(f"CCCfgDownlink = {json.dumps(CCCfgDownlink, indent=2)}")
+        self.logger.debug(f"CCCfgUplink = {json.dumps(CCCfgUplink, indent=2)}")
+        return CCCfgDownlink, CCCfgUplink
+
     def XDfeMix_GetEmptyCCCfg(self, device_id):
         """
         Returns configuration structure CCCfg with CCCfg->Sequence.Length value set
@@ -720,6 +739,25 @@ class MIX_Client(object):
         ret, CCCfg = self.MIX.XDfeMix_SetNextCCCfgAndTrigger(device_id, CCCfg)
         self.logger.debug(f"ret = {ret}, CCCfg = {json.dumps(CCCfg, indent=2)}")
         return ret, CCCfg
+
+    def XDfeMix_SetNextCCCfgAndTriggerSwitchable(self, device_id, CCCfgDownlink, CCCfgUplink):
+        """
+		Writes local CC configuration to the shadow (NEXT) registers and triggers
+		copying from shadow to operational (CURRENT) registers.
+
+        :param device_id: id of the opened device.
+        :param CCCfgDownlink: Downlink CC configuration container.
+        :param CCCfgUplink Uplink CC configuration container.
+        :return: ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
+                 CCCfgDownlink: Downlink component carrier (CC) configuration container.
+                 CCCfgUplink: Uplink component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfeMix_SetNextCCCfgAndTriggerSwitchable({device_id}, "
+                          f"{json.dumps(CCCfgDownlink, indent=2)}, "
+                          f"{json.dumps(CCCfgDownlink, indent=2)})")
+        ret, CCCfgDownlink, CCCfgUplink = self.MIX.XDfeMix_SetNextCCCfgAndTriggerSwitchable(device_id, CCCfgDownlink, CCCfgUplink)
+        self.logger.debug(f"ret = {ret}, CCCfgDownlink = {json.dumps(CCCfgDownlink, indent=2)}, , CCCfgUplink = {json.dumps(CCCfgUplink, indent=2)}")
+        return ret, CCCfgDownlink, CCCfgUplink
 
     def XDfeMix_AddCC(self, device_id, CCID, BitSequence, CarrierCfg, NCO):
         """
@@ -991,6 +1029,18 @@ class MIX_Client(object):
         self.logger.debug(f"CenterTap = {json.dumps(CenterTap, indent=2)}")
         self.logger.debug(f"ret = {ret}")
         return ret, CenterTap
+
+    def XDfeMix_SetRegBank(self, device_id, RegBank):
+        """
+        Sets uplink/downlink register bank.
+
+        :param device_id: id of the opened device.
+        :param RegBank: Register bank value to be set.
+        :return: None
+        """
+        self.logger.debug(f"XDfeMix_SetRegBank({device_id}, {RegBank})")
+        self.MIX.XDfeMix_SetRegBank(device_id, RegBank)
+        return
 
     def XDfeMix_GetVersions(self, device_id):
         """
