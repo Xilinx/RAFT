@@ -987,34 +987,32 @@ class MIX(object):
         self.logger.debug(f"The return value TriggerCfg = {json.dumps(TriggerCfg, indent=2)}")
         return TriggerCfg
 
-    def XDfeMix_GetDUCDDCStatus(self, device_id, CCID):
+    def XDfeMix_GetDUCDDCStatus(self, device_id):
         """
-        Gets DUC/DDC status for a specified CCID.
+        Gets DUC/DDC overflow status.
 
         :param device_id: id of the opened device.
-        :param CCID: is a Channel ID.
         :return: DUCDDCStatus: DUC/DDC status container.
         """
         DUCDDCStatus_ptr = ffi.new("XDfeMix_DUCDDCStatus *")
-        self.logger.debug(f"XDfeMix_GetDUCDDCStatus({device_id}, {CCID})")
+        self.logger.debug(f"XDfeMix_GetDUCDDCStatus({device_id})")
         xmix = self.mix_dict[device_id][1]
-        mix_handle.XDfeMix_GetDUCDDCStatus(xmix, CCID, DUCDDCStatus_ptr)
+        mix_handle.XDfeMix_GetDUCDDCStatus(xmix, DUCDDCStatus_ptr)
         DUCDDCStatus = cdata_to_py(DUCDDCStatus_ptr[0])
         self.logger.debug(f"The return value DUCDDCStatus = {json.dumps(DUCDDCStatus, indent=2)}")
         return DUCDDCStatus
 
-    def XDfeMix_GetMixerStatus(self, device_id, CCID):
+    def XDfeMix_GetMixerStatus(self, device_id):
         """
-        Gets Mixer status for a specified CCID.
+        Gets Mixer overflow status.
 
         :param device_id: id of the opened device.
-        :param CCID: is a Channel ID.
         :return: DUCDDCStatus: DUC/DDC status container.
         """
         MixerStatus_ptr = ffi.new("XDfeMix_MixerStatus *")
-        self.logger.debug(f"XDfeMix_GetMixerStatus({device_id}, {CCID})")
+        self.logger.debug(f"XDfeMix_GetMixerStatus({device_id})")
         xmix = self.mix_dict[device_id][1]
-        mix_handle.XDfeMix_GetMixerStatus(xmix, CCID, MixerStatus_ptr)
+        mix_handle.XDfeMix_GetMixerStatus(xmix, MixerStatus_ptr)
         MixerStatus = cdata_to_py(MixerStatus_ptr[0])
         self.logger.debug(f"MixerStatus = {json.dumps(MixerStatus, indent=2)}")
         return MixerStatus

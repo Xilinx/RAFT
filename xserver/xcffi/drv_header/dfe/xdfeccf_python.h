@@ -58,7 +58,7 @@
 * ----- ---    -------- -----------------------------------------------
 * 1.0   dc     09/03/20 Initial version
 *       dc     02/02/21 Remove hard coded device node name
-*       dc     02/08/21 align driver to curent specification
+*       dc     02/08/21 align driver to current specification
 *       dc     02/22/21 include HW in versioning
 *       dc     03/25/21 Device tree item name change
 *       dc     04/06/21 Register with full node name
@@ -81,7 +81,8 @@
 *       dc     03/21/22 Add prefix to global variables
 * 1.4   dc     04/08/22 Update documentation
 * 1.5   dc     09/12/22 Update handling overflow status
-* 1.6   dc     04/08/22 Switching UL/DL support
+*       dc     10/28/22 Switching Uplink/Downlink support
+*       dc     11/11/22 Align AddCC to switchable UL/DL algorithm
 *
 * </pre>
 * @endcond
@@ -266,7 +267,7 @@ typedef struct {
 			configuration update - set by helper functions when
 			building the configuration channel_id? */
 	u32 MappedId; /**< [0-7] (Private) Defines the hardblock ID value to be
-			used for the CC. Used to map arbitary/system CCID
+			used for the CC. Used to map arbitrary/system CCID
 			values to available hard block TID values. Enumerated
 			incrementally from 0 to max supported CC for a given
 			IP configuration */
@@ -407,9 +408,9 @@ u32 XDfeCcf_SetNextCCCfgAndTriggerSwitchable(XDfeCcf *InstancePtr,
 u32 XDfeCcf_AddCC(XDfeCcf *InstancePtr, s32 CCID, u32 CCSeqBitmap,
 		  const XDfeCcf_CarrierCfg *CarrierCfg);
 u32 XDfeCcf_RemoveCC(XDfeCcf *InstancePtr, s32 CCID);
-u32 XDfeCcf_UpdateCC(const XDfeCcf *InstancePtr, s32 CCID,
+u32 XDfeCcf_UpdateCC(XDfeCcf *InstancePtr, s32 CCID,
 		     const XDfeCcf_CarrierCfg *CarrierCfg);
-u32 XDfeCcf_UpdateAntenna(const XDfeCcf *InstancePtr, u32 Ant, bool Enabled);
+u32 XDfeCcf_UpdateAntenna(XDfeCcf *InstancePtr, u32 Ant, bool Enabled);
 u32 XDfeCcf_UpdateAntennaCfg(XDfeCcf *InstancePtr,
 			     XDfeCcf_AntennaCfg *AntennaCfg);
 u32 XDfeCcf_UpdateAntennaCfgSwitchable(XDfeCcf *InstancePtr,

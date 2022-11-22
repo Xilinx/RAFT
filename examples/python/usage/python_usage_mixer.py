@@ -601,29 +601,26 @@ ret = handle.XDfeMix_SetAntennaGain(device_id, 0, 0)
 TriggerCfg_out = handle.XDfeMix_GetTriggersCfg(device_id)
 
 #Description:
-#   Gets DUC/DDC status for a specified CCID.
+#   Gets DUC/DDC overflow status.
 #C header declaration:
-#   void XDfeMix_GetDUCDDCStatus(const XDfeMix *InstancePtr, u32 CCID, XDfeMix_DUCDDCStatus *DUCDDCStatus);
+#   void XDfeMix_GetDUCDDCStatus(const XDfeMix *InstancePtr, XDfeMix_DUCDDCStatus *DUCDDCStatus);
 #Input Arguments:
 #   device_id: id of the opened device.
-#   CCID: is a Channel ID.
 #Return:
 #   DUCDDCStatus: DUC/DDC status container.
 
-DUCDDCStatus_out = handle.XDfeMix_GetDUCDDCStatus(device_id, 0)
+DUCDDCStatus_out = handle.XDfeMix_GetDUCDDCStatus(device_id)
 
 #Description:
 #   Gets Mixer status for a specified CCID.
 #C header declaration:
-#   void XDfeMix_GetMixerStatus(const XDfeMix *InstancePtr, u32 CCID,
-#   XDfeMix_MixerStatus *MixerStatus);
+#   void XDfeMix_GetMixerStatus(const XDfeMix *InstancePtr, XDfeMix_MixerStatus *MixerStatus);
 #Input Arguments:
 #   device_id: id of the opened device.
-#   CCID: is a Channel ID.
 #Return:
 #   DUCDDCStatus: DUC/DDC status container.
 
-MixerStatus_out = handle.XDfeMix_GetMixerStatus(device_id, 0)
+MixerStatus_out = handle.XDfeMix_GetMixerStatus(device_id)
 
 #Description:
 #   Gets interrupt mask status.

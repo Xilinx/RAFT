@@ -78,10 +78,12 @@
 * 1.4   dc     03/28/22 Update documentation
 *       dc     08/19/22 Update register map
 * 1.5   dc     09/28/22 Auxiliary NCO support
-*       dc     10/24/22 Switching UL/DL support
+*       dc     10/24/22 Switching Uplink/Downlink support
+*       dc     11/10/22 Align AddCC to switchable UL/DL algorithm
+*       dc     11/11/22 Update get overflow status API
 *
 * </pre>
- * @endcond
+* @endcond
 ******************************************************************************/
 /**************************** Includes ***************************************/
 /**************************** Macros Definitions *****************************/
@@ -371,37 +373,39 @@ typedef struct {
  * DUC/DDC status.
  */
 typedef struct {
-	u32 RealOverflowStage; /**< [0-3] First stage in which overflow
-		in real data has occurred. */
-	u32 ImagOverflowStage; /**< [0-3] First stage in which overflow
-		in imaginary data has occurred. */
-	u32 FirstAntennaOverflowing; /**< [0-7] Lowest antenna in which
-		overflow has occurred. */
-	u32 FirstCCIDOverflowing; /**< [0-15] Lowest CCID in which overflow has
-		occurred. */
-	u32 Mode; /** [0-1] Mode in which overflow has occured */
+	u32 Stage; /**< [0-3] Earliest stage in which overflow occurred. */
+	u32 Antenna; /**< [0-7] Antenna on which overflow occured, with lowest
+		antenna taking priority. */
+	u32 NcoId; /**< [0-15] Number of NCO associated with overflowing channel,
+		with lowest taking priority. */
+	u32 Mode; /** [0-1] In Switchable the mode of core when the overflow
+		occured.
+		- 0 = DOWNLINK: Overflow occured while core is in downlink.
+		- 1 = UPLINK: Overflow occured while core is in uplink. */
 } XDfeMix_DUCDDCStatus;
 
 /**
  * Mixer status.
  */
 typedef struct {
-	u32 AdderStage; /**< [0,1] Earliest stage in which overflow occurred.
+	u32 Stage; /**< [0-3] Earliest stage in which overflow occurred.
 		- 0 = COMPLEX_MULT: Complex multiplier output overflowed and
 			has been saturated.
 		- 1 = FIRST_ADDER: First antenna adder output overflowed and
-			has been saturated.
+			has been saturated. Downlink Only.
 		- 2 = SECOND_ADDER: Second antenna adder output overflowed
-			and has been saturated.
-		- 3 = THIRD_ADDER: Third antenna adder output overflowed and
-			has been saturated. Downlink MAX_CCIDs > 8 Only */
-	u32 AdderAntenna; /**< [0-7] Lowest antenna in which overflow has
+			 and has been saturated. Downlink MAX_CCIDs > 4 Only.
+		- 3 = THIRD_ADDER: Third antenna adder output overflowed
+			and has been saturated. Downlink MAX_CCIDs > 8 Only. */
+	u32 Antenna; /**< [0-7] Lowest numbered antenna in which overflow
 		occurred. */
-	u32 MixCCID; /**< [0-15] Lowest CCID on which overflow has occurred
-		in mixer. */
-	u32 MixAntenna; /**< [0-7] Lowest antenna in which overflow has
-		occurred. */
-	u32 Mode; /** [0-1] Mode in which overflow has occured */
+	u32 NcoId; /**< [0-15] NCO on which overflow occured, with lowest
+		antenna taking priority (only relevant to overflow in
+		COMPLEX_MULT stage). */
+	u32 Mode; /** [0-1] In Switchable the mode of core when the overflow
+		occured.
+		- 0 = DOWNLINK: Overflow occured while core is in downlink.
+		- 1 = UPLINK: Overflow occured while core is in uplink. */
 } XDfeMix_MixerStatus;
 
 /**
@@ -430,7 +434,7 @@ typedef XDfeMix_Status XDfeMix_InterruptMask;
 typedef struct {
 	u32 DeviceId; /**< Device Id */
 	metal_phys_addr_t BaseAddr; /**< Device base address */
-	u32 Mode; /**< [0,1] 0=downlink, 1=uplink */
+	u32 Mode; /**< [0,1] 0=downlink, 1=uplink, 2=switchable */
 	u32 NumAntenna; /**< [1,2,4,8] */
 	u32 MaxUseableCcids; /**< [2,4,8] */
 	u32 Lanes; /**< [1-8] */
@@ -508,7 +512,7 @@ void XDfeMix_AddAuxNCOtoCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
 void XDfeMix_RemoveAuxNCOfromCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
 				   const s32 AuxId);
 
-u32 XDfeMix_UpdateCCinCCCfg(const XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
+u32 XDfeMix_UpdateCCinCCCfg(XDfeMix *InstancePtr, XDfeMix_CCCfg *CCCfg,
 			    s32 CCID, const XDfeMix_CarrierCfg *CarrierCfg);
 u32 XDfeMix_SetNextCCCfgAndTrigger(XDfeMix *InstancePtr,
 				   const XDfeMix_CCCfg *CCCfg);
@@ -520,7 +524,7 @@ u32 XDfeMix_AddCC(XDfeMix *InstancePtr, s32 CCID, u32 CCSeqBitmap,
 u32 XDfeMix_RemoveCC(XDfeMix *InstancePtr, s32 CCID);
 u32 XDfeMix_MoveCC(XDfeMix *InstancePtr, s32 CCID, u32 Rate, u32 FromNCO,
 		   u32 ToNCO);
-u32 XDfeMix_UpdateCC(const XDfeMix *InstancePtr, s32 CCID,
+u32 XDfeMix_UpdateCC(XDfeMix *InstancePtr, s32 CCID,
 		     const XDfeMix_CarrierCfg *CarrierCfg);
 u32 XDfeMix_SetAntennaGain(XDfeMix *InstancePtr, u32 AntennaId,
 			   u32 AntennaGain);
@@ -530,9 +534,9 @@ void XDfeMix_GetTriggersCfg(const XDfeMix *InstancePtr,
 			    XDfeMix_TriggerCfg *TriggerCfg);
 void XDfeMix_SetTriggersCfg(const XDfeMix *InstancePtr,
 			    XDfeMix_TriggerCfg *TriggerCfg);
-void XDfeMix_GetDUCDDCStatus(const XDfeMix *InstancePtr, s32 CCID,
+void XDfeMix_GetDUCDDCStatus(const XDfeMix *InstancePtr,
 			     XDfeMix_DUCDDCStatus *DUCDDCStatus);
-void XDfeMix_GetMixerStatus(const XDfeMix *InstancePtr, s32 CCID,
+void XDfeMix_GetMixerStatus(const XDfeMix *InstancePtr,
 			    XDfeMix_MixerStatus *MixerStatus);
 void XDfeMix_GetInterruptMask(const XDfeMix *InstancePtr,
 			      XDfeMix_InterruptMask *Mask);
