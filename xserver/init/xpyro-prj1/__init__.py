@@ -17,6 +17,7 @@ from mix_server import MIX
 from ccf_server import CCF
 from equ_server import EQU
 from prach_server import PRACH
+from ofdm_server import OFDM
 from axi_memmap import AXI_MEMMAP
 from utils import get_ip_and_port
 
@@ -34,6 +35,7 @@ MIX = Pyro4.expose(MIX)
 CCF = Pyro4.expose(CCF)
 EQU = Pyro4.expose(EQU)
 PRACH = Pyro4.expose(PRACH)
+OFDM = Pyro4.expose(OFDM)
 AXI_MEMMAP = Pyro4.expose(AXI_MEMMAP)
 
 Pyro4.Daemon.serveSimple(
@@ -44,6 +46,7 @@ Pyro4.Daemon.serveSimple(
         CCF: "CCF",
         EQU: "EQU",
         PRACH: "PRACH",
+        OFDM: "OFDM",
         AXI_MEMMAP: "AXI_MEMMAP",
     },
     host=IPADDR,

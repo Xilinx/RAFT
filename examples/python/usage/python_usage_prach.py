@@ -216,7 +216,7 @@ Cfg_out = handle.XDfePrach_Configure(device_id, Cfg_in)
 #   None
 
 Init_in = handle.GetStruct_XDfePrach_Init()
-Init_in['Sequence']['Length']=6
+Init_in['Sequence'][0]['Length']= 6
 Init_out = handle.XDfePrach_Initialize(device_id, Init_in)
 
 #Description:
@@ -231,7 +231,9 @@ Init_out = handle.XDfePrach_Initialize(device_id, Init_in)
 #   TriggerCfg: Trigger configuration container.
 
 TriggerCfg_in = handle.GetStruct_XDfePrach_TriggerCfg()
-TriggerCfg_in["FrameInit"]["Mode"] = 1
+TriggerCfg_in["FrameInit"][0]["Mode"] = 1
+TriggerCfg_in["FrameInit"][1]["Mode"] = 1
+TriggerCfg_in["FrameInit"][2]["Mode"] = 1
 TriggerCfg_out = handle.XDfePrach_SetTriggersCfg(device_id, TriggerCfg_in)
 
 #Description:
@@ -284,15 +286,19 @@ CurrentCCCfg = handle.XDfePrach_GetCurrentCCCfg(device_id, CurrCCCfg)
 
 CCCfg = handle.XDfePrach_GetEmptyCCCfg(device_id)
 
-#Description:
-#   Return Dictionary equivalent of structure XDfePrach_InternalDUCDDCCfg
-#Input Arguments:
-#   None
-#Return:
-#   Dictionary equivalent of structure XDfePrach_InternalDUCDDCCfg
-
-#GetStruct_XDfePrach_InternalDUCDDCCfg
-XDfePrach_InternalDUCDDCCfg = handle.GetStruct_XDfePrach_InternalDUCDDCCfg()
+"""
+Returns the current CCID carrier configuration.
+:param device_id: id of the opened device.
+:param CCCfg: component carrier (CC) configuration container.
+:param CCID: Channel ID.
+:param BandId: Band Id.
+:return: CCSeqBitmap: CC slot position container.
+CarrierCfg: CC configuration container.
+"""
+CCCfg = handle.GetStruct_XDfePrach_CCCfg()
+CCID = 0
+BandId = 0
+CCSeqBitmap, CarrierCfg = handle.XDfePrach_GetCarrierCfgMB(device_id, CCCfg, CCID, BandId)
 
 #Description:
 #   Returns the current CCID carrier configuration.
@@ -327,6 +333,29 @@ CCSeqBitmap, CarrierCfg = handle.XDfePrach_GetCarrierCfg(device_id, CCCfg, 0)
 AntennaCfg=[1,1,1,1,1,1,0,0]
 CCCfg = handle.XDfePrach_SetAntennaCfgInCCCfg(device_id, CCCfg, AntennaCfg)
 
+"""
+Adds specified CCID, with specified configuration, to a local CC
+configuration structure for the chosen Band.
+If there is insufficient capacity for the new CC the function will return
+an error.
+Initiates CC update (enable CCUpdate trigger TUSER Single Shot).
+:param device_id: id of the opened device.
+:param CCCfg: component carrier (CC) configuration container.
+:param CCID: Channel ID.
+:param CCSeqBitmap: CC slot position container.
+:param CarrierCfg: CC configuration container.
+:param BandId: Band Id.
+:return: ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
+CCCfg: component carrier (CC) configuration container.
+"""
+CCCfg = handle.GetStruct_XDfePrach_CCCfg()
+CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
+CCID = 0x5
+CCSeqBitmap = 0x1
+CarrierCfg['SCS'] = 0
+BandId = 0
+ret, CCCfg = handle.XDfePrach_AddCCtoCCCfgMB(device_id, CCCfg, CCID, CCSeqBitmap, CarrierCfg, BandId)
+
 #Description:
 #   Adds specified CCID, with specified configuration, to a local CC
 #   configuration structure.
@@ -348,7 +377,24 @@ CCCfg = handle.XDfePrach_SetAntennaCfgInCCCfg(device_id, CCCfg, AntennaCfg)
 
 CCCfg = handle.GetStruct_XDfePrach_CCCfg()
 CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
-#ret, CCCfg = handle.XDfePrach_AddCCtoCCCfg(device_id, CCCfg, 0, 0, CarrierCfg)
+CCID = 0x5
+CCSeqBitmap = 0x1
+CarrierCfg['SCS'] = 0
+ret, CCCfg = handle.XDfePrach_AddCCtoCCCfg(device_id, CCCfg, CCID, CCSeqBitmap, CarrierCfg)
+
+"""
+Removes specified CCID from a local CC configuration structure for
+selected band.
+:param device_id: id of the opened device.
+:param CCCfg: component carrier (CC) configuration container.
+:param CCID: Channel ID.
+:param BandId: Band Id.
+:return: CCCfg: component carrier (CC) configuration container.
+"""
+CCCfg = handle.GetStruct_XDfePrach_CCCfg()
+CCID = 0
+BandId = 0
+CCCfg = handle.XDfePrach_RemoveCCfromCCCfgMB(device_id, CCCfg, CCID, BandId)
 
 #Description:
 #   Removes specified CCID from a local CC configuration structure.
@@ -364,6 +410,24 @@ CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
 
 CCCfg = handle.GetStruct_XDfePrach_CCCfg()
 CCCfg = handle.XDfePrach_RemoveCCfromCCCfg(device_id, CCCfg, 0)
+
+"""
+Updates specified CCID, with specified configuration to a local CC
+configuration structure for selected band.
+If there is insufficient capacity for the new CC the function will return
+an error.
+:param device_id: id of the opened device.
+:param CCCfg: component carrier (CC) configuration container.
+:param CCID: Channel ID.
+:param CarrierCfg: CC configuration container.
+:param BandId: Band Id.
+:return: CCCfg: component carrier (CC) configuration container.
+"""
+CCCfg = handle.GetStruct_XDfePrach_CCCfg()
+CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
+CCID = 0
+BandId = 0
+CCCfg = handle.XDfePrach_UpdateCCinCCCfgMB(device_id, CCCfg, CCID, CarrierCfg, BandId)
 
 #Description:
 #   Updates specified CCID, with specified configuration to a local CC
@@ -383,8 +447,6 @@ CCCfg = handle.XDfePrach_RemoveCCfromCCCfg(device_id, CCCfg, 0)
 
 CCCfg = handle.GetStruct_XDfePrach_CCCfg()
 CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
-CCSeqBitmap = 0xb
-NCO = handle.GetStruct_XDfePrach_NCO()
 CCCfg = handle.XDfePrach_UpdateCCinCCCfg(device_id, CCCfg, 0, CarrierCfg)
 
 #Description:
@@ -472,6 +534,36 @@ ChannelCfg = handle.XDfePrach_GetChannelCfg(device_id, CurrentRCCfg, 0)
 #C header declaration:
 #   u32 XDfePrach_AddRCtoRCCfg(const XDfePrach *InstancePtr, XDfePrach_RCCfg *CurrentRCCfg,
 #   s32 CCID, u32 RCId, u32 RachChan, XDfePrach_DDCCfg *DdcCfg, XDfePrach_NCO *NcoCfg,
+#	XDfePrach_Schedule *StaticSchedule, u32 BandId);
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CurrentRCCfg: current RACH configuration container
+#   CCID: is CC Id.
+#   RCId: is RC Id.
+#   RachChan: is RACH channel.
+#   DdcCfg: is DDC data container.
+#   NcoCfg: is NCO data container.
+#   Schedule: is Schedule data container.
+#   BandId: is band id.
+#Return:
+#   ret: XST_SUCCESS on success, XST_FAILURE on failure
+#   CurrentRCCfg: current RACH configuration container
+
+# RC depends on CC settings, that is why we run AddCC first
+CCCfg = handle.GetStruct_XDfePrach_CCCfg()
+CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
+CCID = 0x5
+CCSeqBitmap = 0x1
+CarrierCfg['SCS'] = 0
+BandId = 0
+ret, NextCCCfg = handle.XDfePrach_AddCCtoCCCfgMB(device_id, CCCfg, CCID, CCSeqBitmap, CarrierCfg, BandId)
+
+#Description:
+#   Adds a new RC entry to the RC_CONFIGURATION. RCId must be same as the
+#   physical channel RachChan.
+#C header declaration:
+#   u32 XDfePrach_AddRCtoRCCfg(const XDfePrach *InstancePtr, XDfePrach_RCCfg *CurrentRCCfg,
+#   s32 CCID, u32 RCId, u32 RachChan, XDfePrach_DDCCfg *DdcCfg, XDfePrach_NCO *NcoCfg,
 #	XDfePrach_Schedule *StaticSchedule);
 #Input Arguments:
 #   device_id: id of the opened device.
@@ -486,12 +578,20 @@ ChannelCfg = handle.XDfePrach_GetChannelCfg(device_id, CurrentRCCfg, 0)
 #   ret: XST_SUCCESS on success, XST_FAILURE on failure
 #   CurrentRCCfg: current RACH configuration container
 
+# RC depends on CC settings, that is why we run AddCC first
+CCCfg = handle.GetStruct_XDfePrach_CCCfg()
+CarrierCfg = handle.GetStruct_XDfePrach_CarrierCfg()
+CCID = 0x5
+CCSeqBitmap = 0x1
+CarrierCfg['SCS'] = 0
+ret, NextCCCfg = handle.XDfePrach_AddCCtoCCCfg(device_id, CCCfg, CCID, CCSeqBitmap, CarrierCfg)
+
 CurrentRCCfg = handle.GetStruct_XDfePrach_RCCfg()
 DdcCfg = handle.GetStruct_XDfePrach_DDCCfg()
 NcoCfg = handle.GetStruct_XDfePrach_NCO()
 StaticSchedule = handle.GetStruct_XDfePrach_Schedule()
 ret, CurrentCCCfg = handle.XDfePrach_AddRCtoRCCfg(device_id, CurrentRCCfg, 0, 0,
-                                           0, DdcCfg, NcoCfg, StaticSchedule)
+                                           0, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg)
 
 #Description:
 #   Removes an RC configuration entry from the RC_CONFIGURATION. RCId must be
@@ -509,6 +609,32 @@ ret, CurrentCCCfg = handle.XDfePrach_AddRCtoRCCfg(device_id, CurrentRCCfg, 0, 0,
 
 CurrentRCCfg = handle.GetStruct_XDfePrach_RCCfg()
 ret, CurrentRCCfg = handle.XDfePrach_RemoveRCfromRCCfg(device_id, CurrentRCCfg, 0)
+
+#Description:
+#   Updates an RC entry to the RC_CONFIGURATION.
+#C header declaration:
+#   void XDfePrach_UpdateRCinRCCfg(const XDfePrach *InstancePtr, XDfePrach_RCCfg *CurrentRCCfg,
+#   s32 CCID, u32 RCId, u32 RachChan, XDfePrach_DDCCfg *DdcCfg, XDfePrach_NCO *NcoCfg,
+#	XDfePrach_Schedule *StaticSchedule, u32 BandId);
+#Input Arguments:
+#   device_id: id of the opened device.
+#   CurrentRCCfg: current PRACH configuration container
+#   CCID: is CC Id.
+#   RCId: is RC Id.
+#   RachChan: is PRACH channel.
+#   DdcCfg: is DDC data container.
+#   NcoCfg: is NCO data container.
+#   Schedule: is Schedule data container.
+#   BandId: is band id.
+#Return:
+#   CurrentRCCfg: current PRACH configuration container
+
+CurrentRCCfg = handle.GetStruct_XDfePrach_RCCfg()
+DdcCfg = handle.GetStruct_XDfePrach_DDCCfg()
+NcoCfg = handle.GetStruct_XDfePrach_NCO()
+StaticSchedule = handle.GetStruct_XDfePrach_Schedule()
+CurrentRCCfg = handle.XDfePrach_UpdateRCinRCCfgMB(device_id, CurrentRCCfg, 0, 0, 0,
+                                         DdcCfg, NcoCfg, StaticSchedule, NextCCCfg, BandId)
 
 #Description:
 #   Updates an RC entry to the RC_CONFIGURATION.
@@ -533,7 +659,7 @@ DdcCfg = handle.GetStruct_XDfePrach_DDCCfg()
 NcoCfg = handle.GetStruct_XDfePrach_NCO()
 StaticSchedule = handle.GetStruct_XDfePrach_Schedule()
 CurrentRCCfg = handle.XDfePrach_UpdateRCinRCCfg(device_id, CurrentRCCfg, 0, 0, 0,
-                                         DdcCfg, NcoCfg, StaticSchedule)
+                                         DdcCfg, NcoCfg, StaticSchedule, NextCCCfg)
 
 #Description:
 #   Writes local CC configuration to the shadow (NEXT) registers and triggers
@@ -593,7 +719,13 @@ ret = handle.XDfePrach_UpdateRCCfg(device_id, 0, 0, 0, DdcCfg, NcoCfg, StaticSch
 #   NcoCfg: is NCO data container.
 #   Schedule: is Schedule data container.
 
-DdcCfg = {"DecimationRate": 0, "SCS": 0, "RachGain": [0, 0, 0, 0, 0, 0]}
+# AddCC first
+CarrierCfg_in = handle.GetStruct_XDfePrach_CarrierCfg()
+CCID = 0x0
+CCSeqBitmap = 0x1
+CarrierCfg['SCS'] = 0
+ret, CarrierCfg_out = handle.XDfePrach_AddCC(device_id, CCID, BitSequence, CarrierCfg_in)
+DdcCfg = {"DecimationRate": 0, "UserSCS": 0, "RachGain": [0, 0, 0, 0, 0, 0]}
 NcoCfg = {
     "PhaseOffset": 0,
     "PhaseAcc": 0,
@@ -732,9 +864,9 @@ InterruptMask_in['MixerOverflow'] = 1
 InterruptMask_in['DecimatorOverrun'] = 1
 InterruptMask_in['SelectorOverrun'] = 1
 InterruptMask_in['RachUpdate'] = 1
-InterruptMask_in['CCSequenceError'] = 1
-InterruptMask_in['FrameInitTrigger'] = 1
-InterruptMask_in['FrameError'] = 1
+InterruptMask_in['CCSequenceError'][0] = 1
+InterruptMask_in['FrameInitTrigger'][0] = 1
+InterruptMask_in['FrameError'][0] = 1
 handle.XDfePrach_SetInterruptMask(device_id, InterruptMask_in)
 
 #Description:
@@ -764,9 +896,9 @@ Status_in['MixerOverflow'] = 1
 Status_in['DecimatorOverrun'] = 1
 Status_in['SelectorOverrun'] = 1
 Status_in['RachUpdate'] = 1
-Status_in['CCSequenceError'] = 1
-Status_in['FrameInitTrigger'] = 1
-Status_in['FrameError'] = 1
+Status_in['CCSequenceError'][0] = 1
+Status_in['FrameInitTrigger'][0] = 1
+Status_in['FrameError'][0] = 1
 handle.XDfePrach_ClearEventStatus(device_id, Status_in)
 
 #Description:
@@ -805,6 +937,16 @@ ret = handle.XDfePrach_RemoveRC(device_id, 0)
 
 ret = handle.XDfePrach_GetTUserDelay(device_id)
 
+"""
+Reads the delay of specified band in multiband mode, which will be
+added to TUSER and TLAST (delay matched through the IP).
+:param device_id: id of the opened device.
+:param BandId: Band Id of requested delay value.
+:return: ret: Delay value
+"""
+BandId = 0
+ret = handle.XDfePrach_GetTUserDelayMB(device_id, BandId)
+
 #Description:
 #   Returns CONFIG.DATA_LATENCY.VALUE + tap, where the tap is between 0
 #   and 23 in real mode and between 0 and 11 in complex/matrix mode.
@@ -816,6 +958,15 @@ ret = handle.XDfePrach_GetTUserDelay(device_id)
 #   ret: data latency value.
 
 ret = handle.XDfePrach_GetTDataDelay(device_id)
+
+"""
+Returns data latency of specified band in multiband mode.
+:param device_id: id of the opened device.
+:param BandId: Band Id of requested delay value.
+:return: ret: data latency value.
+"""
+BandId = 0
+ret = handle.XDfePrach_GetTDataDelayMB(device_id, BandId)
 
 #Description:
 #   This API gets the driver and HW design version.
@@ -852,6 +1003,18 @@ handle.XDfePrach_Deactivate(device_id)
 #   None
 
 handle.XDfePrach_SetTUserDelay(device_id, 10)
+
+"""
+Sets the delay of specified band in multiband mode, which will be added
+to TUSER and TLAST (delay matched through the IP).
+:param device_id: id of the opened device.
+:param Delay: requested delay variable.
+:param BandId: Band Id of requested delay value.
+:return: None
+"""
+Delay = 10
+BandId = 0
+handle.XDfePrach_SetTUserDelayMB(device_id, Delay, BandId)
 
 #Description:
 #   API closes the instances of a PRACH driver and moves the state machine to

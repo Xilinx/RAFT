@@ -127,7 +127,6 @@ class PRACH_Client(object):
         self.PRACH.SetMetalLogLevel(MetalLogLevel)
         return
 
-    # Get enum API
     def GetEnum_XDfePrach_StateId(self):
         """
         Return Dictionary equivalent of enum XDfePrach_StateId
@@ -152,7 +151,6 @@ class PRACH_Client(object):
         self.logger.debug(f"metal_log_level = {json.dumps(metal_log_level, indent=2)}")
         return metal_log_level
 
-    # Get structure  API
     def GetStruct_XDfePrach_Version(self):
         """
         Return Dictionary equivalent of structure XDfePrach_Version
@@ -262,17 +260,6 @@ class PRACH_Client(object):
         self.logger.debug("GetStruct_XDfePrach_NCO()")
         XDfePrach_NCO = self.PRACH.GetStruct_XDfePrach_NCO()
         return XDfePrach_NCO
-
-    def GetStruct_XDfePrach_InternalDUCDDCCfg(self):
-        """
-        Return Dictionary equivalent of structure XDfePrach_InternalDUCDDCCfg
-
-        :param : None
-        :return: Dictionary equivalent of structure XDfePrach_InternalDUCDDCCfg
-        """
-        self.logger.debug("GetStruct_XDfePrach_InternalDUCDDCCfg()")
-        XDfePrach_InternalDUCDDCCfg = self.PRACH.GetStruct_XDfePrach_InternalDUCDDCCfg()
-        return XDfePrach_InternalDUCDDCCfg
 
     def GetStruct_XDfePrach_DDCCfg(self):
         """
@@ -428,7 +415,6 @@ class PRACH_Client(object):
         XDfePrach = self.PRACH.GetStruct_XDfePrach()
         return XDfePrach
 
-    # System initialization API
     def XDfePrach_InstanceInit(self, DeviceNodeName):
         """
         API initialise an instance of the driver.
@@ -463,7 +449,6 @@ class PRACH_Client(object):
         self.PRACH.XDfePrach_InstanceClose(device_id)
         return
 
-    # Register access API
     def XDfePrach_WriteReg(self, device_id, addr_offset, data):
         """
         Writes a value to register in a PRACH instance.
@@ -592,9 +577,25 @@ class PRACH_Client(object):
         self.logger.debug(f"CCCfg = {json.dumps(CCCfg, indent=2)}")
         return CCCfg
 
-    def XDfePrach_GetCarrierCfg(self, device_id, CCCfg, CCID):
+    def XDfePrach_GetCarrierCfgMB(self, device_id, CCCfg, CCID, BandId):
         """
         Returns the current CCID carrier configuration.
+
+        :param device_id: id of the opened device.
+        :param CCCfg: component carrier (CC) configuration container.
+        :param CCID: Channel ID.
+        :param BandId: Band Id.
+        :return: CCSeqBitmap: CC slot position container.
+                 CarrierCfg: CC configuration container.
+        """
+        self.logger.debug(f"XDfePrach_GetCarrierCfgMB({device_id}, {json.dumps(CCCfg, indent=2)}, {CCID}, {BandId})")
+        CCSeqBitmap, CarrierCfg = self.PRACH.XDfePrach_GetCarrierCfgMB(device_id, CCCfg, CCID, BandId)
+        self.logger.debug(f"Return value = {CCSeqBitmap}, {json.dumps(CarrierCfg, indent=2)}")
+        return CCSeqBitmap, CarrierCfg
+
+    def XDfePrach_GetCarrierCfg(self, device_id, CCCfg, CCID):
+        """
+        Returns the current CCID carrier configuration on Band which Id = 0.
 
         :param device_id: id of the opened device.
         :param CCCfg: component carrier (CC) configuration container.
@@ -621,10 +622,33 @@ class PRACH_Client(object):
         self.logger.debug(f"Return value = {json.dumps(CCCfg, indent=2)}")
         return CCCfg
 
+    def XDfePrach_AddCCtoCCCfgMB(self, device_id, CCCfg, CCID, CCSeqBitmap, CarrierCfg, BandId):
+        """
+        Adds specified CCID, with specified configuration, to a local CC
+        configuration structure for the chosen Band.
+        If there is insufficient capacity for the new CC the function will return
+        an error.
+        Initiates CC update (enable CCUpdate trigger TUSER Single Shot).
+
+        :param device_id: id of the opened device.
+        :param CCCfg: component carrier (CC) configuration container.
+        :param CCID: Channel ID.
+        :param CCSeqBitmap: CC slot position container.
+        :param CarrierCfg: CC configuration container.
+        :param BandId: Band Id.
+        :return: ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
+                 CCCfg: component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfePrach_AddCCtoCCCfgMB({device_id}, {json.dumps(CCCfg, indent=2)}, {CCID}, {CCSeqBitmap}, {json.dumps(CarrierCfg, indent=2)}, {BandId})")
+        ret, CCCfg = self.PRACH.XDfePrach_AddCCtoCCCfgMB(device_id, CCCfg, CCID, CCSeqBitmap,
+                                                   CarrierCfg, BandId)
+        self.logger.debug(f"Return value = {ret}, {json.dumps(CCCfg, indent=2)}")
+        return ret, CCCfg
+
     def XDfePrach_AddCCtoCCCfg(self, device_id, CCCfg, CCID, CCSeqBitmap, CarrierCfg):
         """
         Adds specified CCID, with specified configuration, to a local CC
-        configuration structure.
+        configuration structure on Band which Id = 0.
         If there is insufficient capacity for the new CC the function will return
         an error.
         Initiates CC update (enable CCUpdate trigger TUSER Single Shot).
@@ -637,16 +661,32 @@ class PRACH_Client(object):
         :return: ret: XST_SUCCESS if successful, XST_FAILURE if error occurs.
                  CCCfg: component carrier (CC) configuration container.
         """
-        self.logger.debug(f"XDfePrach_AddCCtoCCCfg({device_id}, {json.dumps(CCCfg, indent=2)}, "
-                          f"{CCID}, {CCSeqBitmap}, {json.dumps(CarrierCfg, indent=2)})")
+        self.logger.debug(f"XDfePrach_AddCCtoCCCfg({device_id}, {json.dumps(CCCfg, indent=2)}, {CCID}, {CCSeqBitmap}, {json.dumps(CarrierCfg, indent=2)})")
         ret, CCCfg = self.PRACH.XDfePrach_AddCCtoCCCfg(device_id, CCCfg, CCID, CCSeqBitmap,
                                                    CarrierCfg)
         self.logger.debug(f"Return value = {ret}, {json.dumps(CCCfg, indent=2)}")
         return ret, CCCfg
 
+    def XDfePrach_RemoveCCfromCCCfgMB(self, device_id, CCCfg, CCID, BandId):
+        """
+        Removes specified CCID from a local CC configuration structure for
+        selected band.
+
+        :param device_id: id of the opened device.
+        :param CCCfg: component carrier (CC) configuration container.
+        :param CCID: Channel ID.
+        :param BandId: Band Id.
+        :return: CCCfg: component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfePrach_RemoveCCfromCCCfgMB({device_id}, {json.dumps(CCCfg, indent=2)}, {CCID}, {BandId})")
+        CCCfg = self.PRACH.XDfePrach_RemoveCCfromCCCfgMB(device_id, CCCfg, CCID, BandId)
+        self.logger.debug(f"Return value = {json.dumps(CCCfg, indent=2)}")
+        return CCCfg
+
     def XDfePrach_RemoveCCfromCCCfg(self, device_id, CCCfg, CCID):
         """
-        Removes specified CCID from a local CC configuration structure.
+        Removes specified CCID from a local CC configuration structure on Band
+        which Id = 0.
 
         :param device_id: id of the opened device.
         :param CCCfg: component carrier (CC) configuration container.
@@ -659,10 +699,29 @@ class PRACH_Client(object):
         self.logger.debug(f"Return value = {json.dumps(CCCfg, indent=2)}")
         return CCCfg
 
+    def XDfePrach_UpdateCCinCCCfgMB(self, device_id, CCCfg, CCID, CarrierCfg, BandId):
+        """
+        Updates specified CCID, with specified configuration to a local CC
+        configuration structure for selected band.
+        If there is insufficient capacity for the new CC the function will return
+        an error.
+
+        :param device_id: id of the opened device.
+        :param CCCfg: component carrier (CC) configuration container.
+        :param CCID: Channel ID.
+        :param CarrierCfg: CC configuration container.
+        :param BandId: Band Id.
+        :return: CCCfg: component carrier (CC) configuration container.
+        """
+        self.logger.debug(f"XDfePrach_UpdateCCinCCCfgMB({device_id}, {json.dumps(CCCfg, indent=2)}, {CCID}, {json.dumps(CarrierCfg, indent=2)}, {BandId})")
+        CCCfg = self.PRACH.XDfePrach_UpdateCCinCCCfgMB(device_id, CCCfg, CCID, CarrierCfg, BandId)
+        self.logger.debug(f"Return value CCCfg = {json.dumps(CCCfg, indent=2)}")
+        return CCCfg
+
     def XDfePrach_UpdateCCinCCCfg(self, device_id, CCCfg, CCID, CarrierCfg):
         """
         Updates specified CCID, with specified configuration to a local CC
-        configuration structure.
+        configuration structure on Band which Id = 0.
         If there is insufficient capacity for the new CC the function will return
         an error.
 
@@ -751,7 +810,6 @@ class PRACH_Client(object):
         RCCfg = self.PRACH.XDfePrach_GetEmptyRCCfg(device_id)
         return RCCfg
 
-
     def XDfePrach_GetChannelCfg(self, device_id, RCCfg, RCId):
         """
         Gets RACH channel configuration.
@@ -767,27 +825,53 @@ class PRACH_Client(object):
         self.logger.debug(f"ret = ChannelCfg = {json.dumps(ChannelCfg, indent=2)}")
         return ChannelCfg
 
-    def XDfePrach_AddRCtoRCCfg(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule):
+    def XDfePrach_AddRCtoRCCfgMB(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg, BandId):
         """
         Adds a new RC entry to the RC_CONFIGURATION. RCId must be same as the
         physical channel RachChan.
 
         :param device_id: id of the opened device.
-        :param CurrentRCCfg: current RACH configuration container
+        :param CurrentRCCfg: current PRACH configuration container
         :param CCID: is CC Id.
         :param RCId: is RC Id.
-        :param RachChan: is RACH channel.
+        :param RachChan: is PRACH channel.
         :param DdcCfg: is DDC data container.
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
+        :param NextCCCfg: CC configuration container.
+        :param BandId: Band id.
         return: ret: XST_SUCCESS on success, XST_FAILURE on failure
-                CurrentRCCfg: current RACH configuration container
+                CurrentRCCfg: current PRACH configuration container
+        """
+        self.logger.debug(f"XDfePrach_AddRCtoRCCfgMB({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)}, {json.dumps(NextCCCfg, indent=2)}, {BandId})")
+        ret, CurrentRCCfg = self.PRACH.XDfePrach_AddRCtoRCCfgMB(device_id, CurrentRCCfg, CCID, RCId,
+                                                RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg, BandId)
+        self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
+        return ret, CurrentRCCfg
+
+    def XDfePrach_AddRCtoRCCfg(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg):
+        """
+        Adds a new RC entry to the RC_CONFIGURATION. RCId must be same as the
+        physical channel RachChan.
+
+        :param device_id: id of the opened device.
+        :param CurrentRCCfg: current PRACH configuration container
+        :param CCID: is CC Id.
+        :param RCId: is RC Id.
+        :param RachChan: is PRACH channel.
+        :param DdcCfg: is DDC data container.
+        :param NcoCfg: is NCO data container.
+        :param Schedule: is Schedule data container.
+        :param NextCCCfg: CC configuration container.
+        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+                CurrentRCCfg: current PRACH configuration container
         """
         self.logger.debug(f"XDfePrach_AddRCtoRCCfg({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, "
                           f"{json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, "
-                          f"{json.dumps(StaticSchedule, indent=2)})")
+                          f"{json.dumps(StaticSchedule, indent=2)}, "
+                          f"{json.dumps(NextCCCfg, indent=2)})")
         ret, CurrentRCCfg = self.PRACH.XDfePrach_AddRCtoRCCfg(device_id, CurrentRCCfg, CCID, RCId,
-                                                RachChan, DdcCfg, NcoCfg, StaticSchedule)
+                                                RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg)
         self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
         return ret, CurrentRCCfg
 
@@ -808,7 +892,7 @@ class PRACH_Client(object):
         self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
         return ret, CurrentRCCfg
 
-    def XDfePrach_UpdateRCinRCCfg(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule):
+    def XDfePrach_UpdateRCinRCCfgMB(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg, BandId):
         """
         Updates an RC entry to the RC_CONFIGURATION.
 
@@ -820,13 +904,34 @@ class PRACH_Client(object):
         :param DdcCfg: is DDC data container.
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
+        :param NextCCCfg: CC configuration container.
+        :param BandId: Band id.
         return: CurrentRCCfg: current PRACH configuration container
         """
-        self.logger.debug(f"XDfePrach_UpdateRCinRCCfg({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, "
-                          f"{json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, "
-                          f"{json.dumps(StaticSchedule, indent=2)})")
+        self.logger.debug(f"XDfePrach_UpdateRCinRCCfgMB({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)}, {json.dumps(NextCCCfg, indent=2)}, {BandId})")
+        CurrentRCCfg = self.PRACH.XDfePrach_UpdateRCinRCCfgMB(device_id, CurrentRCCfg, CCID, RCId,
+                                                  RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg, BandId)
+        self.logger.debug(f"CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
+        return CurrentRCCfg
+
+    def XDfePrach_UpdateRCinRCCfg(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg):
+        """
+        Updates an RC entry to the RC_CONFIGURATION.
+
+        :param device_id: id of the opened device.
+        :param CurrentRCCfg: current PRACH configuration container
+        :param CCID: is CC Id.
+        :param RCId: is RC Id.
+        :param RachChan: is PRACH channel.
+        :param DdcCfg: is DDC data container.
+        :param NcoCfg: is NCO data container.
+        :param Schedule: is Schedule data container.
+        :param NextCCCfg: CC configuration container.
+        return: CurrentRCCfg: current PRACH configuration container
+        """
+        self.logger.debug(f"XDfePrach_UpdateRCinRCCfg({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)}, {json.dumps(NextCCCfg, indent=2)})")
         CurrentRCCfg = self.PRACH.XDfePrach_UpdateRCinRCCfg(device_id, CurrentRCCfg, CCID, RCId,
-                                                  RachChan, DdcCfg, NcoCfg, StaticSchedule)
+                                                  RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg)
         self.logger.debug(f"CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
         return CurrentRCCfg
 
@@ -840,9 +945,7 @@ class PRACH_Client(object):
         :param NextRCCfg: a RC configuration container.
         return: ret: XST_SUCCESS on success, XST_FAILURE on failure
         """
-        self.logger.debug(f"XDfePrach_SetNextRCCfg({device_id}, "
-                          f"{json.dumps(NextCCCfg, indent=2)}), "
-                          f"{json.dumps(NextRCCfg, indent=2)})")
+        self.logger.debug(f"XDfePrach_SetNextRCCfg({device_id}, {json.dumps(NextCCCfg, indent=2)}), {json.dumps(NextRCCfg, indent=2)})")
         ret = self.PRACH.XDfePrach_SetNextCfg(device_id, NextCCCfg, NextRCCfg)
         self.logger.debug(f"ret = {ret}")
         return ret
@@ -861,9 +964,7 @@ class PRACH_Client(object):
         :param Schedule: is Schedule data container.
         return: ret: XST_SUCCESS on success, XST_FAILURE on failure
         """
-        self.logger.debug(f"XDfePrach_UpdateRCCfg({device_id}, {CCID}, {RCId}, {RachChan}, "
-                          f"{json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, "
-                          f"{json.dumps(StaticSchedule, indent=2)})")
+        self.logger.debug(f"XDfePrach_UpdateRCCfg({device_id}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)})")
         ret = self.PRACH.XDfePrach_UpdateRCCfg(device_id, CCID, RCId, RachChan,
                                                DdcCfg, NcoCfg, StaticSchedule)
         self.logger.debug(f"ret = {ret}")
@@ -1070,6 +1171,20 @@ class PRACH_Client(object):
         self.PRACH.XDfePrach_SetTUserDelay(device_id, Delay)
         return
 
+    def XDfePrach_SetTUserDelayMB(self, device_id, Delay, BandId):
+        """
+        Sets the delay of specified band in multiband mode, which will be added
+        to TUSER and TLAST (delay matched through the IP).
+
+        :param device_id: id of the opened device.
+        :param Delay: requested delay variable.
+        :param BandId: Band Id of requested delay value.
+        :return: None
+        """
+        self.logger.debug(f"XDfePrach_SetTUserDelayMB({device_id}, {Delay}, {BandId})")
+        self.PRACH.XDfePrach_SetTUserDelayMB(device_id, Delay, BandId)
+        return
+
     def XDfePrach_GetTUserDelay(self, device_id):
         """
         Reads the delay, which will be added to TUSER and TLAST (delay matched
@@ -1083,16 +1198,42 @@ class PRACH_Client(object):
         self.logger.debug(f"ret = {ret}")
         return ret
 
+    def XDfePrach_GetTUserDelayMB(self, device_id, BandId):
+        """
+        Reads the delay of specified band in multiband mode, which will be
+        added to TUSER and TLAST (delay matched through the IP).
+
+        :param device_id: id of the opened device.
+        :param BandId: Band Id of requested delay value.
+        :return: ret: Delay value
+        """
+        self.logger.debug(f"XDfePrach_GetTUserDelayMB({device_id}, {BandId})")
+        ret = self.PRACH.XDfePrach_GetTUserDelayMB(device_id, BandId)
+        self.logger.debug(f"ret = {ret}")
+        return ret
+
     def XDfePrach_GetTDataDelay(self, device_id):
         """
-        Returns CONFIG.DATA_LATENCY.VALUE + tap, where the tap is between 0
-        and 23 in real mode and between 0 and 11 in complex/matrix mode.
+        Returns data latency.
 
         :param device_id: id of the opened device.
         :return: ret: data latency value.
         """
         self.logger.debug(f"XDfePrach_GetTDataDelay({device_id})")
         ret = self.PRACH.XDfePrach_GetTDataDelay(device_id)
+        self.logger.debug(f"ret = {ret}")
+        return ret
+
+    def XDfePrach_GetTDataDelayMB(self, device_id, BandId):
+        """
+        Returns data latency of specified band in multiband mode.
+
+        :param device_id: id of the opened device.
+        :param BandId: Band Id of requested delay value.
+        :return: ret: data latency value.
+        """
+        self.logger.debug(f"XDfePrach_GetTDataDelayMB({device_id}, {BandId})")
+        ret = self.PRACH.XDfePrach_GetTDataDelayMB(device_id, BandId)
         self.logger.debug(f"ret = {ret}")
         return ret
 
