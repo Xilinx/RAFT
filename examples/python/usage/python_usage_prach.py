@@ -787,6 +787,22 @@ TriggerCfg_out = handle.XDfePrach_GetTriggersCfg(device_id)
 CarrierCfg_out = handle.XDfePrach_GetCC(device_id, 0, 0)
 
 #Description:
+#   Get specified CCID carrier configuration from either Current or Next
+#   for selected band in multi-band mode.
+#C header declaration:
+#   void XDfePrach_GetCCMB(const XDfePrach *InstancePtr, u32 CCID,
+# 	XDfePrach_CarrierCfg *CarrierCfg, u32 BandId);
+#Input Arguments:
+#   device_id: id of the opened device.
+#   Next: is next or current data flag.
+#   CCID: is component carrier id number.
+#   BandId: is band id.
+#Return:
+#   CarrierCfg: Carrier config container.
+
+CarrierCfg_out = handle.XDfePrach_GetCCMB(device_id, 0, 0, 0)
+
+#Description:
 #   Get PRACH Status.
 #C header declaration:
 #   void XDfePrach_GetStatus(const XDfePrach *InstancePtr, XDfePrach_Status *Status);

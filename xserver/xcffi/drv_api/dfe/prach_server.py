@@ -903,7 +903,7 @@ class PRACH(object):
         :param device_id: id of the opened device.
         :param RCCfg: RC configuration container.
         :param RCId: Chosen RACH channel Id.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 ChannelCfg: RACH channel container.
         """
         RCCfg_ptr = ffi.new("XDfePrach_RCCfg *", RCCfg)
@@ -930,7 +930,7 @@ class PRACH(object):
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
         :param BandId: Band id.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 CurrentRCCfg: current PRACH configuration container
         """
         CurrentRCCfg_ptr = ffi.new("XDfePrach_RCCfg *", CurrentRCCfg)
@@ -961,7 +961,7 @@ class PRACH(object):
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 CurrentRCCfg: current PRACH configuration container
         """
         CurrentRCCfg_ptr = ffi.new("XDfePrach_RCCfg *", CurrentRCCfg)
@@ -986,7 +986,7 @@ class PRACH(object):
         :param device_id: id of the opened device.
         :param CurrentRCCfg: current PRACH configuration container
         :param RCId: is RC Id.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 CurrentRCCfg: current PRACH configuration container
         """
         CurrentRCCfg_ptr = ffi.new("XDfePrach_RCCfg *", CurrentRCCfg)
@@ -1011,7 +1011,7 @@ class PRACH(object):
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
         :param BandId: Band id.
-        return: CurrentRCCfg: current PRACH configuration container
+        :return: CurrentRCCfg: current PRACH configuration container
         """
         CurrentRCCfg_ptr = ffi.new("XDfePrach_RCCfg *", CurrentRCCfg)
         DdcCfg_ptr = ffi.new("XDfePrach_DDCCfg *", DdcCfg)
@@ -1040,7 +1040,7 @@ class PRACH(object):
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
-        return: CurrentRCCfg: current PRACH configuration container
+        :return: CurrentRCCfg: current PRACH configuration container
         """
         CurrentRCCfg_ptr = ffi.new("XDfePrach_RCCfg *", CurrentRCCfg)
         DdcCfg_ptr = ffi.new("XDfePrach_DDCCfg *", DdcCfg)
@@ -1064,7 +1064,7 @@ class PRACH(object):
         :param device_id: id of the opened device.
         :param NextCCCfg: a CC configuration container.
         :param NextRCCfg: a RC configuration container.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
         """
         NextCCCfg_ptr = ffi.new("XDfePrach_CCCfg *", NextCCCfg)
         NextRCCfg_ptr = ffi.new("XDfePrach_RCCfg *", NextRCCfg)
@@ -1086,7 +1086,7 @@ class PRACH(object):
         :param DdcCfg: is DDC data container.
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
         """
         DdcCfg_ptr = ffi.new("XDfePrach_DDCCfg *", DdcCfg)
         NcoCfg_ptr = ffi.new("XDfePrach_NCO *", NcoCfg)
@@ -1110,7 +1110,7 @@ class PRACH(object):
         :param DdcCfg: is DDC data container.
         :param NcoCfg: is NCO data container.
         :param StaticSchedule: is Schedule data container.
-        return: ret: XST_SUCCESS on succes, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on succes, XST_FAILURE on failure
                 DdcCfg: is DDC data container.
                 NcoCfg: is NCO data container.
                 Schedule: is Schedule data container.        
@@ -1164,7 +1164,7 @@ class PRACH(object):
         Return current trigger configuration.
 
         :param device_id: id of the opened device.
-        return: TriggerCfg: Trigger configuration container
+        :return: TriggerCfg: Trigger configuration container
         """
         TriggerCfg_ptr = ffi.new("XDfePrach_TriggerCfg *")
         self.logger.debug(f"XDfePrach_GetTriggersCfg({device_id})")
@@ -1180,7 +1180,7 @@ class PRACH(object):
 
         :param device_id: id of the opened device.
         :param TriggerCfg: Trigger configuration container.
-        return: TriggerCfg: Trigger configuration container.
+        :return: TriggerCfg: Trigger configuration container.
         """
         TriggerCfg_ptr = ffi.new("XDfePrach_TriggerCfg *", TriggerCfg)
         self.logger.debug(f"XDfePrach_SetTriggersCfg({device_id}, {json.dumps(TriggerCfg, indent=2)})")
@@ -1192,7 +1192,8 @@ class PRACH(object):
 
     def XDfePrach_GetCC(self, device_id, Next, CCID):
         """
-        Get specified CCID carrier configuration from either Current or Next.
+        Get specified CCID carrier configuration from either Current or Next
+        for band id 0.
 
         :param device_id: id of the opened device.
         :param Next: is next or current data flag.
@@ -1203,6 +1204,25 @@ class PRACH(object):
         self.logger.debug(f"XDfePrach_GetCC({device_id}, {Next}, {CCID})")
         xprach = self.prach_dict[device_id][1]
         prach_handle.XDfePrach_GetCC(xprach, Next, CCID, CarrierCfg_ptr)
+        CarrierCfg = cdata_to_py(CarrierCfg_ptr[0])
+        self.logger.debug(f"CarrierCfg = {json.dumps(CarrierCfg, indent=2)}")
+        return CarrierCfg
+
+    def XDfePrach_GetCCMB(self, device_id, Next, CCID, BandId):
+        """
+        Get specified CCID carrier configuration from either Current or Next
+        for selected band in multi-band mode.
+
+        :param device_id: id of the opened device.
+        :param Next: is next or current data flag.
+        :param CCID: is component carrier id number.
+        :param BandId: is Band Id.
+        :return: CarrierCfg: Carrier config container.
+        """
+        CarrierCfg_ptr = ffi.new("XDfePrach_CarrierCfg *")
+        self.logger.debug(f"XDfePrach_GetCC({device_id}, {Next}, {CCID}, {BandId})")
+        xprach = self.prach_dict[device_id][1]
+        prach_handle.XDfePrach_GetCCMB(xprach, Next, CCID, CarrierCfg_ptr, BandId)
         CarrierCfg = cdata_to_py(CarrierCfg_ptr[0])
         self.logger.debug(f"CarrierCfg = {json.dumps(CarrierCfg, indent=2)}")
         return CarrierCfg
@@ -1345,7 +1365,7 @@ class PRACH(object):
 
         :param device_id: id of the opened device.
         :param Delay: requested delay variable.
-        :param BandId: Band Id of requested delay value.
+        :param BandId: is Band Id.
         :return: None
         """
         self.logger.debug(f"XDfePrach_SetTUserDelayMB({device_id}, {Delay}, {BandId})")
@@ -1373,7 +1393,7 @@ class PRACH(object):
         added to TUSER and TLAST (delay matched through the IP).
 
         :param device_id: id of the opened device.
-        :param BandId: Band Id of requested delay value.
+        :param BandId: is Band Id.
         :return: ret: Delay value
         """
         self.logger.debug(f"XDfePrach_GetTUserDelayMB({device_id}, {BandId})")
@@ -1400,7 +1420,7 @@ class PRACH(object):
         Returns data latency of specified band in multiband mode.
 
         :param device_id: id of the opened device.
-        :param BandId: Band Id of requested delay value.
+        :param BandId: is Band Id.
         :return: ret: data latency value.
         """
         self.logger.debug(f"XDfePrach_GetTDataDelayMB({device_id}, {BandId})")

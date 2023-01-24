@@ -684,6 +684,8 @@ void XDfePrach_SetTriggersCfg(const XDfePrach *InstancePtr,
 			      XDfePrach_TriggerCfg *TriggerCfg);
 void XDfePrach_GetCC(const XDfePrach *InstancePtr, bool Next, s32 CCID,
 		     XDfePrach_CarrierCfg *CarrierCfg);
+void XDfePrach_GetCCMB(const XDfePrach *InstancePtr, bool Next, s32 CCID,
+		       XDfePrach_CarrierCfg *CarrierCfg, u32 BandId);
 void XDfePrach_GetStatus(const XDfePrach *InstancePtr,
 			 XDfePrach_Status *Status);
 void XDfePrach_ClearStatus(const XDfePrach *InstancePtr);

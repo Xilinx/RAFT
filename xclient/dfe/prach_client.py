@@ -817,7 +817,7 @@ class PRACH_Client(object):
         :param device_id: id of the opened device.
         :param RCCfg: RC configuration container.
         :param RCId: Chosen RACH channel Id.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 ChannelCfg: RACH channel container.
         """
         self.logger.debug(f"XDfePrach_GetChannelCfg({device_id}, {RCId}")
@@ -840,7 +840,7 @@ class PRACH_Client(object):
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
         :param BandId: Band id.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 CurrentRCCfg: current PRACH configuration container
         """
         self.logger.debug(f"XDfePrach_AddRCtoRCCfgMB({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)}, {json.dumps(NextCCCfg, indent=2)}, {BandId})")
@@ -863,7 +863,7 @@ class PRACH_Client(object):
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 CurrentRCCfg: current PRACH configuration container
         """
         self.logger.debug(f"XDfePrach_AddRCtoRCCfg({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, "
@@ -883,7 +883,7 @@ class PRACH_Client(object):
         :param device_id: id of the opened device.
         :param CurrentRCCfg: current PRACH configuration container
         :param RCId: is RC Id.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
                 CurrentRCCfg: current PRACH configuration container
         """
         self.logger.debug(f"XDfePrach_RemoveRCfromRCCfg({device_id}, "
@@ -906,7 +906,7 @@ class PRACH_Client(object):
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
         :param BandId: Band id.
-        return: CurrentRCCfg: current PRACH configuration container
+        :return: CurrentRCCfg: current PRACH configuration container
         """
         self.logger.debug(f"XDfePrach_UpdateRCinRCCfgMB({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)}, {json.dumps(NextCCCfg, indent=2)}, {BandId})")
         CurrentRCCfg = self.PRACH.XDfePrach_UpdateRCinRCCfgMB(device_id, CurrentRCCfg, CCID, RCId,
@@ -927,7 +927,7 @@ class PRACH_Client(object):
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
         :param NextCCCfg: CC configuration container.
-        return: CurrentRCCfg: current PRACH configuration container
+        :return: CurrentRCCfg: current PRACH configuration container
         """
         self.logger.debug(f"XDfePrach_UpdateRCinRCCfg({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)}, {json.dumps(NextCCCfg, indent=2)})")
         CurrentRCCfg = self.PRACH.XDfePrach_UpdateRCinRCCfg(device_id, CurrentRCCfg, CCID, RCId,
@@ -943,7 +943,7 @@ class PRACH_Client(object):
         :param device_id: id of the opened device.
         :param NextCCCfg: a CC configuration container.
         :param NextRCCfg: a RC configuration container.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
         """
         self.logger.debug(f"XDfePrach_SetNextRCCfg({device_id}, {json.dumps(NextCCCfg, indent=2)}), {json.dumps(NextRCCfg, indent=2)})")
         ret = self.PRACH.XDfePrach_SetNextCfg(device_id, NextCCCfg, NextRCCfg)
@@ -962,7 +962,7 @@ class PRACH_Client(object):
         :param DdcCfg: is DDC data container.
         :param NcoCfg: is NCO data container.
         :param Schedule: is Schedule data container.
-        return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
         """
         self.logger.debug(f"XDfePrach_UpdateRCCfg({device_id}, {CCID}, {RCId}, {RachChan}, {json.dumps(DdcCfg, indent=2)}, {json.dumps(NcoCfg, indent=2)}, {json.dumps(StaticSchedule, indent=2)})")
         ret = self.PRACH.XDfePrach_UpdateRCCfg(device_id, CCID, RCId, RachChan,
@@ -998,7 +998,7 @@ class PRACH_Client(object):
 
         :param device_id: id of the opened device.
         :param RCId: is RC Id.
-        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+        :return: ret: XST_SUCCESS on succes, XST_FAILURE on failure
         """
         self.logger.debug(f"XDfePrach_RemoveRC({device_id}, {RCId})")
         ret = self.PRACH.XDfePrach_RemoveRC(device_id, RCId)
@@ -1025,7 +1025,7 @@ class PRACH_Client(object):
         Return current trigger configuration.
 
         :param device_id: id of the opened device.
-        return: TriggerCfg: Trigger configuration container
+        :return: TriggerCfg: Trigger configuration container
         """
         self.logger.debug(f"XDfePrach_GetTriggersCfg({device_id})")
         TriggerCfg = self.PRACH.XDfePrach_GetTriggersCfg(device_id)
@@ -1038,7 +1038,7 @@ class PRACH_Client(object):
 
         :param device_id: id of the opened device.
         :param TriggerCfg: Trigger configuration container.
-        return: TriggerCfg: Trigger configuration container.
+        :return: TriggerCfg: Trigger configuration container.
         """
         self.logger.debug(f"XDfePrach_SetTriggersCfg({device_id}, {json.dumps(TriggerCfg, indent=2)})")
         TriggerCfg = self.PRACH.XDfePrach_SetTriggersCfg(device_id, TriggerCfg)
@@ -1047,7 +1047,8 @@ class PRACH_Client(object):
 
     def XDfePrach_GetCC(self, device_id, Next, CCID):
         """
-        Get specified CCID carrier configuration from either Current or Next.
+        Get specified CCID carrier configuration from either Current or Next
+        for band id 0.
 
         :param device_id: id of the opened device.
         :param Next: is next or current data flag.
@@ -1056,6 +1057,22 @@ class PRACH_Client(object):
         """
         self.logger.debug(f"XDfePrach_GetCC({device_id}, {Next}, {CCID})")
         CarrierCfg = self.PRACH.XDfePrach_GetCC(device_id, Next, CCID)
+        self.logger.debug(f"CarrierCfg = {json.dumps(CarrierCfg, indent=2)}")
+        return CarrierCfg
+
+    def XDfePrach_GetCCMB(self, device_id, Next, CCID, BandId):
+        """
+        Get specified CCID carrier configuration from either Current or Next
+        for selected band in multi-band mode.
+
+        :param device_id: id of the opened device.
+        :param Next: is next or current data flag.
+        :param CCID: is component carrier id number.
+        :param BandId: is Band Id.
+        :return: CarrierCfg: Carrier config container.
+        """
+        self.logger.debug(f"XDfePrach_GetCC({device_id}, {Next}, {CCID}, {BandId})")
+        CarrierCfg = self.PRACH.XDfePrach_GetCCMB(device_id, Next, CCID, BandId)
         self.logger.debug(f"CarrierCfg = {json.dumps(CarrierCfg, indent=2)}")
         return CarrierCfg
 
@@ -1178,7 +1195,7 @@ class PRACH_Client(object):
 
         :param device_id: id of the opened device.
         :param Delay: requested delay variable.
-        :param BandId: Band Id of requested delay value.
+        :param BandId: is Band Id.
         :return: None
         """
         self.logger.debug(f"XDfePrach_SetTUserDelayMB({device_id}, {Delay}, {BandId})")
@@ -1204,7 +1221,7 @@ class PRACH_Client(object):
         added to TUSER and TLAST (delay matched through the IP).
 
         :param device_id: id of the opened device.
-        :param BandId: Band Id of requested delay value.
+        :param BandId: is Band Id.
         :return: ret: Delay value
         """
         self.logger.debug(f"XDfePrach_GetTUserDelayMB({device_id}, {BandId})")
@@ -1229,7 +1246,7 @@ class PRACH_Client(object):
         Returns data latency of specified band in multiband mode.
 
         :param device_id: id of the opened device.
-        :param BandId: Band Id of requested delay value.
+        :param BandId: is Band Id.
         :return: ret: data latency value.
         """
         self.logger.debug(f"XDfePrach_GetTDataDelayMB({device_id}, {BandId})")
