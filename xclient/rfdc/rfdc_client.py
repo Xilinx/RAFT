@@ -2149,6 +2149,23 @@ class RFDC_Client(object):
         self.logger.debug(f"The return value is: {ret}, {Mode}")
         return ret, Mode
 
+    def XRFdc_GetCoupling(self, inst_id, Type, Tile_Id, Block_Id):
+        """
+        This function is used to get the Coupling mode.
+
+        :param inst_id: Id of the RFDC instance
+        :param Type: Type is ADC or DAC. 0 for ADC and 1 for DAC.
+        :param Tile_Id: Tile_Id indicates Tile number.
+        :param Block_Id: indicates Block number.
+        :return: ret: XRFDC_SUCCESS if successful, XRFDC_FAILURE if error occurs
+                 Mode: return the link coupling mode
+        """
+        self.logger.debug(f"ret = XRFdc_GetCoupling({Type}, {Tile_Id}, {Block_Id})")
+        ret, Mode = self.RFDC.XRFdc_GetCoupling(inst_id, Type, Tile_Id, Block_Id)
+        self.logger.debug(f"The return value is: {ret}, {Mode}")
+        return ret, Mode
+
+
     def XRFdc_GetLinkCoupling(self, inst_id, Tile_Id, Block_Id):
         """
         This function is used to get the Link Coupling mode.

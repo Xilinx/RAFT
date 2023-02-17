@@ -13,7 +13,7 @@ from utils import ffi, open_packed_c_library, cdata_to_py, cptr_to_pylist
 from utils import cdata_to_py, get_python_log_levels
 from utils import getkey_from_listbeginvalue, xhelper_handle
 
-rfdc_handle = open_packed_c_library(RAFT_DIR + "xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h", "/usr/lib/librfdc.so.1")
+rfdc_handle = open_packed_c_library(RAFT_DIR + "xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h", "/usr/lib/librfdc.so.12")
 
 
 class RFDC(object):
@@ -2440,6 +2440,27 @@ class RFDC(object):
         RFdcInstPtr = self.rfdc_inst_dict[inst_id][1]
         ret = rfdc_handle.XRFdc_GetInvSincFIR(
             RFdcInstPtr, Tile_Id, Block_Id, ModePtr
+        )
+        self.logger.debug(f"The return value is: {ret}")
+        Mode = ModePtr[0]
+        return ret, Mode
+
+    def XRFdc_GetCoupling(self, inst_id, Type, Tile_Id, Block_Id):
+        """
+        This function is used to get the Coupling mode.
+
+        :param inst_id: Id of the RFDC instance
+        :param Type: Type is ADC or DAC. 0 for ADC and 1 for DAC.
+        :param Tile_Id: Tile_Id indicates Tile number.
+        :param Block_Id: indicates Block number.
+        :return: ret: XRFDC_SUCCESS if successful, XRFDC_FAILURE if error occurs
+                 Mode: return the link coupling mode
+        """
+        ModePtr = ffi.new("u32 *")
+        self.logger.debug(f"ret = XRFdc_GetCoupling({Type}, {Tile_Id}, {Block_Id}, ModePtr)")
+        RFdcInstPtr = self.rfdc_inst_dict[inst_id][1]
+        ret = rfdc_handle.XRFdc_GetCoupling(
+            RFdcInstPtr, Type, Tile_Id, Block_Id, ModePtr
         )
         self.logger.debug(f"The return value is: {ret}")
         Mode = ModePtr[0]

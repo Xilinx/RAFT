@@ -1607,6 +1607,21 @@ ret = handle.XRFdc_SetInvSincFIR(inst_id, 0, 0, 0)
 ret, Mode = handle.XRFdc_GetInvSincFIR(inst_id, 0, 0)
 
 #Description:
+#   This function is used to get the Coupling mode.
+#C header declaration:
+#   u32 XRFdc_GetCoupling(XRFdc *InstancePtr, u32 Type, u32 Tile_Id, u32 Block_Id, u32 *ModePtr);
+#Input Arguments:
+#   inst_id: Id of the RFDC instance
+#   Type: Type is ADC or DAC. 0 for ADC and 1 for DAC.
+#   Tile_Id: Tile_Id indicates Tile number.
+#   Block_Id: indicates Block number.
+#Return:
+#   ret: XRFDC_SUCCESS if successful, XRFDC_FAILURE if error occurs
+#   Mode: return the link coupling mode
+
+ret, Mode = handle.XRFdc_GetCoupling(inst_id, 0, 0, 0)
+
+#Description:
 #   This function is used to get the Link Coupling mode.
 #C header declaration:
 #   u32 XRFdc_GetLinkCoupling(XRFdc *InstancePtr, u32 Tile_Id, u32 Block_Id, u32 *ModePtr);
