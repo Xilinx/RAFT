@@ -756,7 +756,7 @@ class OFDM_Client(object):
         :return: None
         """
         self.logger.debug(f"XDfeOfdm_SetTUserDelay({device_id}, {TUserDelay})")
-        self.OFDM.XDfeOfdm_SetTUserDelay(xofdm, TUserDelay)
+        self.OFDM.XDfeOfdm_SetTUserDelay(device_id, TUserDelay)
         return
 
     def XDfeOfdm_GetTUserDelay(self, device_id):
@@ -768,7 +768,7 @@ class OFDM_Client(object):
         :return: TUserDelay: Delay value.
         """
         self.logger.debug(f"XDfeOfdm_GetTUserDelay({device_id})")
-        TUserDelay = self.OFDM.XDfeOfdm_GetTUserDelay(xofdm)
+        TUserDelay = self.OFDM.XDfeOfdm_GetTUserDelay(device_id)
         self.logger.debug(f"Return value = {TUserDelay}")
         return TUserDelay
 
@@ -780,7 +780,7 @@ class OFDM_Client(object):
         :return: Returned Data latency.
         """
         self.logger.debug(f"XDfeOfdm_GetDataLatency({device_id})")
-        TDataLatency = self.OFDM.XDfeOfdm_GetDataLatency(xofdm)
+        TDataLatency = self.OFDM.XDfeOfdm_GetDataLatency(device_id)
         self.logger.debug(f"Return value = {TDataLatency}")
         return TDataLatency
 

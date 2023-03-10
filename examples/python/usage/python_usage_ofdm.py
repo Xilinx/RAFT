@@ -150,14 +150,14 @@ CurrentCCCfg = handle.XDfeOfdm_GetCurrentCCCfg(device_id, CurrCCCfg)
 
 # XDfeOfdm_GetEmptyCCCfg
 # void XDfeOfdm_GetEmptyCCCfg(const XDfeCcf *InstancePtr, XDfeOfdm_CCCfg *CCCfg);
-#CCCfg = handle.XDfeOfdm_GetEmptyCCCfg(device_id) #TODO
+CCCfg = handle.XDfeOfdm_GetEmptyCCCfg(device_id) #TODO
 
 # XDfeOfdm_GetCarrierCfg
 # void XDfeOfdm_GetCarrierCfg(const XDfeCcf *InstancePtr, XDfeOfdm_CCCfg *CCCfg,
 #			   s32 CCID, u32 *CCSeqBitmap,
 #			   XDfeOfdm_CarrierCfg *CarrierCfg);
 CCCfg = handle.GetStruct_XDfeOfdm_CCCfg()
-#CCSeqBitmap, CarrierCfg = handle.XDfeOfdm_GetCarrierCfg(device_id, CCCfg, 0) #TODO
+CCSeqBitmap, CarrierCfg = handle.XDfeOfdm_GetCarrierCfg(device_id, CCCfg, 0) #TODO
 
 # XDfeOfdm_AddCCtoCCCfg
 # u32 XDfeOfdm_AddCCtoCCCfg(XDfeCcf *InstancePtr, XDfeOfdm_CCCfg *CCCfg, s32 CCID,
@@ -172,13 +172,13 @@ CarrierCfg['FftSize'] = 1024
 Status['CCUpdate'] = 1
 handle.XDfeOfdm_ClearEventStatus(int(device_id), Status)
 FTSeq = handle.GetStruct_XDfeOfdm_FTSequence()
-#ret, CCCfg, FTSeq = handle.XDfeOfdm_AddCCtoCCCfg(int(device_id), CCCfg, CCID, CCSeqBitmap, CarrierCfg, FTSeq) #TODO
+ret, CCCfg, FTSeq = handle.XDfeOfdm_AddCCtoCCCfg(int(device_id), CCCfg, CCID, CCSeqBitmap, CarrierCfg, FTSeq) #TODO
 
 # XDfeOfdm_RemoveCCfromCCCfg
 # void XDfeOfdm_RemoveCCfromCCCfg(XDfeCcf *InstancePtr, XDfeOfdm_CCCfg *CCCfg,
 # 			       s32 CCID);
 CCCfg = handle.GetStruct_XDfeOfdm_CCCfg()
-#ret, CCCfg, FTSeq = handle.XDfeOfdm_RemoveCCfromCCCfg(device_id, CCCfg, 0, FTSeq)#TODO
+ret, CCCfg, FTSeq = handle.XDfeOfdm_RemoveCCfromCCCfg(device_id, CCCfg, 0, FTSeq)#TODO
 
 # XDfeOfdm_UpdateCCinCCCfg
 # void XDfeOfdm_UpdateCCinCCCfg(const XDfeCcf *InstancePtr, XDfeOfdm_CCCfg *CCCfg,
@@ -205,7 +205,7 @@ print(ret)
 # u32 XDfeOfdm_SetNextCCCfgAndTrigger(const XDfeCcf *InstancePtr,
 #				   XDfeOfdm_CCCfg *CCCfg);
 CCCfg = handle.GetStruct_XDfeOfdm_CCCfg()
-#ret, CCCfg = handle.XDfeOfdm_SetNextCCCfgAndTrigger(device_id, CCCfg)#TODO
+ret, CCCfg = handle.XDfeOfdm_SetNextCCCfgAndTrigger(device_id, CCCfg)#TODO
 
 #XDfeOfdm_AddCC
 #u32 XDfeOfdm_AddCC(const XDfeCcf *InstancePtr, u32 CCID,
@@ -230,7 +230,7 @@ ret = handle.XDfeOfdm_AddCC(device_id, 0, CCSeqBitmap, CarrierCfg_in, FTSeq)
 
 #XDfeOfdm_RemoveCC
 #u32 XDfeOfdm_RemoveCC(const XDfeCcf *InstancePtr, u32 CCID);
-#ret = handle.XDfeOfdm_RemoveCC(device_id, 0, FTSeq)#TODO
+ret = handle.XDfeOfdm_RemoveCC(device_id, 0, FTSeq)#TODO
 
 #XDfeOfdm_UpdateCC
 #u32 XDfeOfdm_UpdateCC(const XDfeCcf *InstancePtr, u32 CCID,
@@ -263,25 +263,26 @@ handle.XDfeOfdm_SetInterruptMask(device_id, Mask_in)
 #	            		       const XDfeOfdm_InterruptMask *Mask);
 Mask_out = handle.XDfeOfdm_GetInterruptMask(device_id)
 
+#XDfeOfdm_Deactivate
+#void XDfeOfdm_Deactivate(XDfeCcf *InstancePtr);
+handle.XDfeOfdm_Deactivate(device_id)
+
+#void XDfeOfdm_SetTUserDelay(const XDfeOfdm *InstancePtr, u32 Delay);
+TUserDelay = 0x123
+handle.XDfeOfdm_SetTUserDelay(device_id, TUserDelay)
+
+#u32 XDfeOfdm_GetTUserDelay(const XDfeOfdm *InstancePtr);
+delay = handle.XDfeOfdm_GetTUserDelay(device_id)
+
+#u32 XDfeOfdm_GetDataLatency(const XDfeOfdm *InstancePtr);
+delay = handle.XDfeOfdm_GetDataLatency(device_id)
+
 #XDfeOfdm_GetVersions
 #void XDfeOfdm_GetVersions(const XDfeCcf *InstancePtr, XDfeOfdm_Version *SwVersion,
 #			              XDfeOfdm_Version *HwVersion);
 SwVersion_out, HwVersion_out = handle.XDfeOfdm_GetVersions(device_id)
 
-#XDfeOfdm_Deactivate
-#void XDfeOfdm_Deactivate(XDfeCcf *InstancePtr);
-handle.XDfeOfdm_Deactivate(device_id)
-
 #XDfeOfdm_InstanceClose
 #void XDfeOfdm_InstanceClose(XDfeOfdm *InstancePtr);
 handle.XDfeOfdm_InstanceClose(device_id)
 
-#void XDfeOfdm_SetTUserDelay(const XDfeOfdm *InstancePtr, u32 Delay);
-TUserDelay = 0x1234
-#handle.XDfeOfdm_SetTUserDelay(device_id, TUserDelay):
-
-#u32 XDfeOfdm_GetTUserDelay(const XDfeOfdm *InstancePtr);
-#delay = handle.XDfeOfdm_GetTUserDelay(device_id):
-
-#u32 XDfeOfdm_GetDataLatency(const XDfeOfdm *InstancePtr);
-#delay = handle.XDfeOfdm_GetDataLatency(device_id):
