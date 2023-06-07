@@ -131,7 +131,4 @@ class CONSOLE_Client(object):
         self.logger.debug(f"return: ststus: {status}, command output: {strCmdRet}")
         return status, strCmdRet
 
-    def __del__(self):
-        logging.info("Inside CONSOLE Pyro Client Destructor")
-
 console = CONSOLE_Client()

@@ -2724,8 +2724,4 @@ class RFDC_Client(object):
         self.logger.debug(f"The return value tile_layout is: {tile_layout}")
         return tile_layout
 
-    def __del__(self):
-        self.logger.info("Inside RFDC Pyro Client Destructor")
-
-
 rfdc = RFDC_Client()

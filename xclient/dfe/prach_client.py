@@ -1269,8 +1269,4 @@ class PRACH_Client(object):
         self.logger.debug(f"HwVersion = {json.dumps(HwVersion, indent=2)}")
         return SwVersion, HwVersion
 
-    def __del__(self):
-        self.logger.info("Inside PRACH Destructor")
-
-
 prach = PRACH_Client()

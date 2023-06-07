@@ -1055,8 +1055,4 @@ class MIX_Client(object):
         self.logger.debug(f"HwVersion = {json.dumps(HwVersion, indent=2)}")
         return SwVersion, HwVersion
 
-    def __del__(self):
-        self.logger.info("Inside MIX Pyro Client Destructor")
-
-
 mix = MIX_Client()

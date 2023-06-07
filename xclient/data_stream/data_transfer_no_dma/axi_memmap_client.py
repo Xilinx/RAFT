@@ -78,8 +78,4 @@ class AXI_MEMMAP_Client(object):
         logging.debug(f"ret = {ret}")
         return ret
 
-    def __del__(self):
-        logging.info("Inside AXI_MEMMAP Pyro Client Destructor")
-
-
 axi_memmap = AXI_MEMMAP_Client()

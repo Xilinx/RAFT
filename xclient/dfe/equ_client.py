@@ -605,7 +605,4 @@ class EQU_Client(object):
         self.logger.debug(f"HwVersion = {json.dumps(HwVersion, indent=2)}")
         return SwVersion, HwVersion
 
-    def __del__(self):
-        self.logger.info("Inside EQU Destructor")
-
 equ = EQU_Client()

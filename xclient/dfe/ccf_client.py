@@ -984,7 +984,4 @@ class CCF_Client(object):
         self.logger.debug(f"HwVersion = {json.dumps(HwVersion, indent=2)}")
         return SwVersion, HwVersion
 
-    def __del__(self):
-        logging.info("Inside CCF Pyro Client Destructor")
-
 ccf = CCF_Client()

@@ -704,7 +704,7 @@ class OFDM_Client(object):
         Get event status
 
         :param device_id: id of the opened device.
-	    :return: Status: event status
+        :return: Status: event status
         """
         self.logger.debug(f"XDfeOfdm_GetEventStatus({device_id})")
         Status = self.OFDM.XDfeOfdm_GetEventStatus(device_id)
@@ -798,8 +798,5 @@ class OFDM_Client(object):
         self.logger.debug(f"SwVersion = {json.dumps(SwVersion, indent=2)}")
         self.logger.debug(f"HwVersion = {json.dumps(HwVersion, indent=2)}")
         return SwVersion, HwVersion
-
-    def __del__(self):
-        logging.info("Inside OFDM Pyro Client Destructor")
 
 ofdm = OFDM_Client()
