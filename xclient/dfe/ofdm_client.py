@@ -699,6 +699,38 @@ class OFDM_Client(object):
         self.logger.debug(f"The return value TriggerCfg = {json.dumps(TriggerCfg, indent=2)}")
         return TriggerCfg
 
+    def XDfeOfdm_SetTuserOutFrameLocation(self, device_id, TuserOutFrameLocation):
+        """
+        Sets TUSER Framing bit Location register where bit location indicates which
+        bit to be used for sending framing information on DL_DOUT IF and
+        M_AXIS_TBASE IF.
+        TUSER bit width is fixed to its default value of 8. Therefore, legal values
+        of FRAME_BIT are 0 to 7.
+
+        :param device_id: id of the opened device.
+        :param TuserOutFrameLocation: TUSER OutFrame Location
+        :return: None
+        """
+        self.logger.debug(f"XDfeOfdm_SetTuserOutFrameLocation({device_id}, {TuserOutFrameLocation})")
+        self.OFDM.XDfeOfdm_SetTuserOutFrameLocation(device_id, TuserOutFrameLocation)
+        return
+
+    def XDfeOfdm_GetTuserOutFrameLocation(self, device_id):
+        """
+        Gets TUSER Framing bit Location register where bit location indicates which
+        bit to be used for sending framing information on DL_DOUT IF and
+        M_AXIS_TBASE IF.
+        TUSER bit width is fixed to its default value of 8. Therefore, legal values
+        of FRAME_BIT are 0 to 7.
+
+        :param device_id: id of the opened device.
+        :return: TuserOutFrameLocation: TUSER OutFrame Location
+        """
+        self.logger.debug(f"XDfeOfdm_GetTuserOutFrameLocation({device_id})")
+        TuserOutFrameLocation = self.OFDM.XDfeOfdm_GetTuserOutFrameLocation(device_id)
+        self.logger.debug(f"Return value = {TuserOutFrameLocation}")
+        return TuserOutFrameLocation
+
     def XDfeOfdm_GetEventStatus(self, device_id):
         """
         Get event status

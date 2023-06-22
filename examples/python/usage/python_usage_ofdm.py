@@ -244,6 +244,17 @@ CarrierCfg_in = handle.GetStruct_XDfeOfdm_CarrierCfg()
 #			                XDfeOfdm_TriggerCfg *TriggerCfg);
 TriggerCfg_out = handle.XDfeOfdm_GetTriggersCfg(device_id)
 
+# XDfeOfdm_SetTuserOutFrameLocation
+#void XDfeOfdm_SetTuserOutFrameLocation(const XDfeOfdm *InstancePtr,
+#                       u32 TuserOutFrameLocation);
+TuserOutFrameLocation = 0x34
+handle.XDfeOfdm_SetTuserOutFrameLocation(device_id, TuserOutFrameLocation)
+
+#XDfeOfdm_GetTuserOutFrameLocation
+#u32 XDfeOfdm_GetTuserOutFrameLocation(const XDfeOfdm *InstancePtr);
+TuserOutFrameLocation = handle.XDfeOfdm_GetTuserOutFrameLocation(device_id)
+assert TuserOutFrameLocation == 0x34
+
 #XDfeOfdm_GetEventStatus
 #void XDfeOfdm_GetEventStatus(const XDfeCcf *InstancePtr, XDfeOfdm_Status *Status);
 Status = handle.XDfeOfdm_GetEventStatus(device_id)
