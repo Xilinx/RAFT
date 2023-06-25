@@ -593,6 +593,8 @@ NcoCfg = handle.GetStruct_XDfePrach_NCO()
 StaticSchedule = handle.GetStruct_XDfePrach_Schedule()
 ret, CurrentCCCfg = handle.XDfePrach_AddRCtoRCCfg(device_id, CurrentRCCfg, 0, 0,
                                            0, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg)
+#ret, CurrentCCCfg = handle.XDfePrach_AddRCtoRCCfgDynamic(device_id, CurrentRCCfg, 0, 0, 0, NextCCCfg)
+ret, CurrentCCCfg = handle.XDfePrach_AddRCtoRCCfgMBDynamic(device_id, CurrentRCCfg, 0, 0, 0, NextCCCfg)
 
 #Description:
 #   Removes an RC configuration entry from the RC_CONFIGURATION. RCId must be

@@ -850,6 +850,27 @@ class PRACH_Client(object):
         self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
         return ret, CurrentRCCfg
 
+    def XDfePrach_AddRCtoRCCfgMBDynamic(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, NextCCCfg, BandId):
+        """
+        Adds a new RC entry to the RC_CONFIGURATION in dynamic mode. RCId must be same as the
+        physical channel RachChan.
+
+        :param device_id: id of the opened device.
+        :param CurrentRCCfg: current PRACH configuration container
+        :param CCID: is CC Id.
+        :param RCId: is RC Id.
+        :param RachChan: is PRACH channel.
+        :param NextCCCfg: CC configuration container.
+        :param BandId: Band id.
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+                CurrentRCCfg: current PRACH configuration container
+        """
+        self.logger.debug(f"XDfePrach_AddRCtoRCCfgMBDynamic({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(NextCCCfg, indent=2)}, {BandId})")
+        ret, CurrentRCCfg = self.PRACH.XDfePrach_AddRCtoRCCfgMBDynamic(device_id, CurrentRCCfg, CCID, RCId,
+                                                RachChan, NextCCCfg, BandId)
+        self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
+        return ret, CurrentRCCfg
+
     def XDfePrach_AddRCtoRCCfg(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg):
         """
         Adds a new RC entry to the RC_CONFIGURATION. RCId must be same as the
@@ -873,6 +894,26 @@ class PRACH_Client(object):
                           f"{json.dumps(NextCCCfg, indent=2)})")
         ret, CurrentRCCfg = self.PRACH.XDfePrach_AddRCtoRCCfg(device_id, CurrentRCCfg, CCID, RCId,
                                                 RachChan, DdcCfg, NcoCfg, StaticSchedule, NextCCCfg)
+        self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
+        return ret, CurrentRCCfg
+
+    def XDfePrach_AddRCtoRCCfgDynamic(self, device_id, CurrentRCCfg, CCID, RCId, RachChan, NextCCCfg):
+        """
+        Adds a new RC entry to the RC_CONFIGURATION in dynamic mode. RCId must be same as the
+        physical channel RachChan.
+
+        :param device_id: id of the opened device.
+        :param CurrentRCCfg: current PRACH configuration container
+        :param CCID: is CC Id.
+        :param RCId: is RC Id.
+        :param RachChan: is PRACH channel.
+        :param NextCCCfg: CC configuration container.
+        :return: ret: XST_SUCCESS on success, XST_FAILURE on failure
+                CurrentRCCfg: current PRACH configuration container
+        """
+        self.logger.debug(f"XDfePrach_AddRCtoRCCfgDynamic({device_id}, {CurrentRCCfg}, {CCID}, {RCId}, {RachChan}, {json.dumps(NextCCCfg, indent=2)})")
+        ret, CurrentRCCfg = self.PRACH.XDfePrach_AddRCtoRCCfgDynamic(device_id, CurrentRCCfg, CCID, RCId,
+                                                RachChan, NextCCCfg)
         self.logger.debug(f"ret = {ret}, CurrentRCCfg = {json.dumps(CurrentRCCfg, indent=2)}")
         return ret, CurrentRCCfg
 

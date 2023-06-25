@@ -1,6 +1,6 @@
 /******************************************************************************
 * Copyright (C) 2022 Xilinx, Inc.  All rights reserved.
-* Copyright (C) 2022 Advanced Micro Devices, Inc. All rights reserved.
+* Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All rights reserved.
 * SPDX-License-Identifier: MIT
 ******************************************************************************/
 
@@ -46,7 +46,8 @@
 * ----- ---    -------- -----------------------------------------------
 * 1.0   dc     11/21/22 Initial version
 * 1.1   dc     04/05/23 Update documentation
-* 1.2   dc     05/22/23 State and status upgrades
+*       dc     05/22/23 State and status upgrades
+*       dc     06/20/23 Depricate obsolete APIs
 *
 * </pre>
 * @endcond
@@ -66,6 +67,7 @@
 #define XDFEOFDM_CC_SEQ_LENGTH_MAX 16U /**< Maximum sequence length */
 #define XDFEOFDM_FT_SEQ_LENGTH_MAX 16U
 /**< Maximum Fourier transform sequence length */
+#define XDFEOFDM_PHASE_COMPENSATION_MAX 112U
 
 /**************************** Type Definitions *******************************/
 /*********** start - common code to all Logiccores ************/
@@ -180,6 +182,9 @@ typedef struct {
 typedef struct {
 	u32 NumAntenna; /**< [1-8] Number of antenas */
 	u32 AntennaInterleave; /**< [1-8] Antenna interleave */
+	u32 PhaseCompensation; /**< [0,1] Phase compesation
+				0 - Phase compesation disabled
+				1 - Phase compesation enabled */
 } XDfeOfdm_ModelParameters;
 
 /**
@@ -228,6 +233,10 @@ typedef struct {
 	/* CC slot delay */
 	u32 OutputDelay; /** [0-2047] Delay required before outputting CC
 		in order to balance CC Filter group delay. */
+	u32 PhaseCompensation
+		[XDFEOFDM_PHASE_COMPENSATION_MAX]; /** Phase weight is
+		a complex number with 0 to 15 bits providing the I and 16 to 31
+		bits the Q part of the weight. */
 } XDfeOfdm_CarrierCfg;
 
 /**
@@ -264,6 +273,9 @@ typedef struct {
 	/* CC slot delay */
 	u32 OutputDelay; /** [0-2047] Delay required before outputting CC
 		in order to balance CC Filter group delay. */
+	u32 PhaseCompensation[XDFEOFDM_PHASE_COMPENSATION_MAX]; /** Phase weight is
+		a complex number with 0 to 15 bits providing the I and 16 to 31
+		bits the Q part of the weight. */
 } XDfeOfdm_InternalCarrierCfg;
 
 /**
@@ -312,6 +324,9 @@ typedef struct {
 	metal_phys_addr_t BaseAddr; /**< Instance base address */
 	u32 NumAntenna; /**< Number of antenas */
 	u32 AntennaInterleave; /**< Antenna interleave */
+	u32 PhaseCompensation; /**< [0,1] Phase compesation
+				0 - Phase compesation disabled
+				1 - Phase compesation enabled */
 } XDfeOfdm_Config;
 
 /**
