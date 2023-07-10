@@ -31,3 +31,6 @@
 <p>If jupyter notebook is enabled as per RAFT/docs/build_petalinux_jupyternb_raft.txt, enter the link to jupyter notebook in the browser.</p>
 <ul>Eg: http://169.254.10.2:8888/</ul>
 
+Copyright (C) 2022 - 2023 Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause
+

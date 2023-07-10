@@ -38,3 +38,6 @@
 <p>In the serial console of the board give the following commands</p>
 <ul>cd /usr/share/examples/python</ul>
 <ul>python3 <i>script_name</i> xpyro board ip_address port</ul>
+
+Copyright (C) 2022 - 2023 Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause

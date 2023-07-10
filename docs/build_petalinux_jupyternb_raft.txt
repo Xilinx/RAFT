@@ -1,3 +1,6 @@
+Copyright (C) 2022 - 2023 Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause
+
 To build petalinux with jupyter notebook and RAFT, follow the below steps.
 Use this document only if jupyter notebook is also required.
 The final file system size will be higher in comparison.

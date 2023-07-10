@@ -1,3 +1,6 @@
+# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+
 APP = xhelper
 
 LIBSOURCES = *.c

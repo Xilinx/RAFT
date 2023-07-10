@@ -45,3 +45,6 @@ Refer the steps in build_petalinux_with_raft.txt which is at docs directory
 
 <h1> Steps to use RAFT at board and host </h1>
 Refer the steps in raft_usage.txt which is at docs directory
+
+Copyright (C) 2022 - 2023 Advanced Micro Devices, Inc. All rights reserved.
+SPDX-License-Identifier: BSD-3-Clause
