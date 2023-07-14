@@ -1,0 +1,816 @@
+{
+	"License" : "Copyright (c) 2021 - 2022 Xilinx, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+	"License" : "Copyright (c) 2022 - 2023 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+
+	"VCK190" : {
+		"FEATURE" : {
+			"List" : ["eeprom", "bootmode", "clock", "voltage", "power",
+				"powerdomain", "BIT", "ddr", "gpio", "ioexp", "SFP",
+				"EBM", "FMC"]
+		},
+		"BOOTMODES" : {
+			"Mode_Lines" : ["SYSCTLR_VERSAL_MODE0", "SYSCTLR_VERSAL_MODE1",
+				"SYSCTLR_VERSAL_MODE2", "SYSCTLR_VERSAL_MODE3"],
+			"Modes" : {
+				"JTAG" : "0x0",
+				"QSPI32" : "0x2",
+				"SD" : "0xe"
+			}
+		},
+		"CLOCK" : {
+			"SI570_ZSFP" : {
+				"Name" : "zSFP Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/si570_zsfp_clk/set_rate",
+				"Default_Freq" : 156.25,
+				"Upper_Freq" : 810.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-8",
+				"I2C_Address" : "0x5d"
+			},
+			"SI570_USER1_FMC" : {
+				"Name" : "User1 FMC2 Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/si570_user1_clk/set_rate",
+				"Default_Freq" : 100.0,
+				"Upper_Freq" : 1250.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-9",
+				"I2C_Address" : "0x5f"
+			},
+			"IDT_8A34001_FMC2" : {
+				"Name" : "8A34001 FMC2",
+				"Type" : "IDT_8A34001",
+				"Display_Label" : ["CIN 1 From Bank 200 GTY_REF",
+					"CIN 2 From Bank 706", "Q0 to CIN 0",
+					"Q1 to Bank 200 GTY_REF",
+					"Q2 to Bank 201, 204-206 GTY_REF",
+					"Q3 to FMC2 REFCLK", "Q4 to FMC2 SYNC",
+					"Q5 to J328", "Q6 to NC", "Q7 to NC",
+					"Q8 to NC", "Q9 to NC", "Q10 to NC", "Q11 to NC"],
+				"Internal_Label" : ["IN1_Frequency", "IN2_Frequency",
+					"OUT0DesiredFrequency", "OUT1DesiredFrequency",
+					"OUT2DesiredFrequency", "OUT3DesiredFrequency",
+					"OUT4DesiredFrequency", "OUT5DesiredFrequency",
+					"OUT6DesiredFrequency", "OUT7DesiredFrequency",
+					"OUT8DesiredFrequency", "OUT9DesiredFrequency",
+					"OUT10DesiredFrequency", "OUT11DesiredFrequency"],
+				"I2C_Bus" : "/dev/i2c-9",
+				"I2C_Address" : "0x5f"
+			},
+			"SI570_REF" : {
+				"Name" : "Versal Sys Clk Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/ref_clk/set_rate",
+				"Default_Freq" : 33.333,
+				"Upper_Freq" : 160.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-11",
+				"I2C_Address" : "0x5d"
+			},
+			"SI570_DIMM1" : {
+				"Name" : "Dimm1 Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/si570_ddrdimm1_clk/set_rate",
+				"Default_Freq" : 200.0,
+				"Upper_Freq" : 810.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-14",
+				"I2C_Address" : "0x60"
+			},
+			"SI570_LPDDR4_CLK1" : {
+				"Name" : "LPDDR4 CLK1 Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/si570_lpddr4_clk1/set_rate",
+				"Default_Freq" : 200.0,
+				"Upper_Freq" : 810.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-16",
+				"I2C_Address" : "0x60"
+			},
+			"SI570_LPDDR4_CLK2" : {
+				"Name" : "LPDDR4 CLK2 Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/si570_lpddr4_clk2/set_rate",
+				"Default_Freq" : 200.0,
+				"Upper_Freq" : 810.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-15",
+				"I2C_Address" : "0x60"
+			},
+			"SI570_HSDP" : {
+				"Name" : "HSDP Si570",
+				"Type" : "Si570",
+				"Sysfs_Path" : "/sys/devices/platform/si570_hsdp_clk/set_rate",
+				"Default_Freq" : 156.25,
+				"Upper_Freq" : 810.0,
+				"Lower_Freq" : 10.0,
+				"I2C_Bus" : "/dev/i2c-17",
+				"I2C_Address" : "0x60"
+			}
+		},
+		"INA226" : {
+			"INA226_VCCINT" : {
+				"Name" : "VCCINT",
+				"I2C_Bus" : "/dev/i2c-4",
+				"I2C_Address" : "0x40",
+				"Shunt_Resistor" : 500,
+				"Maximum_Current" : 192000,
+				"Phase_Multiplier" : 6
+			},
+			"INA226_VCC_SOC" : {
+				"Name" : "VCC_SOC",
+				"I2C_Bus" : "/dev/i2c-4",
+				"I2C_Address" : "0x41",
+				"Shunt_Resistor" : 500,
+				"Maximum_Current" : 18000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCC_PMC" : {
+				"Name" : "VCC_PMC",
+				"I2C_Bus" : "/dev/i2c-4",
+				"I2C_Address" : "0x42",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 500,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCCINT_RAM" : {
+				"Name" : "VCC_RAM",
+				"I2C_Bus" : "/dev/i2c-4",
+				"I2C_Address" : "0x43",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 4000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCCINT_PSLP" : {
+				"Name" : "VCCINT_PSLP",
+				"I2C_Bus" : "/dev/i2c-4",
+				"I2C_Address" : "0x44",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 1000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCCINT_PSFP" : {
+				"Name" : "VCCINT_PSFP",
+				"I2C_Bus" : "/dev/i2c-4",
+				"I2C_Address" : "0x45",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 2000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCCAUX" : {
+				"Name" : "VCCAUX",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x40",
+				"Shunt_Resistor" : 500,
+				"Maximum_Current" : 3000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCCAUX_PMC" : {
+				"Name" : "VCCAUX_PMC",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x41",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 500,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCC_MIO" : {
+				"Name" : "VCC_MIO",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x45",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 2000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCC1V8" : {
+				"Name" : "VCC1V8",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x46",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 6000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCC3V3" : {
+				"Name" : "VCC3V3",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x47",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 500,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCC1V2_DDR4" : {
+				"Name" : "VCC_DDR4",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x48",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 4000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VCC1V1_LP4" : {
+				"Name" : "VCC1V1_LP4",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x49",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 4000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_VADJ_FMC" : {
+				"Name" : "VADJ_FMC",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x4A",
+				"Shunt_Resistor" : 2000,
+				"Maximum_Current" : 10000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_MGTYAVCC" : {
+				"Name" : "MGTYAVCC",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x48",
+				"Shunt_Resistor" : 2000,
+				"Maximum_Current" : 6000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_MGTYAVTT" : {
+				"Name" : "MGTYAVTT",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x4C",
+				"Shunt_Resistor" : 2000,
+				"Maximum_Current" : 10000,
+				"Phase_Multiplier" : 1
+			},
+			"INA226_MGTYVCCAUX" : {
+				"Name" : "MGTYVCCAUX",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x4D",
+				"Shunt_Resistor" : 5000,
+				"Maximum_Current" : 500,
+				"Phase_Multiplier" : 1
+			}
+		},
+		"POWER DOMAIN" : {
+			"PD_FPD" : {
+				"Name" : "FPD",
+				"Rails" : ["INA226_VCCINT_PSFP"]
+			},
+			"PD_LPD" : {
+				"Name" : "LPD",
+				"Rails" : ["INA226_VCCINT_PSFP"]
+			},
+			"PD_PLD" : {
+				"Name" : "PLD",
+				"Rails" : ["INA226_VCCINT", "INA226_VCC1V8", "INA226_VCC3V3",
+					"INA226_VCC1V2_DDR4", "INA226_VCC1V1_LP4",
+					"INA226_VCCINT_RAM", "INA226_VCCAUX"]
+			},
+			"PD_PMC" : {
+				"Name" : "PMC",
+				"Rails" : ["INA226_VCC_PMC", "INA226_VCC_MIO", "INA226_VCCAUX_PMC"]
+			},
+			"PD_GTY" : {
+				"Name" : "GTY",
+				"Rails" : ["INA226_MGTYAVCC", "INA226_MGTYAVTT", "INA226_MGTYVCCAUX"]
+			},
+			"PD_FMC" : {
+				"Name" : "FMC",
+				"Rails" : ["INA226_VADJ_FMC"]
+			},
+			"PD_SYSTEM" : {
+				"Name" : "system",
+				"Rails" : ["INA226_VCC_SOC"]
+			},
+			"PD_CHIP" : {
+				"Name" : "chip",
+				"Rails" : ["INA226_VCCINT", "INA226_VCC_SOC", "INA226_VCC_PMC",
+					"INA226_VCCINT_RAM", "INA226_VCCINT_PSLP", "INA226_VCCINT_PSFP",
+					"INA226_VCCAUX", "INA226_VCCAUX_PMC", "INA226_VCC_MIO", "INA226_VCC1V8",
+					"INA226_VCC3V3", "INA226_VCC1V2_DDR4", "INA226_VCC1V1_LP4",
+					"INA226_VADJ_FMC", "INA226_MGTYAVCC", "INA226_MGTYAVTT", "INA226_MGTYVCCAUX"]
+			}
+		},
+		"VOLTAGE" : {
+			"VOLTAGE_VCCINT" : {
+				"Name" : "VCCINT",
+				"Part_Name" : "IR35215",
+				"Maximum_Volt" : 0.88,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.7,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x46",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 0
+			},
+			"VOLTAGE_VCCINT_SOC" : {
+				"Name" : "VCCINT_SOC",
+				"Part_Name" : "IR35215",
+				"Maximum_Volt" : 0.83,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.77,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x46",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 1
+			},
+			"VOLTAGE_VCCINT_PSLP" : {
+				"Name" : "VCCINT_PSLP",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 0.83,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.77,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x47",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 0
+			},
+			"VOLTAGE_VCCINT_PSFP" : {
+				"Name" : "VCCINT_PSFP",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 0.83,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.77,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x47",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 1
+			},
+			"VOLTAGE_VCCAUX" : {
+				"Name" : "VCCAUX",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.55,
+				"Typical_Volt" : 1.5,
+				"Minimum_Volt" : 1.45,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x47",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 2
+			},
+			"VOLTAGE_VCC_RAM" : {
+				"Name" : "VCC_RAM",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 0.83,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.0,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x47",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 3
+			},
+			"VOLTAGE_VCC_PMC" : {
+				"Name" : "VCC_PMC",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 0.83,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.77,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x47",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 4
+			},
+			"VOLTAGE_VCCO_MIO" : {
+				"Name" : "VCCO_MIO",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.86,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1.74,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4C",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 0
+			},
+			"VOLTAGE_VCC3V3" : {
+				"Name" : "VCC3V3",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 3.4,
+				"Typical_Volt" : 3.3,
+				"Minimum_Volt" : 3.2,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4C",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 1
+			},
+			"VOLTAGE_VCC1V8" : {
+				"Name" : "VCC1V8",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.86,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1.74,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4C",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 2
+			},
+			"VOLTAGE_VCCAUX_PMC" : {
+				"Name" : "VCCAUX_PMC",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.55,
+				"Typical_Volt" : 1.5,
+				"Minimum_Volt" : 1.45,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4C",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 4
+			},
+			"VOLTAGE_MGTYAVTT" : {
+				"Name" : "MGTYAVTT",
+				"Part_Name" : "IR38164",
+				"Maximum_Volt" : 1.24,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1.16,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x50",
+				"PMBus_VOUT_MODE" : 0,
+				"Page_Select" : -1
+			},
+			"VOLTAGE_VADJ_FMC" : {
+				"Name" : "VADJ_FMC",
+				"Part_Name" : "IR38164",
+				"Maximum_Volt" : 1.55,
+				"Typical_Volt" : 1.5,
+				"Minimum_Volt" : 0.0,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4E",
+				"PMBus_VOUT_MODE" : 0,
+				"Page_Select" : -1
+			},
+			"VOLTAGE_MGTYAVCC" : {
+				"Name" : "MGTYAVCC",
+				"Part_Name" : "IR38164",
+				"Maximum_Volt" : 0.91,
+				"Typical_Volt" : 0.88,
+				"Minimum_Volt" : 0.85,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4F",
+				"PMBus_VOUT_MODE" : 0,
+				"Page_Select" : -1
+			},
+			"VOLTAGE_UTIL_1V13" : {
+				"Name" : "UTIL_1V13",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.17,
+				"Typical_Volt" : 1.13,
+				"Minimum_Volt" : 1.09,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4D",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 0
+			},
+			"VOLTAGE_UTIL_2V5" : {
+				"Name" : "UTIL_2V5",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 2.58,
+				"Typical_Volt" : 2.5,
+				"Minimum_Volt" : 2.42,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4D",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 1
+			},
+			"VOLTAGE_VCC1V2_DDR4" : {
+				"Name" : "VCC1V2_DDR4",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.24,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1.16,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4D",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 2
+			},
+			"VOLTAGE_VCC1V1_LP4" : {
+				"Name" : "VCC1V1_LP4",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.14,
+				"Typical_Volt" : 1.1,
+				"Minimum_Volt" : 1.06,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4D",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 3
+			}
+		},
+		"DIMM" : {
+			"DIMM1" : {
+				"Name" : "DIMM1",
+				"I2C_Bus" : "/dev/i2c-14",
+				"I2C_Address_SPD" : "0x50",
+				"I2C_Address_Thermal" : "0x18"
+			}
+		},
+		"GPIO_Group": {
+			"SW1": {
+				"Name": "SW1",
+				"GPIO_Lines": ["SYSCTLR_VERSAL_MODE3", "SYSCTLR_VERSAL_MODE2",
+						"SYSCTLR_VERSAL_MODE1", "SYSCTLR_VERSAL_MODE0"]
+			},
+			"SW3": {
+				"Name": "SW3",
+				"GPIO_Lines": ["SYSCTLR_JTAG_S1", "SYSCTLR_JTAG_S0"]
+			}
+		},
+		"GPIO" : {
+			"DC_SYS_CTRL0" : "500 - DC_SYS_CTRL0",
+			"DC_SYS_CTRL1" : "500 - DC_SYS_CTRL1",
+			"DC_SYS_CTRL2" : "500 - DC_SYS_CTRL2",
+			"DC_SYS_CTRL3" : "500 - DC_SYS_CTRL3",
+			"SYSCTLR_PB" : "500 - SYSCTLR_PB",
+			"LP_I2C0_PMC_SCL" : "501 - LP_I2C0_PMC_SCL",
+			"LP_I2C0_PMC_SDA" : "501 - LP_I2C0_PMC_SDA",
+			"LP_I2C1_SCL" : "501 - LP_I2C1_SCL",
+			"LP_I2C1_SDA" : "501 - LP_I2C1_SDA",
+			"UART0_RXD_IN" : "501 - SYSCTLR_MIO38_UART0_RXD_IN",
+			"UART0_TXD_OUT" : "501 - SYSCTLR_MIO39_UART0_TXD_OUT",
+			"SD1_CD_B" : "501 - SYSCTLR_MIO45_SD1_CD_B",
+			"SD1_DATA0" : "501 - SYSCTLR_MIO46_SD1_DATA0",
+			"SD1_DATA1" : "501 - SYSCTLR_MIO47_SD1_DATA1",
+			"SD1_DATA2" : "501 - SYSCTLR_MIO48_SD1_DATA2",
+			"SD1_DATA3" : "501 - SYSCTLR_MIO49_SD1_DATA3",
+			"SD1_CMD" : "501 - SYSCTLR_MIO50_SD1_CMD",
+			"SD1_CLK" : "501 - SYSCTLR_MIO51_SD1_CLK",
+			"ETH_MDC" : "502 - SYSCTLR_ETH_MDC",
+			"ETH_MDIO" : "502 - SYSCTLR_ETH_MDIO",
+			"SYSCTLR_GPIO0" : "43 - SYSCTLR_GPIO0",
+			"SYSCTLR_GPIO1" : "43 - SYSCTLR_GPIO1",
+			"SYSCTLR_GPIO2" : "43 - SYSCTLR_GPIO2",
+			"SYSCTLR_GPIO3" : "43 - SYSCTLR_GPIO3",
+			"SYSCTLR_GPIO4" : "43 - SYSCTLR_GPIO4",
+			"SYSCTLR_GPIO5" : "43 - SYSCTLR_GPIO5",
+			"SYSCTLR_VERSAL_MODE0" : "44 - SYSCTLR_VERSAL_MODE0",
+			"SYSCTLR_VERSAL_MODE1" : "44 - SYSCTLR_VERSAL_MODE1",
+			"SYSCTLR_VERSAL_MODE2" : "44 - SYSCTLR_VERSAL_MODE2",
+			"SYSCTLR_VERSAL_MODE3" : "44 - SYSCTLR_VERSAL_MODE3",
+			"SYSCTLR_POR_B_LS" : "44 - SYSCTLR_POR_B_LS",
+			"DC_PRSNT" : "44 - DC_PRSNT",
+			"SYSCTLR_JTAG_S0" : "44 - SYSCTLR_JTAG_S0",
+			"SYSCTLR_JTAG_S1" : "44 - SYSCTLR_JTAG_S1",
+			"SYSCTLR_IIC_MUX0_RESET_B" : "44 - SYSCTLR_IIC_MUX0_RESET_B",
+			"SYSCTLR_IIC_MUX1_RESET_B" : "44 - SYSCTLR_IIC_MUX1_RESET_B",
+			"MAX6643_FULLSPD" : "46 - MAX6643_FULLSPD",
+			"MAX6643_FANFAIL_B" : "46 - MAX6643_FANFAIL_B",
+			"MAX6643_OT_B" : "46 - MAX6643_OT_B",
+			"SYSCTLR_VCC0V85_TG" : "46 - SYSCTLR_VCC0V85_TG",
+			"SYSCTLR_ETH_RESET_B" : "46 - SYSCTLR_ETH_RESET_B",
+			"PMBUS_ALERT" : "46 - PMBUS_ALERT",
+			"PMBUS2_INA226_ALERT" : "46 - PMBUS2_INA226_ALERT",
+			"PMBUS1_INA226_ALERT" : "46 - PMBUS1_INA226_ALERT"
+		},
+		"IO Exp" : {
+			"Name" : "TCA6416A",
+			"Labels" : ["Port 0(7) - MAX6643 FULLSPD",
+				"Port 0(6) - N.C.",
+				"Port 0(5) - N.C.",
+				"Port 0(4) - PMBUS2 INA226 ALERT",
+				"Port 0(3) - N.C.",
+				"Port 0(2) - N.C.",
+				"Port 0(1) - MAX6643 Fan Fail (AL)",
+				"Port 0(0) - MAX6643 Fan Over Temp (AL)",
+				"Port 1(7) - PMBUS1 INA226 Alert (AL)",
+				"Port 1(6) - PMBUS Alert (AL)",
+				"Port 1(5) - 8A34001_EXP_RST_B (AL)",
+				"Port 1(4) - VCCINT VRHOT B (AL)",
+				"Port 1(3) - FMCP2 FMCP PRSNT M2C B (AL)",
+				"Port 1(2) - FMCP1 FMCP PRSNT M2C B (AL)",
+				"Port 1(1) - FMCP2 FMC PRSNT M2C B (AL)",
+				"Port 1(0) - FMCP1 FMC PRSNT M2C B (AL)"
+			],
+			"Directions" : [1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1],
+			"I2C_Bus" : "/dev/i2c-0",
+			"I2C_Address" : "0x20"
+		},
+		"Daughter Card" : {
+			"Name" : "X-EBM",
+			"I2C_Bus" : "/dev/i2c-11",
+			"I2C_Address" : "0x52"
+		},
+		"SFPs" : {
+			"SFP_0" : {
+				"Name" : "zSFP-0",
+				"Type" : "sfp",
+				"I2C_Bus" : "/dev/i2c-19",
+				"I2C_Address" : "0x50"
+			},
+			"SFP_1" : {
+				"Name" : "zSFP-1",
+				"Type" : "sfp",
+				"I2C_Bus" : "/dev/i2c-20",
+				"I2C_Address" : "0x50"
+			},
+			"QSFP_0" : {
+				"Name" : "zQSFP1",
+				"Type" : "qsfp",
+				"I2C_Bus" : "/dev/i2c-21",
+				"I2C_Address" : "0x50"
+			}
+		},
+		"FMCs" : {
+			"FMC_1" : {
+				"Name" : "FMC1",
+				"I2C_Bus" : "/dev/i2c-12",
+				"I2C_Address" : "0x50",
+				"Presence_Labels": ["FMCP1_FMC_PRSNT_M2C_B", "FMCP1_FMCP_PRSNT_M2C_B"],
+				"Supported_Volts": [1.2, 1.5],
+				"Voltage_Regulator": "VADJ_FMC",
+				"Default_Volt": 1.5
+			},
+			"FMC_2" : {
+				"Name" : "FMC2",
+				"I2C_Bus" : "/dev/i2c-13",
+				"I2C_Address" : "0x50",
+				"Presence_Labels": ["FMCP2_FMC_PRSNT_M2C_B", "FMCP2_FMCP_PRSNT_M2C_B"],
+				"Supported_Volts": [1.2, 1.5],
+				"Voltage_Regulator": "VADJ_FMC",
+				"Default_Volt": 1.5
+			}
+		},
+		"WORKAROUND" : {
+			"WORKAROUND_VCCAUX" : {
+				"Name" : "vccaux",
+				"Arg_Needed" : 1,
+				"Plat_Workaround_Op" : "VCK190_ES1_Vccaux_Workaround"
+			}
+		},
+		"BITs": {
+			"BIT_IDCODE_VERIFY" : {
+				"Name" : "IDCODE Verify",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "idcode_verify.tcl"
+					}
+				}
+			},
+			"BIT_EFUSE_VERIFY" : {
+				"Name" : "EFUSE Verify",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "read_efuse.tcl"
+					}
+				}
+			},
+			"BIT_VOLTAGES_CHECK" : {
+				"Name" : "Verify Voltages",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "Voltages_Check"
+					}
+				}
+			},
+			"BIT_CLOCKS_CHECK" : {
+				"Name" : "Verify Clock Settings",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "Clocks_Check"
+					}
+				}
+			},
+			"BIT_CLOCKS_OUTPUT_TEST" : {
+				"Name" : "Clocks Output Test",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x01"
+					}
+				}
+			},
+			"BIT_RTC_CLOCK_VERIFY" : {
+				"Name" : "RTC Clock Verify",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x02"
+					}
+				}
+			},
+			"BIT_EBM_EEPROM_CHECK" : {
+				"Name" : "X-EBM EEPROM Check",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "EBM_EEPROM_Check"
+					}
+				}
+			},
+			"BIT_DIMM_EEPROM_CHECK" : {
+				"Name" : "DIMM EEPROM Check",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "DIMM_EEPROM_Check"
+					}
+				}
+			},
+			"BIT_DDRMC_1_CAL_TEST" : {
+				"Name" : "DDRMC_1 Cal Test",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "DDRMC_1_Test"
+					}
+				}
+			},
+			"BIT_DDRMC_2_CAL_TEST" : {
+				"Name" : "DDRMC_2 Cal Test",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "DDRMC_2_Test"
+					}
+				}
+			},
+			"BIT_DDRMC_4_CAL_TEST" : {
+				"Name" : "DDRMC_4 Cal Test",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "DDRMC_4_Test"
+					}
+				}
+			},
+			"BIT_DRAM_MEM_TEST" : {
+				"Name" : "DRAM Mem Test",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x08"
+					}
+				}
+			},
+			"BIT_QSPI_TEST" : {
+				"Name" : "QSPI Test",
+				"Manual" : 0,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x10"
+					}
+				}
+			},
+			"BIT_PL_UART_TEST" : {
+				"Name" : "PL UART Test",
+				"Manual" : 1,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "Display_Instruction",
+						"Instruction" : "\n1- Connect to the 2nd com port (PL console), baud rate 115200\n2- Click 'OK' when this is done.\n"
+					},
+					"Level 1" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x20",
+						"Instruction" : "\n1- Test prints 'Hello world!' message to the PL UART console.\n2- Click 'Pass' if you observe the 'Hello world!' message.\n"
+					}
+				}
+			},
+			"BIT_LEDS_TEST" : {
+				"Name" : "LEDs Test",
+				"Manual" : 1,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "Display_Instruction",
+						"Instruction" : "\n1- Observe LED1 to LED4 blinking, then turn on/off in sequence.\n2- Click 'OK' when you are ready.\n"
+					},
+					"Level 1" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x40",
+						"Instruction" : "\n1- Did you see the LEDs sequencing and blinking?\n2- Click 'Pass' if you observe it.\n"
+					}
+				}
+			},
+			"BIT_BUTTONS_TEST" : {
+				"Name" : "Buttons Test",
+				"Manual" : 1,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "Display_Instruction",
+						"Instruction" : "\n1- Press Push Buttons SW4 followed by SW5 and then any \n2- Click 'OK' when you are ready.\n"
+					},
+					"Level 1" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x80",
+						"Instruction" : "\n1- Click 'OK'.\n"
+					}
+				}
+			},
+			"BIT_DIP_SWITCHES_TEST" : {
+				"Name" : "DIP Switches Test",
+				"Manual" : 1,
+				"BIT Levels" : {
+					"Level 0" : {
+						"Plat_BIT_Op" : "Display_Instruction",
+						"Instruction" : "\n1- Turn On and Turn Off DIP Switches SW6 \n2- Click 'OK' when you are ready.\n"
+					},
+					"Level 1" : {
+						"Plat_BIT_Op" : "XSDB_BIT",
+						"TCL_File" : "versal_bit_download.tcl 0x100",
+						"Instruction" : "\n1- Click 'OK'.\n"
+					}
+				}
+			}
+		}
+	}
+}
