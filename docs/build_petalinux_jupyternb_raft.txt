@@ -159,7 +159,7 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI = "git://github.com/Xilinx/RAFT;protocol=https;branch=main"
-SRCREV = "e14d6650de42be1df612add94ee01479b60c12f5"
+SRCREV = "<required github commid id>"
 
 RDEPENDS_${PN} += "bash"
 S = "${WORKDIR}/git"
@@ -477,7 +477,6 @@ This can be modified as per requirements.
 
 cd /usr/share/notebooks/
 jupyter nbextension enable --py widgetsnbextension
-jupyter nbextension enable --py --sys-prefix bqplot
 export PYTHONPATH=.:/usr/share/raft/xclient/pat:$PYTHONPATH
 echo "c.NotebookApp.token = ''" >> /etc/jupyter/jupyter_notebook_config.py
 echo "c.NotebookApp.password = ''" >> /etc/jupyter/jupyter_notebook_config.py
@@ -570,7 +569,9 @@ CONFIG_python3-async
 
 Step 13: Edit <proj_name>/project-spec/meta-user/conf/petalinuxbsp.conf
 IMAGE_INSTALL:append = " libmetal-dev"
-IMAGE_INSTALL:append += " rfdc-dev"
+IMAGE_INSTALL:append = " rfdc-dev"
+IMAGE_INSTALL:append = " python3-serpent"
+IMAGE_INSTALL:append = " python3-pyro4"
 
 Note: Build options can be given as per requirements.
 
