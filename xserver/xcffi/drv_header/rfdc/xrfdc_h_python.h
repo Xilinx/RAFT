@@ -289,6 +289,7 @@
 *                       DAC coupling.
 *       cog    01/07/23 Added VOP support for DC coupled DACs and removed VOP
 *                       support for ES1 Parts.
+* 12.1  cog    07/27/23 Add NCO frequency to config structures.
 *
 * </pre>
 *
@@ -571,6 +572,7 @@ typedef struct {
 	u32 FifoEnable;
 	u32 AdderEnable;
 	u32 MixerType;
+	double NCOFreq;
 } XRFdc_DACBlock_DigitalDataPath_Config;
 
 /**
@@ -590,6 +592,7 @@ typedef struct {
 	u32 DecimationMode;
 	u32 FifoEnable;
 	u32 MixerType;
+	double NCOFreq;
 } XRFdc_ADCBlock_DigitalDataPath_Config;
 
 /**
