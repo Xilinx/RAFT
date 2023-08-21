@@ -23,6 +23,8 @@ FILES:
 ./xclient/rfdc/rfdc_client.py
 ./xclient/rfdc/rfclk_client.py
 ./xclient/utils/console_client.py
+./xclient/pat/i2c_client.py
+./xclient/pat/sysmon_client.py
 ./xserver/init/xpyro-prj1/__init__.py
 ./xserver/init/xpyro-prj2/__init__.py
 ./xserver/init/xpyro-prj3/__init__.py
@@ -38,6 +40,8 @@ FILES:
 ./xserver/xcffi/drv_api/rfdc/rfclk_server.py
 ./xserver/xcffi/drv_api/rfdc/rfdc_server.py
 ./xserver/xpyro/data_stream/data_transfer_no_dma/axi_memmap.py
+./xserver/xcffi/drv_api/pat/i2c_server.py
+./xserver/xcffi/drv_api/pat/sysmon_server.py
 ./c_lib/libaximemmap/axi_memmap.c
 ./c_lib/libxhelper/xhelper.c
 --------------------------------------------------------------------------------
@@ -59,5 +63,40 @@ FILES:
 ./xserver/xcffi/drv_header/dfe/xdfeprach_python.h
 ./xserver/xcffi/drv_header/rfdc/xrfclk_h_python.h
 ./xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h
+./xserver/xcffi/drv_header/pat/xi2c_python.h
+./xserver/xcffi/drv_header/pat/xsysmon_python.h
 --------------------------------------------------------------------------------
 
+COPYRIGHT TEXT:
+---------------
+
+Copyright (C) 2016-2022 Xilinx, Inc.  All rights reserved.
+Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+SPDX-License-Identifier: MIT
+
+FILES:
+./c_lib/i2c-driver/XI2c.c
+./c_lib/i2c-driver/XI2c.h
+./c_lib/sysmon-driver/Makefile
+./c_lib/sysmon-driver/XSysmon.c
+./c_lib/sysmon-driver/XSysmon.h
+./c_lib/sysmon-driver/sysmon_drv.c
+./c_lib/sysmon-driver/xsysmon_python.h
+
+COPYRIGHT TEXT:
+---------------
+# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# SPDX-License-Identifier: MIT
+
+FILES:
+./c_lib/i2c-driver/Makefile
+./c_lib/sysmon-driver/Makefile
+
+COPYRIGHT TEXT:
+---------------
+# Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# SPDX-License-Identifier: BSD-3-Clause
+
+./examples/python/pat/Pat20.ipynb
+./examples/python/pat/pat20.py
