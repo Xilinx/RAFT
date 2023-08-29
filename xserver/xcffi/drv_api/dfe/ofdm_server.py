@@ -235,17 +235,6 @@ class OFDM(object):
 
     def GetStruct_XDfeOfdm_CCCfg(self):
         """
-        Return Dictionary equivalent of structure XDfeOfdm_AntennaCfg
-
-        :param : None
-        :return: Dictionary equivalent of structure XDfeOfdm_AntennaCfg
-        """
-        XDfeOfdm_AntennaCfg_ptr = ffi.new("XDfeOfdm_AntennaCfg *")
-        XDfeOfdm_AntennaCfg = cdata_to_py(XDfeOfdm_AntennaCfg_ptr[0])
-        return XDfeOfdm_AntennaCfg
-
-    def GetStruct_XDfeOfdm_CCCfg(self):
-        """
         Return Dictionary equivalent of structure XDfeOfdm_CCCfg
 
         :param : None

@@ -243,17 +243,6 @@ class OFDM_Client(object):
         XDfeOfdm_Init = self.OFDM.GetStruct_XDfeOfdm_Init()
         return XDfeOfdm_Init
 
-    def GetStruct_XDfeOfdm_Coefficients(self):
-        """
-        Return Dictionary equivalent of structure XDfeOfdm_Coefficients
-
-        :param : None
-        :return: Dictionary equivalent of structure XDfeOfdm_Coefficients
-        """
-        self.logger.debug("GetStruct_XDfeOfdm_Coefficients()")
-        XDfeOfdm_Coefficients = self.OFDM.GetStruct_XDfeOfdm_Coefficients()
-        return XDfeOfdm_Coefficients
-
     def GetStruct_XDfeOfdm_CarrierCfg(self):
         """
         Return Dictionary equivalent of structure XDfeOfdm_CarrierCfg
