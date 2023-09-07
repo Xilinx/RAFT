@@ -80,16 +80,15 @@ class PAT20:
         """
          SYSMON
         """
-        self.sysmon.append(SysmonData("in_temp0_ps_temp", "PS Temperature", "", P_TYPE.PD_TEMP))
-
-        self.sysmon.append(SysmonData("in_voltage8_vccpsintfp", "VCCPSINTFP", "", P_TYPE.PD_FULL))
-        self.sysmon.append(SysmonData("in_voltage6_vccpsintfpddr", "VCCO_PSDDR_504", "", P_TYPE.PD_FULL))
-        self.sysmon.append(SysmonData("in_voltage7_vccpsintlp", "VCCPSINTLP", "", P_TYPE.PD_LOW))
-        self.sysmon.append(SysmonData("in_voltage9_vccpsaux", "VCCPSAUX", "", P_TYPE.PD_LOW))
-        self.sysmon.append(SysmonData("in_voltage11_vccpsio3", "VCCOPS3", "", P_TYPE.PD_LOW))
-        self.sysmon.append(SysmonData("in_voltage12_vccpsio0", "VCCOPS0", "", P_TYPE.PD_LOW))
-        self.sysmon.append(SysmonData("in_voltage13_vccpsio1", "VCCOPS1", "", P_TYPE.PD_LOW))
-        self.sysmon.append(SysmonData("in_voltage14_vccpsio2", "VCCOPS2", "", P_TYPE.PD_LOW))
+        self.sysmon.append(SysmonData("in_temp7_raw", "PS Temperature", "", P_TYPE.PD_TEMP))
+        self.sysmon.append(SysmonData("in_voltage10_raw", "VCCPSINTFP", "", P_TYPE.PD_FULL))
+        self.sysmon.append(SysmonData("in_voltage6_raw", "VCCO_PSDDR_504", "", P_TYPE.PD_FULL))
+        self.sysmon.append(SysmonData("in_voltage9_raw", "VCCPSINTLP", "", P_TYPE.PD_LOW))
+        self.sysmon.append(SysmonData("in_voltage11_raw", "VCCPSAUX", "", P_TYPE.PD_LOW))
+        self.sysmon.append(SysmonData("in_voltage13_raw", "VCCOPS3", "", P_TYPE.PD_LOW))
+        self.sysmon.append(SysmonData("in_voltage14_raw", "VCCOPS0", "", P_TYPE.PD_LOW))
+        self.sysmon.append(SysmonData("in_voltage15_raw", "VCCOPS1", "", P_TYPE.PD_LOW))
+        self.sysmon.append(SysmonData("in_voltage16_raw", "VCCOPS2", "", P_TYPE.PD_LOW))
 
     def PullINA226Data(self, i2c):
         for chip in self.chip_list:
