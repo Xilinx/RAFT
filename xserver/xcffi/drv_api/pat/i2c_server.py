@@ -14,7 +14,7 @@ from cffi import FFI
 from utils import ffi, xhelper_handle,  open_c_library, cdata_to_py
 from utils import extract_b64_encoded_string, cdata_string_to_py
 
-i2c_handle = open_c_library(RAFT_DIR+"xserver/xcffi/drv_header/pat/xi2c_python.h", "/usr/lib/libXI2c.so")
+i2c_handle = open_c_library(RAFT_DIR+"xserver/xcffi/drv_header/pat/xi2c_python.h", "/usr/lib/libXI2c.so.1")
 
 @Pyro4.expose
 class I2C(object):

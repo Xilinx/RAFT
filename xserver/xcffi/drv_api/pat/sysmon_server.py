@@ -14,7 +14,7 @@ from cffi import FFI
 from utils import ffi, xhelper_handle, open_c_library, cdata_to_py
 from utils import extract_b64_encoded_string, cdata_string_to_py
 
-sysmon_handle = open_c_library(RAFT_DIR+"xserver/xcffi/drv_header/pat/xsysmon_python.h", "/usr/lib/libXSysmon.so")
+sysmon_handle = open_c_library(RAFT_DIR+"xserver/xcffi/drv_header/pat/xsysmon_python.h", "/usr/lib/libXSysmon.so.1")
 
 @Pyro4.expose
 class SYSMON(object):
