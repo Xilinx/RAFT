@@ -143,7 +143,91 @@ Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
 COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
 of petalinux bsp.
 
-Step 6: Create raft library recipe
+
+Step 6: Create sysmon library recipe
+petalinux-create -t apps --template c --name sysmon-driver --enable
+cd project-spec/meta-user/recipes-apps/sysmon-driver/files
+rm -f *
+Copy the contents from <RAFT>/c_lib/sysmon-driver to this folder.
+cd ..
+Edit the file sysmon-driver.bb. It should look as follows
+============================================================================
+#
+# This is the Sysmon application recipe
+#
+#
+
+SUMMARY = "sysmon-driver application"
+SECTION = "libs"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://sysmon_drv.c \
+           file://XSysmon.c \
+           file://XSysmon.h \
+           file://xsysmon_python.h \
+           file://Makefile \
+          "
+
+S = "${WORKDIR}"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+TARGET_CC_ARCH += "${LDFLAGS}"
+
+do_install () {
+        install -d ${D}${libdir}
+        install -d ${D}${includedir}
+        oe_libinstall -so libXSysmon ${D}${libdir}
+        install -d -m 0755 ${D}${includedir}/
+        install -m 0644 ${S}/XSysmon.h ${D}${includedir}/
+}
+
+FILES_${PN} += "${libdir}/*"
+FILES_${PN}-dev = "${libdir}/* ${includedir}"
+============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+Step 7: Create I2c library recipe
+petalinux-create -t apps --template c --name i2c-driver --enable
+cd project-spec/meta-user/recipes-apps/i2c-driver/files
+rm -f *
+Copy the contents from <RAFT>/c_lib/i2c-driver to this folder.
+cd ..
+Edit the file i2c-driver.bb. It should look as follows
+============================================================================
+# This is the I2C apllication recipe
+#
+#
+
+SUMMARY = "i2c-driver application"
+SECTION = "libs"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://XI2c.c \
+           file://XI2c.h \
+           file://Makefile \
+          "
+
+S = "${WORKDIR}"
+
+PACKAGE_ARCH = "${MACHINE_ARCH}"
+TARGET_CC_ARCH += "${LDFLAGS}"
+
+do_install () {
+        install -d ${D}${libdir}
+        install -d ${D}${includedir}
+        oe_libinstall -so libXI2c ${D}${libdir}
+        install -d -m 0755 ${D}${includedir}/
+        install -m 0644 ${S}/XI2c.h ${D}${includedir}/
+}
+
+FILES_${PN} += "${libdir}/*"
+FILES_${PN}-dev = "${libdir}/* ${includedir}"
+
+Step 8: Create raft library recipe
 petalinux-create -t apps --template c --name raft --enable
 cd project-spec/meta-user/recipes-apps/raft
 Edit the file raft.bb as shown below
@@ -159,65 +243,23 @@ LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
 
 SRC_URI = "git://github.com/Xilinx/RAFT;protocol=https;branch=main"
-SRCREV = "<required github commid id>"
+SRCREV = "<required github commit id>"
 
 RDEPENDS_${PN} += "bash"
 S = "${WORKDIR}/git"
 
 do_install() {
-	install -d -m 0755 ${D}${datadir}/raft
-	install -d -m 0755 ${D}${datadir}/raft/examples
-	install -d -m 0755 ${D}${datadir}/raft/examples/usage
-	install -d -m 0755 ${D}${datadir}/raft/examples/rftool
-	install -d -m 0755 ${D}${datadir}/raft/xclient
-	install -d -m 0755 ${D}${datadir}/raft/xclient/data_stream
-	install -d -m 0755 ${D}${datadir}/raft/xclient/data_stream/data_transfer_no_dma
-	install -d -m 0755 ${D}${datadir}/raft/xclient/dfe
-	install -d -m 0755 ${D}${datadir}/raft/xclient/rfdc
-	install -d -m 0755 ${D}${datadir}/raft/xserver
-	install -d -m 0755 ${D}${datadir}/raft/xserver/init
-	install -d -m 0755 ${D}${datadir}/raft/xserver/init/xpyro-prj2
-	install -d -m 0755 ${D}${datadir}/raft/xserver/utils
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/data_stream
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/data_stream/data_transfer_no_dma
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/dfe
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_api/rfdc
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/board_common
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/data_stream
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/data_stream/data_transfer_no_dma
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/dfe
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xcffi/drv_header/rfdc
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xpyro
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xpyro/data_stream
-	install -d -m 0755 ${D}${datadir}/raft/xserver/xpyro/data_stream/data_transfer_no_dma
-	install -m 0755 ${S}/examples/python/usage/*.py ${D}${datadir}/raft/examples/usage
-	install -m 0755 ${S}/examples/python/usage/README.md ${D}${datadir}/raft/examples/usage
-	install -m 0755 ${S}/examples/python/rftool/*.* ${D}${datadir}/raft/examples/rftool
-	install -m 0755 ${S}/xserver/init/xpyro-prj2/*.py ${D}${datadir}/raft/xserver/init/xpyro-prj2
-	install -m 0755 ${S}/xserver/utils/*.py ${D}${datadir}/raft/xserver/utils
-	install -m 0755 ${S}/xclient/data_stream/data_transfer_no_dma/*.py ${D}${datadir}/raft/xclient/data_stream/data_transfer_no_dma
-	install -m 0755 ${S}/xclient/dfe/*.py ${D}${datadir}/raft/xclient/dfe
-	install -m 0755 ${S}/xclient/rfdc/*.py ${D}${datadir}/raft/xclient/rfdc
-	install -m 0755 ${S}/xserver/xcffi/drv_api/data_stream/data_transfer_no_dma/*.py ${D}${datadir}/raft/xserver/xcffi/drv_api/data_stream/data_transfer_no_dma
-	install -m 0755 ${S}/xserver/xcffi/drv_api/dfe/*.py ${D}${datadir}/raft/xserver/xcffi/drv_api/dfe
-	install -m 0755 ${S}/xserver/xcffi/drv_api/rfdc/*.py ${D}${datadir}/raft/xserver/xcffi/drv_api/rfdc
-	install -m 0755 ${S}/xserver/xcffi/drv_header/board_common/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/board_common
-	install -m 0755 ${S}/xserver/xcffi/drv_header/data_stream/data_transfer_no_dma/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/data_stream/data_transfer_no_dma
-	install -m 0755 ${S}/xserver/xcffi/drv_header/dfe/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/dfe
-	install -m 0755 ${S}/xserver/xcffi/drv_header/rfdc/*.h ${D}${datadir}/raft/xserver/xcffi/drv_header/rfdc
-	install -m 0755 ${S}/xserver/xpyro/data_stream/data_transfer_no_dma/*.py ${D}${datadir}/raft/xserver/xpyro/data_stream/data_transfer_no_dma
+    install -d ${D}${datadir}/raft
+    cp -r ${S}/* ${D}${datadir}/raft
 }
 
-FILES_${PN} += "${datadir}/raft"
+FILES_${PN} += "${datadir}/raft/*"
 ============================================================================
 Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
 COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
 of petalinux bsp.
 
-Step 7: Create raft-startup recipe
+Step 9: Create raft-startup recipe
 This is a simple autostart recipe. Modifications can be done as per requirements.
 petalinux-create -t apps --template c --name raft-startup --enable
 cd project-spec/meta-user/recipes-apps/raft-startup
@@ -291,7 +333,7 @@ Add raft-startup file here. This is just for demonstration..
 =============================================================================
 # Start up
 =============================================================================
-Step 8: Create app-startup recipe
+Step 10: Create app-startup recipe
 This is a simple autostart  intended to start applications along with RAFT.
 IP Address can be set here, if needed.
 Modifications can be done as per requirements.
@@ -405,7 +447,7 @@ esac
 
 exit $?
 =============================================================================
-Step 9: Create jupyter-autostart recipe
+Step 11: Create jupyter-autostart recipe
 This is a simple jupyter autostart recipe. Modifications can be done as per requirements.
 petalinux-create -t apps --template c --name jupyter-autostart --enable
 cd project-spec/meta-user/recipes-apps/jupyter-autostart
@@ -483,7 +525,7 @@ echo "c.NotebookApp.password = ''" >> /etc/jupyter/jupyter_notebook_config.py
 echo "c.NotebookApp.disable_check_xsrf = True" >> /etc/jupyter/jupyter_notebook_config.py
 jupyter notebook --ip=0.0.0.0 --no-browser --notebook-dir=/usr/share/notebooks --allow-root
 =============================================================================
-Step 10: Mixer Notebook Recipe
+Step 12: Mixer Notebook Recipe
 This is a simple recipe to demonstrate addition of a notebook application to petalinux.
 Modifications can be done as per requirements.
 petalinux-create -t apps --template c --name mixer-notebook --enable
@@ -523,9 +565,51 @@ of petalinux bsp.
 
 cd files
 rm -rf *
-Copy rftool.py and mixer.ipynb from <RAFT>/examples/python/rftool folder to files directory.
+Copy rftool.py and mixer.ipynb from <RAFT>/examples/python/pat folder to files directory.
 
-Step 11: Edit <proj_name>/project-spec/configs/rootfs_config
+Step 13: PAT20 Notebook Recipe
+This is a simple recipe to demonstrate addition of a notebook application to petalinux.
+Modifications can be done as per requirements.
+petalinux-create -t apps --template c --name pat20-notebook --enable
+cd project-spec/meta-user/recipes-apps/pat20-notebook/files
+rm -f *
+Copy <RAFT>/examples/python/rftool/Pat20.ipynb and <RAFT>/examples/python/pat/pat20.py to here.
+cd ..
+Edit the file pat20-notebook.bb as below.
+ ============================================================================
+SUMMARY = "Pat20 notebook application"
+SECTION = "PETALINUX/apps"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "file://Pat20.ipynb \
+           file://pat20.py \
+          "
+#inherit xilinx-pynq setuptools3
+S = "${WORKDIR}"
+
+do_compile() {
+}
+
+do_install() {
+       echo ${S}
+       install -d -m 0755 ${D}${datadir}/notebooks
+       install -d -m 0755 ${D}${datadir}/notebooks/
+       install -m 0755 ${S}/Pat20.ipynb ${D}${datadir}/notebooks/
+       install -m 0755 ${S}/pat20.py ${D}${datadir}/notebooks/
+}
+FILES:${PN} += "${datadir}/notebooks"
+=============================================================================
+Note: LIC_FILES_CHKSUM above is the checksum of MIT license file in the
+COMMON_LICENSE_DIR (<petalinux-prj>/components/yocto/layers/core/meta/files/common-licenses/)
+of petalinux bsp.
+
+cd files
+rm -rf *
+Copy pat20.py and Pat20.ipynb from <RAFT>/examples/python/pat folder to files directory.
+
+
+Step 14: Edit <proj_name>/project-spec/configs/rootfs_config
 Add the below lines.
 CONFIG_libsysfs=y
 CONFIG_sysfsutils=y
@@ -556,7 +640,10 @@ CONFIG_ADD_EXTRA_USERS="root:root;petalinux:plnx;"
 CONFIG_ADD_USERS_TO_GROUPS="petalinux:audio,video;"
 CONFIG_ADD_USERS_TO_SUDOERS="petalinux"
 
-Step 12: Edit <proj_name>/project-spec/meta-user/conf/user-rootfsconfig
+Note: From 2023.1 onwards bqplot is not supported by yocto. So bokeh library is used in application. 
+So avoid the line CONFIG_python3-bqplot=y for building versions from 2023.1 onwards. 
+
+Step 15: Edit <proj_name>/project-spec/meta-user/conf/user-rootfsconfig
 Add the below lines.
 CONFIG_python3-pyro4
 CONFIG_python3-cffi
@@ -567,7 +654,7 @@ CONFIG_nodejs-dev
 CONFIG_nodejs-npm
 CONFIG_python3-async
 
-Step 13: Edit <proj_name>/project-spec/meta-user/conf/petalinuxbsp.conf
+Step 16: Edit <proj_name>/project-spec/meta-user/conf/petalinuxbsp.conf
 IMAGE_INSTALL:append = " libmetal-dev"
 IMAGE_INSTALL:append = " rfdc-dev"
 IMAGE_INSTALL:append = " python3-serpent"
@@ -575,10 +662,10 @@ IMAGE_INSTALL:append = " python3-pyro4"
 
 Note: Build options can be given as per requirements.
 
-Step 14: Config rootfs
+Step 17: Config rootfs
 petalinux-config -c rootfs --silentconfig
 
-Step 15: Build
+Step 18: Build
 petalinux-build
 
 For boot options please refer UG1444.
