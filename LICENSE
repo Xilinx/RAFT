@@ -1,102 +1,11 @@
-COPYRIGHT TEXT:
----------------
+This repository is under the following license except for when the file is specified as having a separate license.
 
-Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-SPDX-License-Identifier: BSD-3-Clause
+Copyright (c) 2017-2022, Xilinx Inc. All rights reserved.
 
-FILES:
-./examples/python/usage/python_usage_axi_memmap.py
-./examples/python/usage/python_usage_ccf.py
-./examples/python/usage/python_usage_console.py
-./examples/python/usage/python_usage_equ.py
-./examples/python/usage/python_usage_mixer.py
-./examples/python/usage/python_usage_prach.py
-./examples/python/usage/python_usage_rfclk.py
-./examples/python/usage/python_usage_rfdc.py
-./examples/python/rftool/mixer.py
-./examples/python/rftool/rftool.py
-./xclient/data_stream/data_transfer_no_dma/axi_memmap_client.py
-./xclient/dfe/ccf_client.py
-./xclient/dfe/equ_client.py
-./xclient/dfe/mix_client.py
-./xclient/dfe/prach_client.py
-./xclient/rfdc/rfdc_client.py
-./xclient/rfdc/rfclk_client.py
-./xclient/utils/console_client.py
-./xclient/pat/i2c_client.py
-./xclient/pat/sysmon_client.py
-./xserver/init/xpyro-prj1/__init__.py
-./xserver/init/xpyro-prj2/__init__.py
-./xserver/init/xpyro-prj3/__init__.py
-./xserver/init/xpyro-prj4/__init__.py
-./xserver/init/xpyro-prj5/__init__.py
-./xserver/utils/utils.py
-./xserver/utils/console_server.py
-./xserver/xcffi/drv_api/data_stream/data_transfer_no_dma/axi_memmap_c.py
-./xserver/xcffi/drv_api/dfe/ccf_server.py
-./xserver/xcffi/drv_api/dfe/equ_server.py
-./xserver/xcffi/drv_api/dfe/mix_server.py
-./xserver/xcffi/drv_api/dfe/prach_server.py
-./xserver/xcffi/drv_api/rfdc/rfclk_server.py
-./xserver/xcffi/drv_api/rfdc/rfdc_server.py
-./xserver/xpyro/data_stream/data_transfer_no_dma/axi_memmap.py
-./xserver/xcffi/drv_api/pat/i2c_server.py
-./xserver/xcffi/drv_api/pat/sysmon_server.py
-./c_lib/libaximemmap/axi_memmap.c
-./c_lib/libxhelper/xhelper.c
---------------------------------------------------------------------------------
-
-COPYRIGHT TEXT:
----------------
-
-Copyright (c) 2021 - 2022 Xilinx, Inc. All rights reserved.
 SPDX-License-Identifier: MIT
 
-FILES:
-./c_lib/libaximemmap/axi_memmap.h
-./c_lib/libxhelper/xhelper.h
-./xserver/xcffi/drv_header/board_common/xhelper.h
-./xserver/xcffi/drv_header/data_stream/data_transfer_no_dma/axi_memmap.h
-./xserver/xcffi/drv_header/dfe/xdfeccf_python.h
-./xserver/xcffi/drv_header/dfe/xdfeequ_python.h
-./xserver/xcffi/drv_header/dfe/xdfemix_python.h
-./xserver/xcffi/drv_header/dfe/xdfeprach_python.h
-./xserver/xcffi/drv_header/rfdc/xrfclk_h_python.h
-./xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h
-./xserver/xcffi/drv_header/pat/xi2c_python.h
-./xserver/xcffi/drv_header/pat/xsysmon_python.h
---------------------------------------------------------------------------------
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
-COPYRIGHT TEXT:
----------------
+The above copyright notice and this permission notice (including the next paragraph) shall be included in all copies or substantial portions of the Software.
 
-Copyright (C) 2016-2022 Xilinx, Inc.  All rights reserved.
-Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
-SPDX-License-Identifier: MIT
-
-FILES:
-./c_lib/i2c-driver/XI2c.c
-./c_lib/i2c-driver/XI2c.h
-./c_lib/sysmon-driver/Makefile
-./c_lib/sysmon-driver/XSysmon.c
-./c_lib/sysmon-driver/XSysmon.h
-./c_lib/sysmon-driver/sysmon_drv.c
-./c_lib/sysmon-driver/xsysmon_python.h
-
-COPYRIGHT TEXT:
----------------
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
-# SPDX-License-Identifier: MIT
-
-FILES:
-./c_lib/i2c-driver/Makefile
-./c_lib/sysmon-driver/Makefile
-
-COPYRIGHT TEXT:
----------------
-# Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
-# SPDX-License-Identifier: BSD-3-Clause
-
-./examples/python/pat/Pat20.ipynb
-./examples/python/pat/pat20.py
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
