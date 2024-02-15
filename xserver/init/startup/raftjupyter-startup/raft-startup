@@ -14,16 +14,18 @@ start ()
 	sudo ifconfig -a | grep lo
         if [ $RESULT -eq 0 ]; then
 	    cd /usr/share/raft/xserver/init/xpyro-prj2/
-        /usr/bin/python3 __init__.py 127.0.0.1 &
-        sudo -u petalinux bash -c 
-        'cd /usr/share/notebooks/ && jupyter nbextension enable --py widgetsnbextension \
-        && export PYTHONPATH=.:/usr/share/raft/xclient/pat:$PYTHONPATH \
-        && echo "c.NotebookApp.token = ''" >> /home/petalinux/.jupyter/jupyter_notebook_config.py \
-        && echo "c.NotebookApp.password = ''" >> /home/petalinux/.jupyter/jupyter_notebook_config.py \
-        && echo "c.NotebookApp.disable_check_xsrf = True" >> /home/petalinux/.jupyter/jupyter_notebook_config.py \
-        && jupyter notebook --ip=0.0.0.0 --no-browser --notebook-dir=/usr/share/notebooks' 
-	    fi
+            /usr/bin/python3 __init__.py 127.0.0.1 &
+            cd /usr/share/notebooks/
+            jupyter nbextension enable --py widgetsnbextension
+            #jupyter nbextension enable --py --sys-prefix bqplot
+            export PYTHONPATH=.:/usr/share/raft/xclient/pat:$PYTHONPATH
+            echo "c.NotebookApp.token = ''" >> /etc/jupyter/jupyter_notebook_config.py
+            echo "c.NotebookApp.password = ''" >> /etc/jupyter/jupyter_notebook_config.py
+            echo "c.NotebookApp.disable_check_xsrf = True" >> /etc/jupyter/jupyter_notebook_config.py
+            jupyter notebook --ip=0.0.0.0 --no-browser --notebook-dir=/usr/share/notebooks --allow-root
+	fi
     fi
+
 }
 
 stop ()
