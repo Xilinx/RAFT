@@ -188,9 +188,9 @@ class Rftool(RFDC_Client, RFCLK_CLIENT, AXI_MEMMAP_Client):
         """
         def RFClk_Initialize():
             if self.BOARD == "zcu208":
-                ret_rfclk_init = self.XRFClk_Init(493)
+                ret_rfclk_init = self.XRFClk_Init(533)
             else:
-                ret_rfclk_init = self.XRFClk_Init(485)
+                ret_rfclk_init = self.XRFClk_Init(541)
             if ret_rfclk_init == self.SUCCESS:
                 ret_rfclk_config = self.XRFClk_SetConfigOnOneChipFromConfigId(self.RFCLK_LMK, self.DEFAULT_RFCLK_LMK_CONFIG)
                 if ret_rfclk_config == self.SUCCESS:
