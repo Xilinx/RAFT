@@ -9,6 +9,8 @@ NAME := aximemmap
 MAJOR = 1
 MINOR = 0
 VERSION = $(MAJOR).$(MINOR)
+LIBDIR=$(DESTDIR)/usr/lib
+INCLUDE_DIR=$(DESTDIR)/usr/include
 
 all: lib$(NAME).so
 
@@ -22,6 +24,12 @@ lib$(NAME).so: lib$(NAME).so.$(VERSION)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c -fPIC $(LIBSOURCES)
+
+install:
+	install -m 755 -d $(DESTDIR)/usr/lib
+	install -m 755 lib$(NAME).so.$(MAJOR).$(MINOR) $(LIBDIR)
+	cp -P lib$(NAME).so.$(MAJOR) $(LIBDIR)
+	cp -P lib$(NAME).so $(LIBDIR)
 
 clean:
 	rm -rf *.o *.so *.so.*
