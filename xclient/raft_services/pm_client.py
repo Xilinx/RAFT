@@ -37,9 +37,8 @@ class PM_Client(object):
         Default loglevel is set inside this class
 
         :return: logger
-
         """
-        log_level = logging.DEBUG
+        log_level = logging.ERROR
         logging.basicConfig(format="%(levelname)s:%(message)s")
         logger = logging.getLogger(__name__)
         try:
@@ -61,7 +60,6 @@ class PM_Client(object):
         :param ipaddr: IP Address string
         :param port: Port number string
         :return: None
-
         """
         uri = f"PYRO:PM@{ipaddr}:{port}"
         self.logger.debug(f"SetIpAndPort({ipaddr}, {port})\n uri = {uri}")
@@ -72,7 +70,6 @@ class PM_Client(object):
         """
         Return the logging levels supported by logging library in python
 
-        :param : None
         :return: Dictionary showing the log levels supported by logging library
         """
         self.logger.debug("GetPythonLogLevels()")
@@ -84,7 +81,7 @@ class PM_Client(object):
         """
         Set the python log level to the given level
 
-        :param : Log level to set
+        :param PythonLogLevel: Log level to set
         :return: None
         """
         self.logger.debug(f"SetServerLogLevel({PythonLogLevel})")
@@ -95,10 +92,9 @@ class PM_Client(object):
         """
         Set the python log level to the given level
 
-        :param : Log level to set
+        :param PythonLogLevel: Log level to set
         :return: None
         """
-
         if PythonLogLevel == self.LogLevelsDict["DEBUG"]:
             self.logger.setLevel(logging.DEBUG)
         elif PythonLogLevel == self.LogLevelsDict["INFO"]:
@@ -111,98 +107,105 @@ class PM_Client(object):
             self.logger.setLevel(logging.CRITICAL)
         return
 
-    def SetMetalLogLevel(self, MetalLogLevel):
-        """
-        Set the metal log level to the given level
-
-        :param : Log level to set
-        :return: None
-        """
-        self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
-        self.PM.SetMetalLogLevel(MetalLogLevel)
-        return
-
     def GetBoardInfo(self):
         """
-        API console command.
+        Gets Board's Info
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param : None 
+        :return: Board Info in json formatted
         """
-        #self.logger.debug(f"execute: " + strCmd)
-        status = self.PM.GetBoardInfo()
-        #self.logger.debug(f"return: ststus: {status}, command output: {strCmdRet}")
-        return status
+        self.logger.debug("GetBoardInfo()")
+        return self.PM.GetBoardInfo()
 
     def GetPowerDomains(self):
         """
-        API console command.
+        Gets list of Power Domains.
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param : None
+        :return: Domains in json formatted
         """
-        #self.logger.debug(f"execute: " + strCmd)
-        #my_dict["power-domains"]
-        my_list = []
-        my_list = self.PM.GetPowerDomains()
-        for d in my_list:
-            print(d)
-        #self.logger.debug(f"return: ststus: {status}, command output: {strCmdRet}")
-        return True
+        self.logger.debug("GetValueOfRail()")
+        return self.PM.GetPowerDomains()
 
-    def GetSuppliesOfDomain(self, tag):
+    def GetRailsOfDomain(self, domainname):
         """
-        API console command.
+        Gets list of Rails given domain name.
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param domainname: string of a "domainname" 
+        :return: Rails in json formatted
         """
-        #self.logger.debug(f"execute: " + strCmd)
-        list_s = self.PM.GetSuppliesOfDomain(tag)
-        print(list_s)
-        #self.logger.debug(f"return: ststus: {status}, command output: {strCmdRet}")
-        return True
+        self.logger.debug("GetRailsOfDomain()")
+        return self.PM.GetRailsOfDomain(domainname)
 
-    def GetSupplyDetails(self, supplyname):
+    def GetRailDetails(self, railname):
         """
-        API console command.
+        Gets list of the rail's details given rail name.
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param railname: string of a "railname" 
+        :return: Details of the Rail in json formatted
         """
-        #self.logger.debug(f"execute: " + strCmd)
-        supply = self.PM.GetSupplyDetails(supplyname)
-        print(supply)
-        return True
+        self.logger.debug("GetRailDetails({railname})")
+        return  self.PM.GetRailDetails(railname)
 
-    def ReadValues(self):
+
+    def GetValueOfRail(self, railname):
         """
-        API console command.
+        Gets list of the rail's sensor values given rail name.
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param railname: string of a "railname" 
+        :return: Sensor values of the Rail in json formatted
         """
-        #self.logger.debug(f"execute: " + strCmd)
-        status = self.PM.GetValues()
-        #self.logger.debug(f"return: ststus: {status}, command output: {strCmdRet}")
-        return status
+        self.logger.debug("GetValueOfRail({railname})")
+        return self.PM.GetValueOfRail(railname)
 
-    def RaftConsole(self, strCmd):
+    def GetValueOfDomain(self, domainname):
         """
-        API console command.
+        Gets the domain's all rail sensor values given domain name.
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param : string of a "domainname" 
+        :return: The domain's all rails sensor values of the Rail in json formatted
         """
-        self.logger.debug(f"execute: " + strCmd)
-        status, strCmdRet = self.PM.RaftConsole(strCmd)
-        self.logger.debug(f"return: ststus: {status}, command output: {strCmdRet}")
-        return status, strCmdRet
+        self.logger.debug("GetValueOfDomain({domainname})")
+        return self.PM.GetValueOfDomain(domainname)
 
-pm_c = PM_Client()
-pm_c.GetBoardInfo()
-pm_c.GetPowerDomains()
-pm_c.GetSuppliesOfDomain("FPD")
-pm_c.GetSupplyDetails("VCCINT")
-#client.GetSu("saasa")
-##client.ReadValues()
+    def GetPowersAll(self):
+        """
+        Gets the boards's all domain's and total power values
+
+        :param : None 
+        :return: The boards's all domain's and total power values
+        """
+        self.logger.debug("GetPowersAll()")
+        return self.PM.GetPowersAll()
+
+    def GetValuesAll(self):
+        """
+        Gets the boards's all domain's rails sensor values
+
+        :param : None 
+        :return: The board's all rails sensor values of the Rail in json formatted
+        """
+        self.logger.debug("GetValuesAll()")
+        return self.PM.GetValuesAll()
+
+    def GetSysmonTemperatures(self):
+        """
+        Gets the Sysmon temperature values
+
+        :param : None 
+        :return: The sysmon temperature values in json formatted
+        """
+        self.logger.debug("GetSysmonTemperatures()")
+        return self.PM.GetSysmonTemperatures()
+
+    def GetPSTemperature(self):
+        """
+        Gets the PS temperature value
+
+        :param : None 
+        :return: The PS temperature value in json formatted
+        """
+        self.logger.debug("GetPSTemperature()")
+        return self.PM.GetSysmonTemperature()
+
+pm = PM_Client()

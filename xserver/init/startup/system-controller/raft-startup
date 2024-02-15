@@ -1,9 +1,4 @@
 #!/bin/sh
-sudo ifconfig -a | grep eth0
-RESULT=$?
-if [ $RESULT -eq 0 ]; then
-	sudo ifconfig eth0 169.254.10.2 up
-fi
 
 cd /usr/share/raft/xserver/init/xpyro-prj6/
 python3 __init__.py 127.0.0.1 9090

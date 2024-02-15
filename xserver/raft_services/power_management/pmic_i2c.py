@@ -7,45 +7,35 @@ __copyright__ = "Copyright 2023, Advanced Micro Devices, Inc."
 import Pyro4
 import logging
 import base64
+from enum import Enum
 from periphery import I2C
 
 logging.basicConfig(level=logging.ERROR)
 
 
+class DeviceType(Enum):
+    INA226 = 1
+    INA230 = 2
+    SYSMON = 99
+    #Possible other Power Monitor IC definitions here.
 class I2C_Client(object):
 
-    def __init__(self, device_no, device_addr, device_type):
+    def __init__(self, device_no, device_addr):
         logging.info("Inside I2C_Client Constructor")
-        self.addr = device_addr
+        self.addr = int(device_addr, 0)
         self.device_no = device_no
-        self.device_type = device_type
+        self.device = None
+
 
         logging.debug(
             "I2C_Client Initialize(" + str(self.device_no) +  ")"
         )
         try:
-            self.device = I2C("/dev/i2c-" + str(self.device_no))
+            self.device = I2C(self.device_no)
         except IOError:
             logging.error("I2C_Client Initialize failed.")
         
 
-    """
-    def SetIpAndPort(self, ipaddr, port):
-        
-        API to inform I2C Client the IP address and port number of I2C Server.
-
-        :param ipaddr: IP Address string
-        :param port: Port number string
-        :return: None
-
-        
-        logging.debug("ipaddr = " + str(ipaddr))
-        logging.debug("port = " + str(port))
-        uri = "PYRO:I2C@" + str(ipaddr) + ":" + str(port)
-        logging.debug("uri = " + uri)
-        self.I2C = Pyro4.Proxy(uri)
-        pass
-    """
     def Initialize(self):
         """
         I2C driver one time initialisation.
@@ -65,35 +55,30 @@ class I2C_Client(object):
         #    logging.error("I2C_Client Initialize failed.")
         return ret
     
-    def ReadRegister(self, reg):
+    def ReadRegister(self, reg, length):
         """
         I2C driver read a register
 
-        :param addr: address of I2C device
         :param reg: register to be read
+        :param length: length to be read
         :return: ret_code, value of register
         """
         ret = False
+        msgs = None
+        data  = bytearray(length)
         try:
-            match self.device_type:
-                case DeviceType.INA226:
-                    msgs = [I2C.Message([reg]), I2C.Message([0x00, 0x00], read=True)]
-                case _:
-                    return ret, None
+            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
             self.device.transfer(self.addr, msgs)
-            logging.debug("{0}: 0x{1:02x}{2:02x}".format(self.addr, msgs[1].data[0], msgs[1].data[1]))
+            #logging.debug("{0}: 0x{1:02x}{2:02x}".format(self.addr, msgs[1].data[0], msgs[1].data[1]))
             ret = True
         except IOError:   
-            logging.error("I2C_Client ReadINA226Reg failed.")
-        val = (msgs[1].data[0] << 8) + msgs[1].data[1]
-        #ret, val = self.I2C.XI2c_ReadINA226Reg(addr, reg)
-        return ret, val
+            logging.error("I2C_Client  failed.")
+        return ret, msgs[1].data
 
     def WriteRegister(self, reg, val):
         """
         I2C driver write a register
 
-        :param addr: address of INA226 device
         :param reg: register to be written
         :param val: value to be written
         :return: ret_code
@@ -101,19 +86,13 @@ class I2C_Client(object):
         ret = False
         data = None
         try:
-            match self.device_type:
-                case DeviceType.INA226:
-                    data = bytearray(val.to_bytes(2, "big"))
-                    data.insert(0, reg)
-                    msgs = [I2C.Message(data)]
-                case _:
-                    return ret
+            data = bytearray(val.to_bytes(2, "big"))
+            data.insert(0, reg)
+            msgs = [I2C.Message(data)]
             self.device.transfer(self.addr, msgs)
             ret = True
         except IOError:   
             logging.error("I2C_Client WriteINA226Reg failed.")
-        #val = (msgs[1].data[0] << 8) + msgs[1].data[1]
-        #ret = self.I2C.XI2c_WriteINA226Reg(addr, reg, val)
         return ret
 
     def Release(self):

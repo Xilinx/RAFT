@@ -10,120 +10,65 @@ import sys
 import json
 import subprocess
 
-print(platform.machine())
 
-if platform.machine() == 'x86_64':
-    RAFT_DIR = '/usr/share/raft/'
-else:
-    RAFT_DIR = os.environ['RAFT_DIR']
+RAFT_DIR = '/usr/share/raft/'
 
 sys.path.append(RAFT_DIR + 'xserver/utils')
 #sys.path.append(os.environ['RAFT_DIR'] + 'xserver/utils')
 import logging
 from pmic import PMIC
+from pmic import DeviceType
+from sysmon import Sysmon
 from utils import get_python_log_levels
 
-
-class Supply:
-    def __init__(self, name, device, device_type, shunt_resistor, addr, domain_tag):
-        self.name = name
-        self.device = device
-        self.device_type = device_type
-        self.addr = addr
-        self.domain_tag = domain_tag
-        self.shunt_resistor = shunt_resistor
-
-    def __str__(self):
-        str_info = {
-            k: v
-            for k, v in self.__dict__.items()
-            if k not in ['device', 'addr', 'shunt_resistor', 'device_type','domain_tag'] and v
-        }
-        return str(str_info)
-    pass
-class Domain:
-    def __init__(self, name, description, tag):
-        self.name = name
-        self.description = description
-        self.tag = tag
-        self.supplies = []
-        self.temperatures = []
-
-   # def __str__(self):
-    #    return "{0} {1} {2}".format(self.name, self.description, self.tag)
-    
-    def __str__(self):
-        str_info = {
-            k: v
-            for k, v in self.__dict__.items()
-            if k not in ['supplies', 'temperatures'] and v
-        }
-        return str(str_info)
-
-    def toJSON(self):
-        return json.dumps(self, default=lambda o: o.__dict__, 
-            sort_keys=True, indent=4)
-
-    #def __repr__(self):
-    #    return f'Domain(\'{self.name}\', {self.description})'
-
-    #def AddSupply(self, supply):
-    #   self.supplies.append(supply)
-
-    #def GetSupplies(self):
-    #    return self.suplies
         
 class PM(object):
+    _instance = None
     device_id = 0
     logger = None
-    domain_list = []
+    domains = []
+    rails = []
     pmic = None
+    board_name = ""
+    sysmons = []
     
+    def __new__(cls):
+        if not cls._instance:
+            cls._instance = super(PM, cls).__new__(cls)
+ 
+        return cls._instance
 
-    def __init__(self, json_data):
+    def __init__(self, json_data, board_name, rail_prefix, eeprom):
         self.logger = self.GetLogger()
+        self.boardeeprom = eeprom
+        self.board_name = board_name
+        power_domains_data = json_data[board_name]['POWER DOMAIN']
+        temperatures_data = json_data[board_name]['Temperature']
+        rails_data = json_data[board_name][rail_prefix]
+        for k, v in power_domains_data.items():
+            temp_d = Domain(**v)
+            for railname in temp_d.railnames:
+                for k, v in rails_data.items():
+                    if k == railname:
+                        temp_r = Rails(**v)
+                        temp_r._device_type = DeviceType.INA226 # fix this !!!
+                        self.rails.append(temp_r)
+                        temp_d.rails.append(temp_r)
+            self.domains.append(temp_d)
 
-        #json_formatted_str = json.dumps(json_data, indent=2)
-        #self.logger.info(json_formatted_str)
-        
-        domains = json_data['domains']
-        #print(domains)
-        for d in domains:
-            self.domain_list.append(Domain(**d)) 
-            #print(d)
+        for k, v in temperatures_data.items():
+            temp_s = Sysmon(**s)
+            for name in temp_s.Name:
+                if "i2c" in name:
+                    tokens = name.split("-")
+                    print(tokens)
+                    temp_s._device_type = Sysmon_Device_Type.iic
+                    print(sysmon_name)
 
-        supplies = json_data['supplies']
-        print(supplies)
-        for s in supplies:
-            supply = Supply(**s)
-            for index, domain in enumerate(self.domain_list):
-                if supply.domain_tag == domain.tag:
-                    self.domain_list[index].supplies.append(supply)
-                    print(self.domain_list[index])
-                    for p in self.domain_list[index].supplies:
-                        print(p)
-
-        ret, self.pmic = self.InitPMIC(supplies)
-        if ret != True:
+        self.pmic = PMIC(self.domains, self.sysmons)
+        if self.pmic is None:
             self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
         self.logger.info("Inside PM Constructor")
-        pass
-    
-    @staticmethod
-    def InitPMIC(supplies):
-        ret = True
-        pmic = PMIC(supplies)
-
-        #logger = logging.getLogger(__name__)
-        #try:
-        #    handler_set_check = getattr(logger, 'handler_set')
-        #except AttributeError:
-        #    handler_set_check = False
-        #if not handler_set_check:
-        #    logger.setLevel(log_level)
-        #    logger.handler_set = True
-        #    logger.disabled = False
-        return ret, pmic
 
     @staticmethod
     def GetLogger():
@@ -179,70 +124,194 @@ class PM(object):
         return
 
     def GetBoardInfo(self):
-        return 
+        """
+        Gets Board's Info
+
+        :param : None 
+        :return: Board Info in json formatted
+        """
+        return self.pmic.BoardInfo(self.boardeeprom)
+    
+    def GetPSTemperature(self):
+        ps_temp = {}
+        ret, val = subprocess.getstatusoutput(["cat", "/sys/bus/iio/devices/iio\:device0/in_temp20_input"])
+        if ret == 0:
+            ps_temp['PS_TEMP'] = float(val/1000)
+        return ps_temp
     
     def GetPowerDomains(self):
-        powerdomains = []
-        for d in self.domain_list:
-            #print(str(d))
-            powerdomains.append(str(d))
-        #jsonStr = json.dumps(self.domain_list.__dict__)
-        #json_string = json.dumps([domain.__dict__ for domain in self.domain_list])
+        """
+        Gets list of Power Domains.
+
+        :param : None
+        :return: Domains in json formatted
+        """
+        powerdomains = {}
+        powerdomains['POWER DOMAINS'] = []
+        for d in self.domains:
+            for k, v in d.__dict__.items():
+                if k in ['name'] and v:
+                    temp = {k: v}
+                    powerdomains['POWER DOMAINS'].append(temp)
         return powerdomains
 
-    def GetSuppliesOfDomain(self, tag):
-        print(tag)
-        lst = []
-        for d in self.domain_list:
-            if d.tag == tag:
-               for s in d.supplies:
-                lst.append(str(s))
-        #jsonStr = json.dumps(self.domain_list.__dict__)
-        #json_string = json.dumps([domain.__dict__ for domain in self.domain_list])
-        return lst
+    def GetRailsOfDomain(self, domainname):
+        """
+        Gets list of Rails given domain name.
+
+        :param domainname: string of a "domainname" 
+        :return: Rails in json formatted
+        """
+        rails = {}
+        rails[domainname] = []
+        for d in self.domains:
+            if d.name == domainname:
+               for r in d.rails:
+                for k, v in r.__dict__.items():
+                    if k in ['name'] and v:
+                        temp = {k: v}
+                        rails[domainname].append(temp)
+        return rails
     
-    def GetSupplyDetails(self, supplyname):
-        lst = []
-        for d in self.domain_list:
-            for s in d.supplies:
-                if supplyname == s.name:
-                   lst.append(str(s))
-        return lst
+    def GetRailDetails(self, railname):
+        """
+        Gets list of the rail's details given rail name.
+
+        :param railname: string of a "railname" 
+        :return: Details of the Rail in json formatted
+        """
+        details = {}
+        for d in self.domains:
+            for r in d.rails:
+                if railname == r.name:
+                    details[r.name] = {}
+                    for k, v in r.__dict__.items():
+                        if k not in ['name', 'sensor', '_sensor', '_device_type'] and v:
+                                details[r.name][k] = v
+        return details
     
     @staticmethod
-    def ReadSupplyValues(supply):
+    def GetRailValues(domain, rail):
         val = None
-        if (sensor := self.pmic.GetSensor(supply.tag, supply.name)) is not None:
-            val = self.pmic.GetSensorValues(sensor)
-        return val
+        for rail in domain.rails:
+            val = self.GetValueOfRail(rail)
 
-    def GetValuesofSuply(self, tag, supplyname):
-        val = None
-        for s in self.domain_list:
-            if s.tag == tag and s.name == supplyname:
-                val = ReadSupplyValues(s)
-        return val
+    
+    def GetSensorValue(self, sensor, railname):
+        value = {}
+        v, i, p = self.pmic.GetSensorValues(sensor)
+        value[railname] = {}
+        value[railname]['Voltage'] = round(v, 4)
+        value[railname]['Current'] = round(i, 4)
+        value[railname]['Power'] = round(p, 4)
+        return value
+
+    def GetPowerValue(self, sensor, railname):
+        value = {}
+        v, i, p = self.pmic.GetSensorValues(sensor)
+        value[railname] = {}
+        value[railname]['Power'] = round(p, 4)
+        return value
+
+    def GetValueOfRail(self, railname):
+        """
+        Gets list of the rail's sensor values given rail name.
+
+        :param railname: string of a "railname" 
+        :return: Sensor values of the Rail in json formatted
+        """
+        data = None
+        sensor = None
+        for domain in self.domains:
+            for rail in domain.rails:
+                if rail.name == railname:
+                    sensor = self.pmic.GetSensor(domain.name, rail.name)
+        if sensor is not None: 
+            data = self.GetSensorValue(sensor, railname)
+        return data
+
+    def GetValueOfDomain(self, domainname):
+        """
+        Gets the domain's all rail sensor values given domain name.
+
+        :param : string of a "domainname" 
+        :return: The domain's all rails sensor values of the Rail in json formatted
+        """
+        total_power = 0.0
+        data = {}
+        sensor = None
+        data[domainname] = {}
+        data[domainname]['Rails'] = []
+        for domain in self.domains:
+            if domain.name == domainname:
+                for rail in domain.rails:
+                    sensor = self.pmic.GetSensor(domain.name, rail.name)
+                    if sensor is not None:
+                        temp_v = self.GetSensorValue(sensor,rail.name)
+                        data[domainname]['Rails'].append(temp_v)
+                        total_power += temp_v[rail.name]['Power']
+        data[domainname]['Total Power'] = round(total_power, 4)
+        return data
+
+    def GetPowerValueOfDomain(self, domainname):
+        """
+        Gets the domain's power value given domain name.
+
+        :param : string of a "domainname" 
+        :return: The domain's power value in json formatted
+        """
+        total_power = 0.0
+        domain_power = 0.0
+        data = {}
+        data[domainname] = {}
+        sensor = None
+        for domain in self.domains:
+            if domain.name == domainname:
+                domain_power = 0.0
+                for rail in domain.rails:
+                    sensor = self.pmic.GetSensor(domain.name, rail.name)
+                    if sensor is not None:
+                        temp_p = self.GetPowerValue(sensor,rail.name)
+                        domain_power += temp_p[rail.name]['Power']
+                data[domainname]['Power'] = round(domain_power, 4)
+        return data
+
+    def GetPowersAll(self):
+        """
+        Gets the boards's all domain's and total power values
+
+        :param : None 
+        :return: The boards's all domain's and total power values
+        """
+        data = {}
+        data[self.board_name] = {}
+        data[self.board_name]['Power Domains'] = []
+        total_power = 0.0
+        for domain in self.domains:
+            temp_p = self.GetPowerValueOfDomain(domain.name)
+            total_power += temp_p[domain.name]['Power']
+            data[self.board_name]['Power Domains'].append(temp_p)
+        data[self.board_name]['Total Power'] = round(total_power, 4)
+        return data
 
     def GetValuesAll(self):
-        val = []
-        for s in self.domain_list:
-            val.append(self.ReadSupplyValues(supply))
-        print(vars(val))
-        return val
-    """
-    def RaftConsole(self, str_cmd):
-        
-        API console command.
+        """
+        Gets the boards's all domain's rails sensor values
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
-        
-        self.logger.debug(f"execute: " + str_cmd)
-        ret = subprocess.getstatusoutput(str_cmd)
-        status = ret[0]
-        str_cmd_ret = ret[1]
-        self.logger.debug(f"return: status: {status}, command output: {str_cmd_ret}")
-        return status, str_cmd_ret
-    """
+        :param : None 
+        :return: The board's all rails sensor values of the Rail in json formatted
+        """
+        data = {}
+        data[self.board_name] = []
+        for domain in self.domains:
+            data[self.board_name].append(self.GetValueOfDomain(domain.name))
+        return data
+    
+
+    def GetSysmonTemperatures(self):
+        sysmon = {}
+        sysmon[self.board_name] = []
+        #for
+        return sysmon
     def __del__(self):
         self.logger.info("Inside PM Destructor")

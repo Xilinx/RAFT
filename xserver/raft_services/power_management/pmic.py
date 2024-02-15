@@ -8,20 +8,56 @@ import os
 import platform
 import sys
 import subprocess
+import time
 
-if platform.machine() == 'x86_64':
-    RAFT_DIR = '/usr/share/raft/'
-else:
-    RAFT_DIR = os.environ['RAFT_DIR']
+
+RAFT_DIR = '/usr/share/raft/'
 
 sys.path.append(RAFT_DIR + 'xserver/utils')
-#sys.path.append(os.environ['RAFT_DIR'] + 'xserver/utils')
 import logging
 import json
 from enum import Enum
 from pmic_i2c import I2C_Client
-import pmic_ina226 as INA226
+from pmic_ina226 import INA226
 #from pmic_spi import spi
+
+class Rails:
+    def __init__(self, Name, I2C_Bus, I2C_Address, Shunt_Resistor, Maximum_Current, Phase_Multiplier):
+        self.name = Name
+        self.i2c_bus = I2C_Bus
+        self.i2c_address = I2C_Address
+        self.shunt_resistor = Shunt_Resistor
+        self.maximum_current = Maximum_Current
+        self.phase_multiplier = Phase_Multiplier
+        self._device_type = 0
+        self._sensor = None
+
+    def __str__(self):
+        str_info = {
+            k: v
+            for k, v in self.__dict__.items()
+            if k not in ['i2c_bus', 'i2c_address', 'shunt_resistor', 'maximum_current','phase_multiplier', '_device_type', '_sensor'] and v
+        }
+        return str(str_info)
+    pass
+class Domain:
+    def __init__(self, Name, Rails):
+        self.name = Name
+        self.railnames = Rails
+        self.rails = []
+    
+    def __str__(self):
+        str_info = {
+            k: v
+            for k, v in self.__dict__.items()
+            if k not in ['railnames', 'rails'] and v
+        }
+        return str(str_info)
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__, 
+            sort_keys=True, indent=4)
+
 
 class DeviceType(Enum):
     INA226 = 1
@@ -30,50 +66,43 @@ class DeviceType(Enum):
     #Possible other Power Monitor IC definitions here.
 
 class SensorData:
-    def __init__(self, tag, name, client ):
-        self.tag = tag
+    def __init__(self, name, domain_name, device, Shunt_Resistor, Maximum_Current , Phase_Multiplier):
         self.name = name
-        self.client = client
-        vshunt = 0
-        vbus = 0
-        current = 0
-        power = 0
+        self.domain_name = domain_name
+        self.device = device
+        self.shunt_resistor = Shunt_Resistor
+        self.maximum_current = Maximum_Current
+        self.phase_multiplier = Phase_Multiplier
+        self.vbus = 0.0
+        self.current = 0.0
+        self.power = 0.0
         overflow = False
-   
+        
     def __str__(self):
         str_info = {
             k: v
             for k, v in self.__dict__.items()
-            if k not in ['client'] and v
+            if k not in ['domain_name', 'device', 'shunt_resistor', 'maximum_current','phase_multiplier'] and v
         }
         return str(str_info)
-
-
 
 class PMIC(object):
     device_id = 0
     logger = None
     sensor_list = []
 
-    def __init__(self, supplies):
+    def __init__(self, domains, sysmons):
         self.logger = self.GetLogger()
-        for s in supplies:
-            match s['device_type']:
-                case 'INA226':
-                    d_type = DeviceType.INA226
-                    sensor = SensorData(s['domain_tag'], s['name'], I2C_Client(s['device'], s['addr'], d_type))
-                    print(str(sensor))
-                    self.sensor_list.append(sensor)
-                case 'INA230':
-                    d_type = DeviceType.INA230
-                    sensor = SensorData(s['domain_tag'], s['name'], I2C_Client(s['addr'], d_type))
-                    print(str(sensor))
-                    self.sensor_list.append(sensor)
-                case _:
-                    self.logger.error("Wrong Device type")
-        
+        for d in domains:
+            for r in d.rails:
+                if r._device_type == DeviceType.INA226:
+                    r._sensor = SensorData(r.name, d.name, INA226(r.i2c_address, r.i2c_bus), r.shunt_resistor, r.maximum_current, r.phase_multiplier)
+                #elif r._device_type == DeviceType.INAxxx: # Future developments
+                #    r._sensor = SensorData(r.name, d.name, INA226(r.i2c_address, r.i2c_bus), r.shunt_resistor, r.maximum_current, r.phase_multiplier)
+                else:
+                    self.logger.error(f"PMIC: Wrong Device/Sensor Type. railname = {r.name}")
+                self.sensor_list.append(r._sensor)
         ret = self.InitBoard()
-
         if True != ret:
             self.logger.error(f"PMIC: InitBoardInfo failed. ret = {ret}")
         self.logger.info("Inside PMIC Constructor")
@@ -102,11 +131,66 @@ class PMIC(object):
         return logger
 
     def InitBoard(self):
+        """
+        Initialize Board's sensor calibration values
+
+        :param : None
+        :return: True: Sensor initializations are successful
+        """
+        ret = True
         self.logger.debug("InitBoardInfo called")
         for s in self.sensor_list:
-            s.client.Initialize()
-        
-    # Log level
+           ret &= s.device.initSensor(s.maximum_current, s.shunt_resistor, s.phase_multiplier)
+        return ret
+
+    def BoardInfo(self, eeprom):
+        """
+        Create Board's Info
+
+        :param : None
+        :return: Board info in json formatted
+        """
+        boardinfo = {}
+        i2c = I2C_Client(eeprom.I2C_Bus, eeprom.I2C_Addr)
+        result, eeprom_data = i2c.ReadRegister(0x00, 256)
+        if result:
+            offset = 0xA
+            boardinfo["Language"] = eeprom_data[offset]
+            #offset = 0xB
+            #a = _struct_time(tm_year=96, tm_mday=1, tm_min= int.from_bytes(eeprom_data[offset:offset+2], "big"))
+            #manu_time.tm_year = 96
+            #manu_time.tm_mday = 1
+            #manu_time.tm_min = int.from_bytes(eeprom_data[offset:offset+2], "big")
+            #_time = time.mktime(a)
+            #board["Manufacturing Date"] = time.ctime(_time)
+
+            offset = 0xe
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Manufacturer"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Product Name"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Board Serial Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+            
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Board Part Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Board Revision"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+        i2c.Release()
+        return boardinfo
+
     def GetPythonLogLevels(self):
         """
         Return the logging levels supported by logging library in python
@@ -137,118 +221,30 @@ class PMIC(object):
             self.logger.setLevel(logging.CRITICAL)
         return
 
-    def ReadSensorVoltage(sensor):
-        match sensor.client.device_type:
-            case DeviceType.INA226:
-                value = sensor.client.ReadReg(INA226.REG_BUSVOLTAGE)
-                return float(value) * INA226.BUS_MILLIVOLTS_LSB / 1000
-            case _:
-                return 0
-    def ReadSensorCurrent(sensor):
-        match sensor.client.device_type:
-            case DeviceType.INA226:
-                pass
-            case _:
-                pass
-        pass
-    
-    def ReadSensorSupplyVoltage(sensor):
-        match sensor.client.device_type:
-            case DeviceType.INA226:
-                #sensor.client.
-                pass
-            case _:
-                pass
-        pass
-    def ReadSensorShuntVoltage(sensor):
-        match sensor.client.device_type:
-            case DeviceType.INA226:
-                pass
-            case _:
-                pass
-        pass
-    def ReadSensorPower(sensor):
-        match sensor.client.device_type:
-            case DeviceType.INA226:
-                pass
-            case _:
-                pass
-        pass
-
-
-
-    def voltage(self):
-        """Return the bus voltage in volts."""
-        value = self._voltage_register()
-        return float(value) * self.__BUS_MILLIVOLTS_LSB / 1000
-
-    def supply_voltage(self):
-        """Return the bus supply voltage in volts.
-
-        This is the sum of the bus voltage and shunt voltage. A
-        DeviceRangeError exception is thrown if current overflow occurs.
+    def GetSensor(self, domainname, railname):
         """
-        return self.voltage() + (float(self.shunt_voltage()) / 1000)
+        Get sensor object of given domain and rail name
 
-    def current(self):
-        """Return the bus current in milliamps.
-
-        A DeviceRangeError exception is thrown if current overflow occurs.
+        :param : None
+        :return: sensor object, low level sensor handler.
         """
-        self._handle_current_overflow()
-        return self._current_register() * self._current_lsb * 1000
-
-    def power(self):
-        """Return the bus power consumption in milliwatts.
-
-        A DeviceRangeError exception is thrown if current overflow occurs.
-        """
-        self._handle_current_overflow()
-        return self._power_register() * self._power_lsb * 1000
-
-    def shunt_voltage(self):
-        """Return the shunt voltage in millivolts.
-
-        A DeviceRangeError exception is thrown if current overflow occurs.
-        """
-        self._handle_current_overflow()
-        return self._shunt_voltage_register() * self.__SHUNT_MILLIVOLTS_LSB
-
-  # print("Bus Voltage    : %.3f V" % ina.voltage())
-   # print("Bus Current    : %.3f mA" % ina.current())
-   # print("Supply Voltage : %.3f V" % ina.supply_voltage())
-   # print("Shunt voltage  : %.3f mV" % ina.shunt_voltage())
-   # print("Power          : %.3f mW" % ina.power())
-
-    def GetSensor(self, tag, supplyname):
         sensor = None
         for _s in self.sensor_list:
-            if _s.tag == tag and _s.name == supplyname:
+            if _s.domain_name == domainname and _s.name == railname:
                 sensor = _s
         return sensor
 
     def GetSensorValues(self, sensor):
-        ReadSensorVoltage(sensor)
-        ReadSensorCurrent(sensor)
-        ReadSensorSupplyVoltage(sensor)
-        ReadSensorShuntVoltage(sensor)
-        ReadSensorPower(sensor)
-        return str(sensor)
-
-
-    def RaftConsole(self, str_cmd):
         """
-        API console command.
+        Find and Get sensor object of given domain and rail name
 
-        :param : string as a "cat" command argument 
-        :return: outStr output from cat command
+        :param : None
+        :return: Sensor Bus Voltage, Current and Power values
         """
-        self.logger.debug(f"execute: " + str_cmd)
-        ret = subprocess.getstatusoutput(str_cmd)
-        status = ret[0]
-        str_cmd_ret = ret[1]
-        self.logger.debug(f"return: status: {status}, command output: {str_cmd_ret}")
-        return status, str_cmd_ret
+        sensor.current = sensor.device.getCurrent()
+        sensor.vbus = sensor.device.getBusVoltage()
+        sensor.power = sensor.device.getPower()
+        return sensor.vbus, sensor.current, sensor.power
 
     def __del__(self):
         self.logger.info("Inside PMIC Destructor")

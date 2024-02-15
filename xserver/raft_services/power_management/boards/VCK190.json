@@ -254,7 +254,7 @@
 			},
 			"PD_LPD" : {
 				"Name" : "LPD",
-				"Rails" : ["INA226_VCCINT_PSFP"]
+				"Rails" : ["INA226_VCCINT_PSLP"]
 			},
 			"PD_PLD" : {
 				"Name" : "PLD",
