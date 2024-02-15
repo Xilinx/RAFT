@@ -1,0 +1,54 @@
+#!/bin/sh
+#
+# APP Start-Up Script
+#
+# Applications inteded to start with RAFT can be initialized here
+#
+
+start ()
+{
+    sudo ifconfig -a | grep eth0
+    RESULT=$?
+    if [ $RESULT -eq 0 ]; then
+	sudo ifconfig eth0 169.254.10.2 up
+	sudo ifconfig -a | grep lo
+        if [ $RESULT -eq 0 ]; then
+	    cd /usr/share/raft/xserver/init/xpyro-prj2/
+        /usr/bin/python3 __init__.py 127.0.0.1 &
+        sudo -u petalinux bash -c 
+        'cd /usr/share/notebooks/ && jupyter nbextension enable --py widgetsnbextension \
+        && export PYTHONPATH=.:/usr/share/raft/xclient/pat:$PYTHONPATH \
+        && echo "c.NotebookApp.token = ''" >> /home/petalinux/.jupyter/jupyter_notebook_config.py \
+        && echo "c.NotebookApp.password = ''" >> /home/petalinux/.jupyter/jupyter_notebook_config.py \
+        && echo "c.NotebookApp.disable_check_xsrf = True" >> /home/petalinux/.jupyter/jupyter_notebook_config.py \
+        && jupyter notebook --ip=0.0.0.0 --no-browser --notebook-dir=/usr/share/notebooks' 
+	    fi
+    fi
+}
+
+stop ()
+{
+    echo "Stopping Applications"
+}
+
+restart()
+{
+    stop
+    start
+}
+
+
+case "$1" in
+    start)
+	start; ;;
+    stop)
+	stop; ;;
+    restart)
+	restart; ;;
+    *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?
+

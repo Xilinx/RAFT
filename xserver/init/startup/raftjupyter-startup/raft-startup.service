@@ -1,0 +1,11 @@
+[Unit]
+Description=raft-startup
+
+[Service]
+Type=oneshot
+StandardOutput=journal+console
+ExecStart=/usr/bin/raft-startup start
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
