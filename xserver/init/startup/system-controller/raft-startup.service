@@ -1,9 +1,13 @@
 [Unit]
 Description=raft-startup
+After=systemd-networkd.service
+Requires=systemd-networkd.service
 
 [Service]
 ExecStart=/usr/bin/raft-startup
 StandardOutput=journal+console
+Restart=always
+RestartSec=3
 
 [Install]
 WantedBy=multi-user.target

@@ -182,6 +182,12 @@
 				"I2C_Address": "0x5b"
 			}
 		},
+		"POWER DOMAIN": {
+			"PD_SYSTEM" : {
+				"Name" : "system",
+				"Rails" : ["INA226_VCC_SOC"]
+			}
+		},
 		"INA226": {
 			"INA226_VCCINT": {
 				"Name": "VCCINT",

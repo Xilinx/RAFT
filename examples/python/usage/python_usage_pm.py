@@ -16,7 +16,7 @@ def usage():
     print(f"Usage: The application work in three modes xclient and xpyro\n"
           f"python3 {sys.argv[0]} xclient host/board ip_address port => Runs at host or board with xclient\n"
           f"python3 {sys.argv[0]} xpyro host/board ip_address port => Runs at host or board with xpyro\n"
-          f"Example: python3 {sys.argv[0]} xclient host 169.254.10.2 9090")
+          f"Example: python3 {sys.argv[0]} xclient host 127.0.0.1 9090")
 
 if (len(sys.argv) !=  5):
     usage()
@@ -178,7 +178,7 @@ print(f'######## GET PS TEMPERATURE VALUE ##########')
 #   None
 #Return:
 #   ret: PS Temperature values.
-ret = handle.GetSysmonTemperatures()
+ret = handle.GetPSTemperature()
 print(json.dumps(ret, indent=2))
 print(f'########################################')
 

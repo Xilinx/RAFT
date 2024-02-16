@@ -91,7 +91,7 @@ class PMIC(object):
     logger = None
     sensor_list = []
 
-    def __init__(self, domains, sysmons):
+    def __init__(self, domains):
         self.logger = self.GetLogger()
         for d in domains:
             for r in d.rails:

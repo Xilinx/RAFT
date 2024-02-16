@@ -206,6 +206,6 @@ class PM_Client(object):
         :return: The PS temperature value in json formatted
         """
         self.logger.debug("GetPSTemperature()")
-        return self.PM.GetSysmonTemperature()
+        return self.PM.GetPSTemperature()
 
 pm = PM_Client()

@@ -36,7 +36,6 @@ class INA226(object):
 		self._maxCurrent = 0
 		self._shunt = 0
 		self._phase_multiplier = 0
-		pass
 
 	def initSensor(self, mc, sr, pm):
 		if 0x2260 == self.getDieID():
