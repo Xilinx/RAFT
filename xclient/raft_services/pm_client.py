@@ -208,4 +208,14 @@ class PM_Client(object):
         self.logger.debug("GetPSTemperature()")
         return self.PM.GetPSTemperature()
 
+    def GetSystemStats(self):
+        """
+        Get the System Status value
+
+        :param : None 
+        :return: The System Status value in json formatted
+        """
+        self.logger.debug("GetSystemStats()")
+        return self.PM.GetSystemStats()
+
 pm = PM_Client()

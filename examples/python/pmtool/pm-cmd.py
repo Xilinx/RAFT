@@ -15,7 +15,7 @@ def main():
     client = PM_Client()
     
     parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-    parser.add_argument("-c", "--command", required=True, choices=["boardinfo", "domains", "powervalue", "rails", "raildetail", "railvalue", "loglevel", "pstemp", "sysmon"],
+    parser.add_argument("-c", "--command", required=True, choices=["boardinfo", "domains", "powervalue", "rails", "raildetail", "railvalue", "loglevel", "pstemp", "sysmon", "stats"],
                             help="Specify the command (boardinfo, domains, rails or railvalue)")
 
     args, remaining_args = parser.parse_known_args()
@@ -69,6 +69,9 @@ def main():
             
         elif args.command == "pstemp":
             print(json.dumps(client.GetPSTemperature()))
+
+        elif args.command == "stats":
+            print(json.dumps(client.GetSystemStats()))
         
         else:
             args = parser.parse_args(remaining_args)

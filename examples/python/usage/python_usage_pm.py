@@ -183,6 +183,17 @@ print(json.dumps(ret, indent=2))
 print(f'########################################')
 
 
+print(f'######## GET SYSTEM STATS ##########')
+#Description:
+#   Gets PS temperature value of Versal.
+#Input Arguments:
+#   None
+#Return:
+#   ret: PS Temperature values.
+ret = handle.GetSystemStats()
+print(json.dumps(ret, indent=2))
+print(f'########################################')
+
 
 
 

@@ -8,8 +8,6 @@ import os
 import platform
 import sys
 import json
-import subprocess
-
 
 RAFT_DIR = '/usr/share/raft/'
 
@@ -22,11 +20,11 @@ from pmic import Domain
 from pmic import DeviceType
 from sysmon import Sysmon_Device_Type
 from sysmon import Sysmon
+from stats import Stats
 from utils import get_python_log_levels
 
         
 class PM(object):
-    _instance = None
     device_id = 0
     logger = None
     domains = []
@@ -34,14 +32,27 @@ class PM(object):
     pmic = None
     board_name = ""
     sysmons = []
+    status = None
+    voltages = []
 
     def __init__(self, json_data, board_name, rail_prefix, eeprom):
         self.logger = self.GetLogger()
         self.boardeeprom = eeprom
         self.board_name = board_name
-        power_domains_data = json_data[board_name]['POWER DOMAIN']
-        temperature_data = json_data[board_name]['Temperature']
-        rails_data = json_data[board_name][rail_prefix]
+        board_data = json_data[board_name]
+        power_domains_data = {}
+        temperature_data = {}
+        hwmon_data = {}
+
+        if 'POWER DOMAIN' in board_data:
+            power_domains_data = board_data['POWER DOMAIN']
+        
+        if 'VOLTAGE' in board_data:
+            hwmon_data = board_data['VOLTAGE']
+        
+        if rail_prefix in board_data:
+            rails_data = board_data[rail_prefix]
+        
         for k, v in power_domains_data.items():
             temp_d = Domain(**v)
             for railname in temp_d.railnames:
@@ -53,22 +64,41 @@ class PM(object):
                         temp_d.rails.append(temp_r)
             self.domains.append(temp_d)
 
-        sensorStr = temperature_data['Sensor']
-        if "i2c" in sensorStr:
-            tokens = sensorStr.split("-")
-            address = tokens[3]
-            device = "/dev/i2c-" + tokens[2]
-            temp_s = None
-            try:
-                temp_s = Sysmon(address, device, Sysmon_Device_Type.iic)
-            except Exception as e:
-                print(e)
+        for k, v in hwmon_data.items():
+            temp_r = Rails(v['Name'], v['I2C_Bus'], v['I2C_Address'], "", "", "")
+            self.voltages.append(temp_r)
+   
+        if 'Temperature' in board_data:
+            temperature_data = board_data['Temperature']
+            sensorStr = temperature_data['Sensor']
+            if "i2c" in sensorStr:
+                tokens = sensorStr.split("-")
+                address = tokens[3]
+                device = "/dev/i2c-" + tokens[2]
+                temp_s = None
+                try:
+                    temp_s = Sysmon(address, device, Sysmon_Device_Type.iic)
+                except Exception as e:
+                    print(e)
                 
-            if temp_s is not None:
-                self.sysmons.append(temp_s)
+                if temp_s is not None:
+                    self.sysmons.append(temp_s)
 
+        try:
+            self.status = Stats(self.voltages)
+            if self.status is None:
+                self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
+        except Exception as e:
+            self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
+            exit_program()
 
-        self.pmic = PMIC(self.domains)
+        try:
+            self.pmic = PMIC(self.domains)
+        except Exception as e:
+            print(e)
+            exit_program()
+
+        
         if self.pmic is None:
             self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
         self.logger.info("Inside PM Constructor")
@@ -136,11 +166,13 @@ class PM(object):
         return self.pmic.BoardInfo(self.boardeeprom)
     
     def GetPSTemperature(self):
-        ps_temp = {}
-        ret, val = subprocess.getstatusoutput('cat /sys/bus/iio/devices/iio\:device0/in_temp20_input')
-        if ret == 0:
-            ps_temp['PS_TEMP'] = float(int(val)/1000)
-        return ps_temp
+        """
+        Gets SysCtl Temperature Info
+
+        :param : None 
+        :return: SysCtl Temperature Info in json formatted
+        """
+        return self.status.getTemperatures()
     
     def GetPowerDomains(self):
         """
@@ -320,8 +352,12 @@ class PM(object):
             data[self.board_name]['MAX'] = _max
             data[self.board_name]['MIN_MIN'] = _min_min
             data[self.board_name]['MAX_MAX'] = _max_max
-            #data[self.board_name].append(temp_s)
         return data
         
+    def GetSystemStats(self):
+        data = {}
+        data = self.status.getLastStatus()
+        return data
+    
     def __del__(self):
         self.logger.info("Inside PM Destructor")
