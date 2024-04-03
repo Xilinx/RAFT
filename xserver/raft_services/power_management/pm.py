@@ -69,27 +69,34 @@ class PM(object):
             self.voltages.append(temp_r)
    
         if 'Temperature' in board_data:
-            temperature_data = board_data['Temperature']
-            sensorStr = temperature_data['Sensor']
-            if "i2c" in sensorStr:
-                tokens = sensorStr.split("-")
-                address = tokens[3]
-                device = "/dev/i2c-" + tokens[2]
-                temp_s = None
+            sensor_data = board_data['Temperature']['Sensor']
+            temp_s = None
+            if "versal-isa-0000" in sensor_data:
                 try:
-                    temp_s = Sysmon(address, device, Sysmon_Device_Type.iic)
+                    temp_s = Sysmon(None, None, Sysmon_Device_Type.sysfs)
+                    if temp_s is not None:
+                        self.sysmons.append(temp_s)
+                except Exception as e:
+                    print(e)
+            
+            if "i2c" in sensor_data:
+                tokens = sensor_data.split("-")
+                address = tokens[3]
+                device_path = "/dev/i2c-" + tokens[2]
+                try:
+                    temp_s = Sysmon(address, device_path, Sysmon_Device_Type.iic)
+                    if temp_s is not None:
+                        self.sysmons.append(temp_s)
                 except Exception as e:
                     print(e)
                 
-                if temp_s is not None:
-                    self.sysmons.append(temp_s)
-
         try:
             self.status = Stats(self.voltages)
             if self.status is None:
                 self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
         except Exception as e:
             self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
+            print(e)
             exit_program()
 
         try:
@@ -103,6 +110,11 @@ class PM(object):
             self.logger.error(f"PM: InitBoardInfo failed. ret = {ret}")
         self.logger.info("Inside PM Constructor")
 
+    @staticmethod
+    def exit_program():
+        print("CRITITCAL ERROR: Unable to Run Pyro Server.\n")
+        sys.exit(1)
+    
     @staticmethod
     def GetLogger():
         """
@@ -344,14 +356,16 @@ class PM(object):
     
 
     def GetSysmonTemperatures(self):
+        if self.sysmons is None:
+            return None
         data = {}
         for s in self.sysmons:
-            data[self.board_name] = {}
-            _min, _max, _min_min, _max_max = s.ReadSysmonTemperatures()
-            data[self.board_name]['MIN'] = _min
-            data[self.board_name]['MAX'] = _max
-            data[self.board_name]['MIN_MIN'] = _min_min
-            data[self.board_name]['MAX_MAX'] = _max_max
+            data = {}
+            temperature, minimum, max_max, min_min = s.ReadSysmonTemperatures()
+            data['TEMP'] = temperature
+            data['MIN'] = minimum
+            data['MAX_MAX'] = max_max
+            data['MIN_MIN'] = min_min
         return data
         
     def GetSystemStats(self):

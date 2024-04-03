@@ -18,6 +18,7 @@ from pmic_i2c import I2C_Client
 from utils import get_ip_and_port
 
 RAFT_DIR = '/usr/share/raft/'
+SYS_CTL_APP_DIR = '/usr/share/system-controller-app/'
 
 IPADDR, PORT = get_ip_and_port()
 if len(IPADDR) == 0:
@@ -34,14 +35,14 @@ def exit_program():
 
 def is_valid_json_file(file_path):
     if not os.path.isfile(file_path):
-        print("not in path")
+        print("ERROR:root:Board Identification Json is not in Path : {file_path}")
         return False
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
             return True
     except json.JSONDecodeError:
-        print('The file is not a JSON file.')
+        print("ERROR:root:{file} Board Identification is not a JSON")
         return False
 
 class board_eeprom:
@@ -89,13 +90,14 @@ def get_product_name():
 if(len(sys.argv) > 2):
 
     product_name = get_product_name()
-    json_file = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/boards', '.'.join((product_name, 'json')))
-    
+    #json_file = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/boards', '.'.join((product_name, 'json')))
+    json_file = os.path.join(SYS_CTL_APP_DIR, 'board', '.'.join((product_name, 'json')))
+
     if is_valid_json_file(json_file):
         json_data = parse_json_file(json_file)
         board_name = os.path.splitext(os.path.basename(json_file))
     else:
-        sys.exit()
+        exit_program()
 
 PM = Pyro4.expose(PM)
 
