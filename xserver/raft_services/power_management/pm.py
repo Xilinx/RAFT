@@ -34,6 +34,7 @@ class PM(object):
     sysmons = []
     status = None
     voltages = []
+    pdi_file = ""
 
     def __init__(self, json_data, board_name, rail_prefix, eeprom):
         self.logger = self.GetLogger()
@@ -89,7 +90,10 @@ class PM(object):
                         self.sysmons.append(temp_s)
                 except Exception as e:
                     print(e)
-                
+
+        if 'Boot Config' in board_data:
+            pdi_file = board_data['Boot Config']['PDI']
+
         try:
             self.status = Stats(self.voltages)
             if self.status is None:
@@ -175,7 +179,10 @@ class PM(object):
         :param : None 
         :return: Board Info in json formatted
         """
-        return self.pmic.BoardInfo(self.boardeeprom)
+        prod_board = False
+        if self.pdi_file:
+            prod_board = True
+        return self.pmic.BoardInfo(self.boardeeprom, prod_board)
     
     def GetPSTemperature(self):
         """

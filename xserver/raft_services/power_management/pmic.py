@@ -8,7 +8,7 @@ import os
 import platform
 import sys
 import subprocess
-import time
+import datetime
 
 
 RAFT_DIR = '/usr/share/raft/'
@@ -143,7 +143,7 @@ class PMIC(object):
            ret &= s.device.initSensor(s.maximum_current, s.shunt_resistor, s.phase_multiplier)
         return ret
 
-    def BoardInfo(self, eeprom):
+    def BoardInfo(self, eeprom, isProdBoard):
         """
         Create Board's Info
 
@@ -154,15 +154,21 @@ class PMIC(object):
         i2c = I2C_Client(eeprom.I2C_Bus, eeprom.I2C_Addr)
         result, eeprom_data = i2c.ReadRegister(0x00, 256)
         if result:
+            #print(''.join('{:02x} '.format(x) for x in eeprom_data))
             offset = 0xA
             boardinfo["Language"] = eeprom_data[offset]
-            #offset = 0xB
-            #a = _struct_time(tm_year=96, tm_mday=1, tm_min= int.from_bytes(eeprom_data[offset:offset+2], "big"))
-            #manu_time.tm_year = 96
-            #manu_time.tm_mday = 1
-            #manu_time.tm_min = int.from_bytes(eeprom_data[offset:offset+2], "big")
-            #_time = time.mktime(a)
-            #board["Manufacturing Date"] = time.ctime(_time)
+
+            if isProdBoard:
+                boardinfo["Silicon Revision"] = "PROD"
+            else:
+                boardinfo["Silicon Revision"] = ""
+
+            build_date = datetime.datetime(1996, 1, 1)
+            minutes  = (eeprom_data[0xd] << 16 | eeprom_data[0xc] << 8 | eeprom_data[0xb])
+            time_delta = datetime.timedelta(minutes=minutes)
+            build_date += time_delta
+            time_string = build_date.strftime('%c')
+            boardinfo['Manufacturing Date'] = time_string
 
             offset = 0xe
             length = int.from_bytes(eeprom_data[offset:offset+1], "big")
@@ -184,6 +190,10 @@ class PMIC(object):
             length &= 0x3f
             boardinfo["Board Part Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
 
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            #/* Skip FRU File ID */
             offset = offset + length + 1
             length = int.from_bytes(eeprom_data[offset:offset+1], "big")
             length &= 0x3f
