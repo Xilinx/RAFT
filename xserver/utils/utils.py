@@ -63,7 +63,7 @@ def open_packed_c_library(c_libhdr, c_lib):
 
 def struct_to_py(CdataPtr, TypeFields):
     for Fld, FldType in TypeFields:
-        if FldType.type.kind == 'primitive':
+        if FldType.type.kind == 'primitive' or FldType.type.kind == 'enum':
             yield (Fld, getattr(CdataPtr, Fld))
         else:
             yield (Fld, cdata_to_py(getattr(CdataPtr, Fld)))
