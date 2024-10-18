@@ -720,6 +720,34 @@ class OFDM_Client(object):
         self.logger.debug(f"Return value = {TuserOutFrameLocation}")
         return TuserOutFrameLocation
 
+    def XDfeOfdm_SetTuserCCUpdateTrigger(self, device_id, TuserCCUpdateTrigger):
+        """
+        Sets the TUSER CC Update trigger where bit location would indicate which bit
+        to be used for sending cc update triggering on TUSER (DL_DOUT IF and
+        M_AXIS_TBASE IF).
+        TUSER bit width is fixed to its default value of 8. Therefore, legal values
+        of FRAME_BIT are 0 to 7.
+
+        :param device_id: id of the opened device.
+        :param TuserCCUpdateTrigger: TUSER CC Update trigger
+        :return: None
+        """
+        self.logger.debug(f"XDfeOfdm_SetTuserCCUpdateTrigger({device_id}, {TuserCCUpdateTrigger})")
+        self.OFDM.XDfeOfdm_SetTuserCCUpdateTrigger(device_id, TuserCCUpdateTrigger)
+        return
+
+    def XDfeOfdm_GetTuserCCUpdateTrigger(self, device_id):
+        """
+        Gets the TUSER CC Update trigger.
+
+        :param device_id: id of the opened device.
+        :return: TuserCCUpdateTrigger: TUSER CC Update Trigger
+        """
+        self.logger.debug(f"XDfeOfdm_GetTuserCCUpdateTrigger({device_id})")
+        TuserCCUpdateTrigger = self.OFDM.XDfeOfdm_GetTuserCCUpdateTrigger(device_id)
+        self.logger.debug(f"Return value = {TuserCCUpdateTrigger}")
+        return TuserCCUpdateTrigger
+
     def XDfeOfdm_GetEventStatus(self, device_id):
         """
         Get event status
