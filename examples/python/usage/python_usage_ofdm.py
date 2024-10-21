@@ -255,6 +255,17 @@ handle.XDfeOfdm_SetTuserOutFrameLocation(device_id, TuserOutFrameLocation)
 TuserOutFrameLocation = handle.XDfeOfdm_GetTuserOutFrameLocation(device_id)
 assert TuserOutFrameLocation == 0x34
 
+# XDfeOfdm_SetTuserCCUpdateTrigger
+#void XDfeOfdm_SetTuserCCUpdateTrigger(const XDfeOfdm *InstancePtr,
+#				       u32 TuserCCUpdateTrigger);
+TuserCCUpdateTrigger = 0x34
+handle.XDfeOfdm_SetTuserCCUpdateTrigger(device_id, TuserCCUpdateTrigger)
+
+#XDfeOfdm_GetTuserCCUpdateTrigger
+#u32 XDfeOfdm_GetTuserCCUpdateTrigger(const XDfeOfdm *InstancePtr);
+TuserCCUpdateTrigger = handle.XDfeOfdm_GetTuserCCUpdateTrigger(device_id)
+assert TuserCCUpdateTrigger == 0x34
+
 #XDfeOfdm_GetEventStatus
 #void XDfeOfdm_GetEventStatus(const XDfeCcf *InstancePtr, XDfeOfdm_Status *Status);
 Status = handle.XDfeOfdm_GetEventStatus(device_id)
