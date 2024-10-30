@@ -1,49 +1,49 @@
-# Copyright (C) 2023 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2023-2024 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2023, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023-2024, Advanced Micro Devices, Inc."
 
-import os 
-import platform
+import os
 import sys
 import json
+import logging
 sys.path.append('../../utils')
 sys.path.append('../../raft_services')
 sys.path.append('../../raft_services/power_management')
 import Pyro4
-from pathlib import Path
+from periphery import I2C
 from pm import PM
-from pmic_i2c import I2C_Client
 from utils import get_ip_and_port
 
 RAFT_DIR = '/usr/share/raft/'
-SYS_CTL_APP_DIR = '/usr/share/system-controller-app/'
+
+logging.basicConfig(level=logging.ERROR)
 
 IPADDR, PORT = get_ip_and_port()
 if len(IPADDR) == 0:
-    print("RAFT ERROR: Unable to Run Pyro Server.\n"
-          "No network interface present.\n"
+    print("CRITITCAL ERROR: Unable to Run Pyro Server.\n"
+          "No eth0 network interface present.\n"
           "Please pass the ipaddress to __init__.py and retry.\n"
           "Usage:python3 __init__.py <ipaddress> <port>\n")
-    sys.exit()
+    sys.exit(1)
 else:
     print("RAFT Pyro Server run successfully\n")
 
 def exit_program():
-    print("CRITITCAL ERROR: Unable to Run Pyro Server.\n")
+    logging.error("CRITICAL ERROR: Unable to Run Raft-PM Server.")
     sys.exit(1)
 
 def is_valid_json_file(file_path):
     if not os.path.isfile(file_path):
-        print("ERROR:root:Board Identification Json is not in Path : {file_path}")
+        logging.error("ERROR:root:Board Identification Json is not in Path : {file_path}")
         return False
     try:
         with open(file_path, 'r') as file:
             data = json.load(file)
             return True
     except json.JSONDecodeError:
-        print("ERROR:root:{file} Board Identification is not a JSON")
+        logging.error("ERROR:root:{file} Board Identification is not a JSON")
         return False
 
 class board_eeprom:
@@ -56,6 +56,7 @@ onboard = board_eeprom()
 def parse_json_file(json_file):
     with open(json_file, 'r') as f:
         json_data = json.load(f)
+        #print(json.dumps(json_data, indent=2))
     return json_data
 
 def get_eeprom_data():
@@ -63,22 +64,36 @@ def get_eeprom_data():
     i2c = None
     onboard.Name = "Common"
     onboard.I2C_Bus = "/dev/i2c-1"
-    onboard.I2C_Addr = "0x54"
-    i2c = I2C_Client(onboard.I2C_Bus, onboard.I2C_Addr) # Common_OnBoard_EEPROM
-    if i2c.device is not None:
-        result, eeprom_data = i2c.ReadRegister(0x00, 256)
+    onboard.I2C_Addr = 0x54
+    i2c = I2C(onboard.I2C_Bus)
+    if i2c is not None:
+        data  = bytearray(256)
+        try:
+            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
+            i2c.transfer(onboard.I2C_Addr, msgs)
+            eeprom_data = msgs[1].data
+            result = True
+        except IOError:
+            logging.info(f"Onboard {onboard.Name} Eeprom read failed!")
+        i2c.close()
     if result is False:
-        #i2c.Release()
         onboard.Name = "Legacy"
         onboard.I2C_Bus = "/dev/i2c-11"
-        onboard.I2C_Addr = "0x54"
-        i2c = I2C_Client(onboard.I2C_Bus, onboard.I2C_Addr)
-        if i2c.device is not None:
-            result, eeprom_data = i2c.ReadRegister(0x00, 256)
+        onboard.I2C_Addr = 0x54
+        i2c = I2C(onboard.I2C_Bus)
+        if i2c is not None:
+            data  = bytearray(256)
+            try:
+                msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
+                i2c.transfer(onboard.I2C_Addr, msgs)
+                eeprom_data = msgs[1].data
+                result = True
+            except IOError:
+                logging.info(f"Onboard {onboard.Name} Eeprom read failed!")
+            i2c.close()
         if result is False:
-            print("ERROR:root:Board Identification Eeprom Failed.")
+            logging.error("Board Eeprom Identification Failed.")
             exit_program()
-        i2c.Release()
     return eeprom_data
 
 def get_product_name():
@@ -88,27 +103,24 @@ def get_product_name():
     name = eeprom_data[offset+1:(offset+1 + length)].decode("utf-8").strip('\x00')
     return name
 
-if(len(sys.argv) > 2):
 
-    product_name = get_product_name()
-    #json_file = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/boards', '.'.join((product_name, 'json')))
-    json_file = os.path.join(SYS_CTL_APP_DIR, 'board', '.'.join((product_name, 'json')))
+product_name = get_product_name()
+json_file = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/board', '.'.join((product_name, 'json')))
 
-    if is_valid_json_file(json_file):
-        json_data = parse_json_file(json_file)
-        board_name = os.path.splitext(os.path.basename(json_file))
-    else:
-        exit_program()
+if is_valid_json_file(json_file):
+    json_data = parse_json_file(json_file)
+    board_name = os.path.splitext(os.path.basename(json_file))
+else:
+    exit_program()
 
 PM = Pyro4.expose(PM)
 
 Pyro4.Daemon.serveSimple(
     {
-        PM(json_data, board_name[0], 'INA226', onboard): "PM",
+        PM(json_data, board_name[0], onboard): "PM",
     },
     host=IPADDR,
     port=PORT,
     ns=False,
     verbose=True,
 )
-

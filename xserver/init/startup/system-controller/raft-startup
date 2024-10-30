@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cd /usr/share/raft/xserver/init/xpyro-prj6/
-python3 __init__.py 127.0.0.1 9090
+python3 __init__.py 0.0.0.0 9090

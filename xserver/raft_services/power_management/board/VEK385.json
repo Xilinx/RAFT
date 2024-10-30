@@ -1,0 +1,64 @@
+{
+	"License" : "Copyright (c) 2024 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+
+	"VEK385" : {
+		"FEATURE" : {
+			"List" : ["power", "powerdomain"]
+		},
+		"POWER_SENSORS" : {
+			"VCC_LPD" : {
+				"Name" : "VCC_LPD",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 6000,
+				"Phase_Multiplier" : 1
+			},
+			"VCCAUX_LPD" : {
+				"Name" : "VCCAUX_LPD",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 2000,
+				"Phase_Multiplier" : 1
+			},
+			"VCCO_50X" : {
+				"Name" : "VCCO_50X",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 3000,
+				"Phase_Multiplier" : 1
+			},
+			"VCC_MIPI_507" : {
+				"Name" : "VCCO_50X",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 3000,
+				"Phase_Multiplier" : 1
+			},
+                        "VCCIO_MIPI_507" : {
+				"Name" : "VCCO_50X",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 3000,
+				"Phase_Multiplier" : 1
+			}
+		},
+		"POWER DOMAIN" : {
+			"LPD" : {
+				"Name" : "LPD",
+				"Rails" : ["VCC_LPD", "VCCAUX_LPD", "VCCO_50X", "VCC_MIPI_507", "VCCIO_MIPI_507"]
+			},
+			"FPD" : {
+				"Name" : "FPD",
+				"Rails" : ["ADC_AVCC", "ADC_AVCCAUX"]
+			},
+                        "SYSTEM" : {
+
+                        }
+		}
+	}
+}
