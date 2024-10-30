@@ -57,7 +57,7 @@ if (sys.argv[1] == 'xclient'):
     #GetPythonLogLevels
     PythonLogLevels = handle.GetPythonLogLevels()
     #SetClientLogLevel
-    handle.SetClientLogLevel(PythonLogLevels["DEBUG"])
+    #handle.SetClientLogLevel(PythonLogLevels["DEBUG"])
 
 
 print(f'######## BOARD INFO ########')
@@ -184,15 +184,23 @@ print(f'########################################')
 
 
 print(f'######## GET SYSTEM STATS ##########')
-#Description:
-#   Gets PS temperature value of Versal.
-#Input Arguments:
-#   None
-#Return:
-#   ret: PS Temperature values.
 ret = handle.GetSystemStats()
 print(json.dumps(ret, indent=2))
 print(f'########################################')
+
+
+print(f'######## LIST VOLTAGES ##########')
+voltages = handle.ListVoltages()
+print(json.dumps(voltages, indent=2))
+print(f'#################################')
+
+
+print(f'######## GET ALL VOLTAGES ##########')
+for voltage in voltages['voltages']:
+    for k, v in voltage.items():
+        ret = handle.GetVoltage(k)
+        print(json.dumps(ret, indent=2))
+print(f'###################################')
 
 
 

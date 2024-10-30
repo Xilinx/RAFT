@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2023-2024 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim, Sree Parvathi Anish"
@@ -19,24 +19,25 @@ def update_csv_data(csv_data, data, sample_rate, duration):
     columns_order = []
     row_item = {}
     write_timestamp = 1
-    for pd in data["VCK190"]:
-        for key, value in pd.items():
-            for rails_item in value["Rails"]:
-                for rails_key, rails_value in rails_item.items():
-                    if write_timestamp == 1:
-                        columns_order.append("Timestamp")
-                        start_time = datetime.datetime.now()
-                        row_item.update({"Timestamp" : start_time})
-                        write_timestamp = 0
-                    column_name = f"{key}-{rails_key}-{list(rails_value.keys())[0]}"
-                    columns_order.append(column_name)
-                    row_item.update({f"{column_name}": rails_value['Voltage']})
-                    column_name = f"{key}-{rails_key}-{list(rails_value.keys())[1]}"
-                    columns_order.append(column_name)
-                    row_item.update({f"{column_name}": rails_value['Current']})
-                    column_name = f"{key}-{rails_key}-{list(rails_value.keys())[2]}"
-                    columns_order.append(column_name)
-                    row_item.update({f"{column_name}": rails_value['Power']})
+    for k, domain_list in data.items():
+        for index, domain in enumerate(domain_list):
+            for key, value in domain.items():
+                for rails_item in value["Rails"]:
+                    for rails_key, rails_value in rails_item.items():
+                        if write_timestamp == 1:
+                            columns_order.append("Timestamp")
+                            start_time = datetime.datetime.now()
+                            row_item.update({"Timestamp" : start_time})
+                            write_timestamp = 0
+                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[0]}"
+                        columns_order.append(column_name)
+                        row_item.update({f"{column_name}": rails_value['Voltage']})
+                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[2]}"
+                        columns_order.append(column_name)
+                        row_item.update({f"{column_name}": rails_value['Current']})
+                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[3]}"
+                        columns_order.append(column_name)
+                        row_item.update({f"{column_name}": rails_value['Power']})
         column_name = f"{key}-TotalPower"
         columns_order.append(column_name)
         row_item.update({f"{column_name}": value["Total Power"]})
@@ -57,10 +58,13 @@ def pm_csv_dump(csv_data, columns_order, filepath, filename):
 
 def main():
     client = PM_Client()
-    
+
     parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-    parser.add_argument("-c", "--command", required=True, choices=["boardinfo", "domains", "powervalue", "rails", "raildetail", "railvalue", "loglevel", "pstemp", "sysmon", "stats", "output-csv"],
-                            help="Specify the command (boardinfo, domains, rails or railvalue)")
+    parser.add_argument("-c", "--command", required=True, choices=["boardinfo", "domains", "powervalue", "rails", "raildetail", "railvalue", "loglevel", "pstemp", "sysmon", "stats",
+                        "listpower", "getpower", "getcalpower", "getinaconf", "setinaconf",
+                        "listvoltage", "enablevoltage", "disablevoltage", "getvoltage", "setvoltage", "setbootvoltage", "restorevoltage", "getregulator",
+                        "output-csv"],
+                        help="Specify the command (boardinfo, domains, rails or railvalue ...)")
 
     args, remaining_args = parser.parse_known_args()
 
@@ -69,53 +73,147 @@ def main():
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-
             if target_args.target:
                 print(json.dumps(client.GetRailsOfDomain(target_args.target)))
-        
+
         elif args.command == "railvalue":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-
             if target_args.target:
                 print(json.dumps(client.GetValueOfRail(target_args.target)))
         elif args.command == "raildetail":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-
             if target_args.target:
                 print(json.dumps(client.GetRailDetails(target_args.target)))
 
         elif args.command == "boardinfo":
-            print(json.dumps(client.GetBoardInfo()))
-        
+            print(json.dumps(client.GetBoardInfo(), indent=2))
+
         elif args.command == "domains":
-            print(json.dumps(client.GetPowerDomains()))
+            print(json.dumps(client.GetPowerDomains(), indent=2))
 
         elif args.command == "powervalue":
-            print(json.dumps(client.GetPowersAll()))
+            print(json.dumps(client.GetPowersAll(), indent=2))
 
         elif args.command == "loglevel":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=False, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-
             if target_args.target is None:
                 print(json.dumps(client.logger.level))
             else:
                 if target_args.target:
                     print(f"Target: {target_args.target}")
-        
+
         elif args.command == "sysmon":
-            print(json.dumps(client.GetSysmonTemperatures()))
-            
+            print(json.dumps(client.GetSysmonTemperatures(), indent=2))
+
         elif args.command == "pstemp":
-            print(json.dumps(client.GetPSTemperature()))
+            print(json.dumps(client.GetPSTemperature(), indent=2))
 
         elif args.command == "stats":
-            print(json.dumps(client.GetSystemStats()))
+            print(json.dumps(client.GetSystemStats(), indent=2))
+
+        elif args.command == "listpower":
+            print(json.dumps(client.ListPowerSensors(), indent=2))
+
+        elif args.command == "getpower":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.GetPowerSensor(target_args.target), indent=2))
+
+        elif args.command == "getcalpower":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.GetCalPowerSensor(target_args.target), indent=2))
+
+        elif args.command == "getinaconf":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.GetPowerSensorConf(target_args.target), indent=2))
+
+        elif args.command == "setinaconf":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                value_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+                value_parser.add_argument("-v", "--value", required=True, help="Specify the target")
+                value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
+                if value_args.value:
+                    print(value_args.value)
+                    conf_data = json.loads(value_args.value)
+                    print(conf_data)
+                    print(json.dumps(client.SetPowerSensorConf(target_args.target, conf_data), indent=2))
+
+        elif args.command == "listvoltage":
+            print(json.dumps(client.ListVoltages(), indent=2))
+
+        elif args.command == "enablevoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.EnableVoltage(target_args.target), indent=2))
+
+        elif args.command == "disablevoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.DisableVoltage(target_args.target), indent=2))
+
+        elif args.command == "getvoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.GetVoltage(target_args.target), indent=2))
+
+        elif args.command == "setvoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                value_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+                value_parser.add_argument("-v", "--value", required=True, help="Specify the target")
+                value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
+                if value_args.value:
+                    print(json.dumps(client.SetVoltage(target_args.target, round(float(value_args.value), 3)), indent=2))
+
+        elif args.command == "setbootvoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                value_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+                value_parser.add_argument("-v", "--value", required=True, help="Specify the target")
+                value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
+                if value_args.value:
+                    print(json.dumps(client.SetBootVoltage(target_args.target, round(float(value_args.value), 3)), indent=2))
+        
+        elif args.command == "restorevoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                    print(json.dumps(client.RestoreVoltage(target_args.target), indent=2))
+        
+        elif args.command == "getregulator":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print(json.dumps(client.GetRegulatorAll(target_args.target), indent=2))
 
         elif args.command == "output-csv":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
@@ -157,7 +255,7 @@ def main():
                     break
             filename = start_datetime.strftime(f"pmtool_s-{sample_rate}_d-{duration}_%Y-%m-%d_%H-%M-%S.csv")
             pm_csv_dump(csv_data, columns_order, filepath, filename)
-        
+
         else:
             args = parser.parse_args(remaining_args)
 
