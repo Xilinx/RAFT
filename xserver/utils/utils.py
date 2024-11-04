@@ -9,6 +9,8 @@ import base64
 from cffi import FFI
 import os
 import sys
+import subprocess
+import re
 
 RAFT_DIR = '/usr/share/raft/'
 DEFAULT_PORT_NUMBER=9090
@@ -115,9 +117,14 @@ def get_ip_and_port():
     if (len(sys.argv) > 1):
         ipaddr = sys.argv[1]
     else:
-        handle = os.popen('ip addr show eth0 | grep "\<inet\>" | awk \'{ print $2 }\' | awk -F "/" \'{ print $1 }\'')
-        ipaddr = handle.read().strip()
-        handle.close()
+        ip_end0 = subprocess.run(['ip', 'addr', 'show', 'end0'], capture_output=True, text=True)
+        ip_stdout = ip_end0.stdout
+
+        found = re.search(r'inet (\d+\.\d+\.\d+\.\d+)', ip_stdout)
+        if found:
+            ipaddr = found.group(1)
+        else:
+            ipaddr = "0.0.0.0"
 
     if (len(sys.argv) > 2):
         port = int(sys.argv[2])
