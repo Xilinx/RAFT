@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -109,6 +109,26 @@ class PRACH(object):
         else:
             xhelper_handle.XHelper_MetalSetLogLevel(xhelper_handle.METAL_LOG_EMERGENCY)
         return
+
+    def GetPrachMacro(self):
+        """
+        Return Dictionary with all PRACH macros in the prach header file
+
+        :param : None
+        :return: Dictionary with all PRACH macros in the prach header file
+        """
+        prach_macro = {}
+        prach_macro["XDFEPRACH_MAX_NUM_INSTANCES"] = prach_handle.XDFEPRACH_MAX_NUM_INSTANCES
+        prach_macro["XST_SUCCESS"] = prach_handle.XST_SUCCESS
+        prach_macro["XST_FAILURE"] = prach_handle.XST_FAILURE
+        prach_macro["XDFEPRACH_NODE_NAME_MAX_LENGTH"] = prach_handle.XDFEPRACH_NODE_NAME_MAX_LENGTH
+        prach_macro["XDFEPRACH_CC_NUM_MAX"] = prach_handle.XDFEPRACH_CC_NUM_MAX
+        prach_macro["XDFEPRACH_RC_NUM_MAX"] = prach_handle.XDFEPRACH_RC_NUM_MAX
+        prach_macro["XDFEPRACH_NCO_NUM_MAX"] = prach_handle.XDFEPRACH_NCO_NUM_MAX
+        prach_macro["XDFEPRACH_ANT_NUM_MAX"] = prach_handle.XDFEPRACH_ANT_NUM_MAX
+        prach_macro["XDFEPRACH_SEQ_LENGTH_MAX"] = prach_handle.XDFEPRACH_SEQ_LENGTH_MAX
+        prach_macro["XDFEPRACH_BAND_ID_MAX"] = prach_handle.XDFEPRACH_BAND_ID_MAX
+        return prach_macro
 
     def GetEnum_XDfePrach_StateId(self):
         """

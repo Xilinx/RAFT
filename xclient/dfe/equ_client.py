@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -127,6 +127,18 @@ class EQU_Client(object):
         self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
         self.EQU.SetMetalLogLevel(MetalLogLevel)
         return
+
+    def GetEquMacro(self):
+        """
+        Return Dictionary with all EQU macros in the equ header file
+
+        :param : None
+        :return: Dictionary with all EQU macros in the equ header file
+        """
+        self.logger.debug("GetEquMacro()")
+        equ_macro = self.EQU.GetEquMacro()
+        self.logger.debug(f"equ_macro = {json.dumps(equ_macro, indent=2)}")
+        return equ_macro
 
     # Get enum API
     def GetEnum_XDfeEqu_StateId(self):

@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -109,6 +109,28 @@ class EQU(object):
         else:
             xhelper_handle.XHelper_MetalSetLogLevel(xhelper_handle.METAL_LOG_EMERGENCY)
         return
+
+    def GetEquMacro(self):
+        """
+        Return Dictionary with all EQU macros in the equ header file
+
+        :param : None
+        :return: Dictionary with all EQU macros in the equ header file
+        """
+        equ_macro = {}
+        equ_macro["XDFEEQU_MAX_NUM_INSTANCES"] = equ_handle.XDFEEQU_MAX_NUM_INSTANCES
+        equ_macro["XST_SUCCESS"] = equ_handle.XST_SUCCESS
+        equ_macro["XST_FAILURE"] = equ_handle.XST_FAILURE
+        equ_macro["XDFEEQU_NODE_NAME_MAX_LENGTH"] = equ_handle.XDFEEQU_NODE_NAME_MAX_LENGTH
+        equ_macro["XDFEEQU_ANT_NUM_MAX"] = equ_handle.XDFEEQU_ANT_NUM_MAX
+        equ_macro["XDFEEQU_CHANNEL_NUM"] = equ_handle.XDFEEQU_CHANNEL_NUM
+        equ_macro["XDFEEQU_MAX_NUMBER_OF_UNITS_COMPLEX"] = equ_handle.XDFEEQU_MAX_NUMBER_OF_UNITS_COMPLEX
+        equ_macro["XDFEEQU_MAX_NUMBER_OF_UNITS_REAL"] = equ_handle.XDFEEQU_MAX_NUMBER_OF_UNITS_REAL
+        equ_macro["XDFEEQU_NUM_COEFF"] = equ_handle.XDFEEQU_NUM_COEFF
+        equ_macro["XDFEEQU_DATAPATH_MODE_REAL"] = equ_handle.XDFEEQU_DATAPATH_MODE_REAL
+        equ_macro["XDFEEQU_DATAPATH_MODE_COMPLEX"] = equ_handle.XDFEEQU_DATAPATH_MODE_COMPLEX
+        equ_macro["XDFEEQU_DATAPATH_MODE_MATRIX"] = equ_handle.XDFEEQU_DATAPATH_MODE_MATRIX
+        return equ_macro
 
     # Get enum API
     def GetEnum_XDfeEqu_StateId(self):

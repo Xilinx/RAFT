@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -128,6 +128,18 @@ class OFDM_Client(object):
         self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
         self.OFDM.SetMetalLogLevel(MetalLogLevel)
         return
+
+    def GetOfdmMacro(self):
+        """
+        Return Dictionary with all OFDM macros in the ofdm header file
+
+        :param : None
+        :return: Dictionary with all OFDM macros in the ofdm header file
+        """
+        self.logger.debug("GetOfdmMacro()")
+        ofdm_macro = self.OFDM.GetOfdmMacro()
+        self.logger.debug(f"ofdm_macro = {json.dumps(ofdm_macro, indent=2)}")
+        return ofdm_macro
 
     # Get enum API
     def GetEnum_XDfeOfdm_StateId(self):

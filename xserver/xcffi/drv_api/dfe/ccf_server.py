@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -109,6 +109,24 @@ class CCF(object):
         else:
             xhelper_handle.XHelper_MetalSetLogLevel(xhelper_handle.METAL_LOG_EMERGENCY)
         return
+
+    def GetCcfMacro(self):
+        """
+        Return Dictionary with all CCF macros in the ccf header file
+
+        :param : None
+        :return: Dictionary with all CCF macros in the ccf header file
+        """
+        ccf_macro = {}
+        ccf_macro["XDFECCF_MAX_NUM_INSTANCES"] = ccf_handle.XDFECCF_MAX_NUM_INSTANCES
+        ccf_macro["XST_SUCCESS"] = ccf_handle.XST_SUCCESS
+        ccf_macro["XST_FAILURE"] = ccf_handle.XST_FAILURE
+        ccf_macro["XDFECCF_NODE_NAME_MAX_LENGTH"] = ccf_handle.XDFECCF_NODE_NAME_MAX_LENGTH
+        ccf_macro["XDFECCF_CC_NUM"] = ccf_handle.XDFECCF_CC_NUM
+        ccf_macro["XDFECCF_ANT_NUM_MAX"] = ccf_handle.XDFECCF_ANT_NUM_MAX
+        ccf_macro["XDFECCF_SEQ_LENGTH_MAX"] = ccf_handle.XDFECCF_SEQ_LENGTH_MAX
+        ccf_macro["XDFECCF_NUM_COEFF"] = ccf_handle.XDFECCF_NUM_COEFF
+        return ccf_macro
 
     # Get enum API
     def GetEnum_XDfeCcf_StateId(self):

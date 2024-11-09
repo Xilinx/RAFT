@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -123,6 +123,26 @@ handle.SetServerLogLevel(PythonLogLevels["DEBUG"])
 #SetMetalLogLevel
 metal_log_level = handle.GetEnum_metal_log_level()
 handle.SetMetalLogLevel(metal_log_level["METAL_LOG_EMERGENCY"])
+
+#Description:
+#   Return Dictionary with all MIX macros in the mix header file
+#Input Arguments:
+#   None
+#Return:
+#   Dictionary with all MIX macros in the mix header file
+#GetMixMacro
+mix_macro = handle.GetMixMacro()
+print(mix_macro["XDFEMIX_MAX_NUM_INSTANCES"])
+print(mix_macro["XST_SUCCESS"])
+print(mix_macro["XST_FAILURE"])
+print(mix_macro["XDFEMIX_NODE_NAME_MAX_LENGTH"])
+print(mix_macro["XDFEMIX_CC_NUM"])
+print(mix_macro["XDFEMIX_ANT_NUM_MAX"])
+print(mix_macro["XDFEMIX_SEQ_LENGTH_MAX"])
+print(mix_macro["XDFEMIX_RATE_MAX"])
+print(mix_macro["XDFEMIX_AUX_NCO_MAX"])
+print(mix_macro["XDFEMIX_NCO_MAX"])
+print(mix_macro["XDFEMIX_CC_GAIN_MAX"])
 
 #Description:
 #   Return Dictionary equivalent of enum XDfeMix_StateId

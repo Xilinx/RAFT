@@ -1,4 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Gerard Thomas Colman"
@@ -117,6 +118,18 @@ class RFCLK_CLIENT(object):
         self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
         self.RFCLK.SetMetalLogLevel(MetalLogLevel)
         return
+
+    def GetRfclkMacro(self):
+        """
+        Return Dictionary with all RFCLK macros in the rfclk header file
+
+        :param : None
+        :return: Dictionary with all RFCLK macros in the rfclk header file
+        """
+        self.logger.debug("GetRfclkMacro()")
+        rfclk_macro = self.RFCLK.GetRfclkMacro()
+        self.logger.debug(f"rfclk_macro = {json.dumps(rfclk_macro, indent=2)}")
+        return rfclk_macro
 
     def GetEnum_metal_log_level(self):
         """

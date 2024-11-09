@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -80,6 +80,18 @@ handle.SetServerLogLevel(PythonLogLevels["DEBUG"])
 #SetMetalLogLevel
 metal_log_level = handle.GetEnum_metal_log_level()
 handle.SetMetalLogLevel(metal_log_level["METAL_LOG_DEBUG"])
+
+#GetOfdmMacro
+ofdm_macro = handle.GetOfdmMacro()
+print(ofdm_macro["XDFEOFDM_MAX_NUM_INSTANCES"])
+print(ofdm_macro["XST_SUCCESS"])
+print(ofdm_macro["XST_FAILURE"])
+print(ofdm_macro["XDFEOFDM_NODE_NAME_MAX_LENGTH"])
+print(ofdm_macro["XDFEOFDM_CC_NUM"])
+print(ofdm_macro["XDFEOFDM_FT_NUM"])
+print(ofdm_macro["XDFEOFDM_CC_SEQ_LENGTH_MAX"])
+print(ofdm_macro["XDFEOFDM_FT_SEQ_LENGTH_MAX"])
+print(ofdm_macro["XDFEOFDM_PHASE_COMPENSATION_MAX"])
 
 #GetEnum_XDfeOfdm_StateId
 XDfeOfdm_StateId = handle.GetEnum_XDfeOfdm_StateId()

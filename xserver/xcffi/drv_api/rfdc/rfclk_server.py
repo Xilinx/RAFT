@@ -1,4 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -110,6 +111,28 @@ class RFCLK(object):
         else:
             xhelper_handle.XHelper_MetalSetLogLevel(xhelper_handle.METAL_LOG_EMERGENCY)
         return
+
+    def GetRfclkMacro(self):
+        """
+        Return Dictionary with all RFCLK macros in the rfclk header file
+
+        :param : None
+        :return: Dictionary with all RFCLK macros in the rfclk header file
+        """
+        rfclk_macro = {}
+        rfclk_macro["XST_SUCCESS"] = rfclk_handle.XST_SUCCESS
+        rfclk_macro["XST_FAILURE"] = rfclk_handle.XST_FAILURE
+        rfclk_macro["RFCLK_LMX2594_1"] = rfclk_handle.RFCLK_LMX2594_1
+        rfclk_macro["RFCLK_LMX2594_2"] = rfclk_handle.RFCLK_LMX2594_2
+        rfclk_macro["RFCLK_LMK"] = rfclk_handle.RFCLK_LMK
+        rfclk_macro["RFCLK_CHIP_NUM"] = rfclk_handle.RFCLK_CHIP_NUM
+        rfclk_macro["LMK_COUNT"] = rfclk_handle.LMK_COUNT
+        rfclk_macro["LMK_FREQ_NUM"] = rfclk_handle.LMK_FREQ_NUM
+        rfclk_macro["LMX_ADC_NUM"] = rfclk_handle.LMX_ADC_NUM
+        rfclk_macro["LMX_DAC_NUM"] = rfclk_handle.LMX_DAC_NUM
+        rfclk_macro["LMX2594_COUNT"] = rfclk_handle.LMX2594_COUNT
+        rfclk_macro["FREQ_LIST_STR_SIZE"] = rfclk_handle.FREQ_LIST_STR_SIZE
+        return rfclk_macro
 
     def GetEnum_metal_log_level(self):
         """
