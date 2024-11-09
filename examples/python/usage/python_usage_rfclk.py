@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
+# Copyright (C) 2021-2024 Xilinx, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Gerard Thomas Colman"
@@ -80,6 +80,21 @@ handle.SetServerLogLevel(PythonLogLevels["DEBUG"])
 #SetMetalLogLevel
 metal_log_level = handle.GetEnum_metal_log_level()
 handle.SetMetalLogLevel(metal_log_level["METAL_LOG_EMERGENCY"])
+
+#GetRfclkMacro
+rfclk_macro = handle.GetRfclkMacro()
+print(rfclk_macro["XST_SUCCESS"])
+print(rfclk_macro["XST_FAILURE"])
+print(rfclk_macro["RFCLK_LMX2594_1"])
+print(rfclk_macro["RFCLK_LMX2594_2"])
+print(rfclk_macro["RFCLK_LMK"])
+print(rfclk_macro["RFCLK_CHIP_NUM"])
+print(rfclk_macro["LMK_COUNT"])
+print(rfclk_macro["LMK_FREQ_NUM"])
+print(rfclk_macro["LMX_ADC_NUM"])
+print(rfclk_macro["LMX_DAC_NUM"])
+print(rfclk_macro["LMX2594_COUNT"])
+print(rfclk_macro["FREQ_LIST_STR_SIZE"])
 
 #XRFClk_Init
 ret = handle.XRFClk_Init(486)

@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -127,6 +127,18 @@ class MIX_Client(object):
         self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
         self.MIX.SetMetalLogLevel(MetalLogLevel)
         return
+
+    def GetMixMacro(self):
+        """
+        Return Dictionary with all MIX macros in the mix header file
+
+        :param : None
+        :return: Dictionary with all MIX macros in the mix header file
+        """
+        self.logger.debug("GetMixMacro()")
+        mix_macro = self.MIX.GetMixMacro()
+        self.logger.debug(f"mix_macro = {json.dumps(mix_macro, indent=2)}")
+        return mix_macro
 
     # Get enum API
     def GetEnum_XDfeMix_StateId(self):

@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -119,6 +119,18 @@ class RFDC_Client(object):
         self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
         self.RFDC.SetMetalLogLevel(MetalLogLevel)
         return
+
+    def GetRfdcMacro(self):
+        """
+        Return Dictionary with all RFDC macros in the rfdc header file
+
+        :param : None
+        :return: Dictionary with all RFDC macros in the rfdc header file
+        """
+        self.logger.debug("GetRfdcMacro()")
+        rfdc_macro = self.RFDC.GetRfdcMacro()
+        self.logger.debug(f"rfdc_macro = {json.dumps(rfdc_macro, indent=2)}")
+        return rfdc_macro
 
     def GetEnum_metal_log_level(self):
         """

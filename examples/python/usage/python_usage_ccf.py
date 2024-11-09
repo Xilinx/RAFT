@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -113,6 +113,23 @@ handle.SetServerLogLevel(PythonLogLevels["DEBUG"])
 #SetMetalLogLevel
 metal_log_level = handle.GetEnum_metal_log_level()
 handle.SetMetalLogLevel(metal_log_level["METAL_LOG_EMERGENCY"])
+
+#Description:
+#   Return Dictionary with all CCF macros in the ccf header file
+#Input Arguments:
+#   None
+#Return:
+#   Dictionary with all CCF macros in the ccf header file
+#GetCcfMacro
+ccf_macro = handle.GetCcfMacro()
+print(ccf_macro["XDFECCF_MAX_NUM_INSTANCES"])
+print(ccf_macro["XST_SUCCESS"])
+print(ccf_macro["XST_FAILURE"])
+print(ccf_macro["XDFECCF_NODE_NAME_MAX_LENGTH"])
+print(ccf_macro["XDFECCF_CC_NUM"])
+print(ccf_macro["XDFECCF_ANT_NUM_MAX"])
+print(ccf_macro["XDFECCF_SEQ_LENGTH_MAX"])
+print(ccf_macro["XDFECCF_NUM_COEFF"])
 
 #Description:
 #   Return Dictionary equivalent of enum XDfeCcf_StateId

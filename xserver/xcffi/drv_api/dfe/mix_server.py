@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -109,6 +109,27 @@ class MIX(object):
         else:
             xhelper_handle.XHelper_MetalSetLogLevel(xhelper_handle.METAL_LOG_EMERGENCY)
         return
+
+    def GetMixMacro(self):
+        """
+        Return Dictionary with all MIX macros in the mix header file
+
+        :param : None
+        :return: Dictionary with all MIX macros in the mix header file
+        """
+        mix_macro = {}
+        mix_macro["XDFEMIX_MAX_NUM_INSTANCES"] = mix_handle.XDFEMIX_MAX_NUM_INSTANCES
+        mix_macro["XST_SUCCESS"] = mix_handle.XST_SUCCESS
+        mix_macro["XST_FAILURE"] = mix_handle.XST_FAILURE
+        mix_macro["XDFEMIX_NODE_NAME_MAX_LENGTH"] = mix_handle.XDFEMIX_NODE_NAME_MAX_LENGTH
+        mix_macro["XDFEMIX_CC_NUM"] = mix_handle.XDFEMIX_CC_NUM
+        mix_macro["XDFEMIX_ANT_NUM_MAX"] = mix_handle.XDFEMIX_ANT_NUM_MAX
+        mix_macro["XDFEMIX_SEQ_LENGTH_MAX"] = mix_handle.XDFEMIX_SEQ_LENGTH_MAX
+        mix_macro["XDFEMIX_RATE_MAX"] = mix_handle.XDFEMIX_RATE_MAX
+        mix_macro["XDFEMIX_AUX_NCO_MAX"] = mix_handle.XDFEMIX_AUX_NCO_MAX
+        mix_macro["XDFEMIX_NCO_MAX"] = mix_handle.XDFEMIX_NCO_MAX
+        mix_macro["XDFEMIX_CC_GAIN_MAX"] = mix_handle.XDFEMIX_CC_GAIN_MAX
+        return mix_macro
 
     # Get enum API
     def GetEnum_XDfeMix_StateId(self):

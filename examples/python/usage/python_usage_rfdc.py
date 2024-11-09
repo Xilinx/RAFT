@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -101,6 +101,25 @@ handle.SetServerLogLevel(PythonLogLevels["DEBUG"])
 #SetMetalLogLevel
 metal_log_level = handle.GetEnum_metal_log_level()
 handle.SetMetalLogLevel(metal_log_level["METAL_LOG_EMERGENCY"])
+
+#Description:
+#   Return Dictionary with all RFDC macros in the rfdc header file
+#Input Arguments:
+#   None
+#Return:
+#   return: Dictionary with all RFDC macros in the rfdc header file
+rfdc_macro = handle.GetRfdcMacro()
+#The macros in the header file can be accessed as shown below.
+print(rfdc_macro["XRFDC_SUCCESS"])
+print(rfdc_macro["XRFDC_FAILURE"])
+print(rfdc_macro["XRFDC_ADC_TILE"])
+print(rfdc_macro["XRFDC_DAC_TILE"])
+print(rfdc_macro["XRFDC_TILE_ID_MAX"])
+print(rfdc_macro["XRFDC_BLOCK_ID_MAX"])
+print(rfdc_macro["XRFDC_EVNT_SRC_IMMEDIATE"])
+print(rfdc_macro["XRFDC_EVNT_SRC_SLICE"])
+print(rfdc_macro["XRFDC_EVNT_SRC_TILE"])
+print(rfdc_macro["XRFDC_EVNT_SRC_SYSREF"])
 
 #Description:
 #   Return Dictionary equivalent of structure XRFdc_PLL_Settings

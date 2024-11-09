@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -127,6 +127,18 @@ class PRACH_Client(object):
         self.logger.debug(f"SetMetalLogLevel({MetalLogLevel})")
         self.PRACH.SetMetalLogLevel(MetalLogLevel)
         return
+
+    def GetPrachMacro(self):
+        """
+        Return Dictionary with all PRACH macros in the prach header file
+
+        :param : None
+        :return: Dictionary with all PRACH macros in the prach header file
+        """
+        self.logger.debug("GetPrachMacro()")
+        prach_macro = self.PRACH.GetPrachMacro()
+        self.logger.debug(f"prach_macro = {json.dumps(prach_macro, indent=2)}")
+        return prach_macro
 
     def GetEnum_XDfePrach_StateId(self):
         """

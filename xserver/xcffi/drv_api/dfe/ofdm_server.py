@@ -1,5 +1,5 @@
 # Copyright (C) 2021-2022 Xilinx, Inc.  All rights reserved.
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2024 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Anish Kadamathikuttiyil Karthikeyan Pillai"
@@ -109,6 +109,25 @@ class OFDM(object):
         else:
             xhelper_handle.XHelper_MetalSetLogLevel(xhelper_handle.METAL_LOG_EMERGENCY)
         return
+
+    def GetOfdmMacro(self):
+        """
+        Return Dictionary with all OFDM macros in the ofdm header file
+
+        :param : None
+        :return: Dictionary with all OFDM macros in the ofdm header file
+        """
+        ofdm_macro = {}
+        ofdm_macro["XDFEOFDM_MAX_NUM_INSTANCES"] = ofdm_handle.XDFEOFDM_MAX_NUM_INSTANCES
+        ofdm_macro["XST_SUCCESS"] = ofdm_handle.XST_SUCCESS
+        ofdm_macro["XST_FAILURE"] = ofdm_handle.XST_FAILURE
+        ofdm_macro["XDFEOFDM_NODE_NAME_MAX_LENGTH"] = ofdm_handle.XDFEOFDM_NODE_NAME_MAX_LENGTH
+        ofdm_macro["XDFEOFDM_CC_NUM"] = ofdm_handle.XDFEOFDM_CC_NUM
+        ofdm_macro["XDFEOFDM_FT_NUM"] = ofdm_handle.XDFEOFDM_FT_NUM
+        ofdm_macro["XDFEOFDM_CC_SEQ_LENGTH_MAX"] = ofdm_handle.XDFEOFDM_CC_SEQ_LENGTH_MAX
+        ofdm_macro["XDFEOFDM_FT_SEQ_LENGTH_MAX"] = ofdm_handle.XDFEOFDM_FT_SEQ_LENGTH_MAX
+        ofdm_macro["XDFEOFDM_PHASE_COMPENSATION_MAX"] = ofdm_handle.XDFEOFDM_PHASE_COMPENSATION_MAX
+        return ofdm_macro
 
     # Get enum API
     def GetEnum_XDfeOfdm_StateId(self):
