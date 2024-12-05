@@ -4,7 +4,7 @@
 
 	"VMK180" : {
 		"FEATURE" : {
-			"List" : ["voltage", "power", "powerdomain"]
+			"List" : ["power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"VCCINT" : {

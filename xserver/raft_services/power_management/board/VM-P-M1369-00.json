@@ -3,7 +3,7 @@
 
 	"VM-P-M1369-00" : {
 		"FEATURE" : {
-			"List" : ["voltage", "temp", "power", "powerdomain"]
+			"List" : ["temp", "power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"VCC_SOC" : {

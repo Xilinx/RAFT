@@ -3,7 +3,7 @@
 
 	"VPK180-112": {
 		"FEATURE": {
-			"List" : ["voltage", "temp", "power", "powerdomain"]
+			"List" : ["temp", "power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"VCCINT": {
