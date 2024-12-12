@@ -16,7 +16,7 @@ class Rails:
     def __init__(self, Name, Part_Name, I2C_Bus, I2C_Address,
                  Shunt_Resistor=None, Maximum_Current=None, Phase_Multiplier=None,
                  Maximum_Volt=None, Typical_Volt=None, Minimum_Volt=None,
-                 PMBus_VOUT_MODE=-1, Page_Select=-1, Phase=-1, FB_Ratio=1.0):
+                 PMBus_VOUT_MODE=-1, Page_Select=-1, Phase=-1, FB_Ratio=1.0, Voltage_Multiplier=-1):
         self.name = Name
         self.part_name = Part_Name
         self.i2c_bus = I2C_Bus
@@ -31,6 +31,7 @@ class Rails:
         self.page_select = int(Page_Select)
         self.phase = int(Phase)
         self.fb_ratio = float(FB_Ratio)
+        self.voltage_multiplier = int(Voltage_Multiplier)
 
         self._sensor = None
         self._output = None
@@ -39,15 +40,18 @@ class Rails:
         str_info = {
             k: v
             for k, v in self.__dict__.items()
-            if k in ['name', 'part_name'] and v
+            if k and v is not None
         }
         return str(str_info)
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+            sort_keys=True, indent=4)
 
 class Domain:
     def __init__(self, Name, Rails):
         self.name = Name
         self.railnames = Rails
-        #self.rails = []
 
     def __str__(self):
         str_info = {

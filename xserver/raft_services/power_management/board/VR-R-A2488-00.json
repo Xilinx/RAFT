@@ -1,0 +1,378 @@
+{
+	"License" : "Copyright (c) 2024 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+
+	"VR-R-A2488-00" : {
+		"FEATURE" : {
+			"List" : ["voltage", "power", "powerdomain"]
+		},
+		"POWER_SENSORS" : {
+			"DAC_AVCCAUX" : {
+				"Name" : "DAC_AVCCAUX",
+				"Part_Name" : "INA226",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x40",
+				"Shunt_Resistor" : 1000,
+				"Maximum_Current" : 1600,
+				"Phase_Multiplier" : 1
+			},
+			"DAC_AVTT" : {
+				"Name" : "DAC_AVTT",
+				"Part_Name" : "INA226",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x41",
+				"Shunt_Resistor" : 1000,
+				"Maximum_Current" : 1000,
+				"Phase_Multiplier" : 1
+			},
+			"ADC_AVCC" : {
+				"Name" : "ADC_AVCC",
+				"Part_Name" : "INA226",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x42",
+				"Shunt_Resistor" : 1000,
+				"Maximum_Current" : 7500,
+				"Phase_Multiplier" : 1
+			},
+			"ADC_AVCCAUX" : {
+				"Name" : "ADC_AVCCAUX",
+				"Part_Name" : "INA226",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x43",
+				"Shunt_Resistor" : 1000,
+				"Maximum_Current" : 3500,
+				"Phase_Multiplier" : 1
+			},
+			"DAC_AVCC" : {
+				"Name" : "DAC_AVCC",
+				"Part_Name" : "INA226",
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x48",
+				"Shunt_Resistor" : 1000,
+				"Maximum_Current" : 8000,
+				"Phase_Multiplier" : 1
+			}
+		},
+		"POWER DOMAIN" : {
+			"PD_DAC" : {
+				"Name" : "DAC",
+				"Rails" : ["DAC_AVCCAUX", "DAC_AVTT", "DAC_AVCC"]
+			},
+			"PD_ADC" : {
+				"Name" : "ADC",
+				"Rails" : ["ADC_AVCC", "ADC_AVCCAUX"]
+			}
+		},
+		"VOLTAGE" : {
+			"VCCINT" : {
+				"Name" : "VCCINT",
+				"Part_Name" : "TPS53681",
+				"Maximum_Volt" : 0.975,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x60",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 0.0,
+				"Phase" : 4
+			},
+			"VCC_SOC" : {
+				"Name" : "VCC_SOC",
+				"Part_Name" : "TPS53681",
+				"Maximum_Volt" : 0.97,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x60",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 1,
+				"Phase" : 2
+			},
+			"VCC_IO" : {
+				"Name" : "VCC_IO",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x1B",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCCINT_GT" : {
+				"Name" : "VCCINT_GT",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x10",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCC_RAM" : {
+				"Name" : "VCC_RAM",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x11",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"UTIL_1V8" : {
+				"Name" : "UTIL_1V8",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x1A",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCC_PMC" : {
+				"Name" : "VCC_PMC",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x29",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCC_PSFP" : {
+				"Name" : "VCC_PSFP",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x13",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCC_PSLP" : {
+				"Name" : "VCC_PSLP",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x14",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCCO_MIO" : {
+				"Name" : "VCCO_MIO",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 0.8,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x16",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCCAUX" : {
+				"Name" : "VCCAUX",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x23",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCCO_X5IO" : {
+				"Name" : "VCCO_X5IO",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x18",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"VCCO_700" : {
+				"Name" : "VCCO_700",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x19",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"LP5_VDD1_1V8" : {
+				"Name" : "LP5_VDD1_1V8",
+				"Part_Name" : "TPS544B25",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x0E",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"LP5_VDD2_1V05" : {
+				"Name" : "LP5_VDD2_1V05",
+				"Part_Name" : "TPS544B25",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 1.05,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x0F",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"LP5_VCCO_1V0" : {
+				"Name" : "LP5_VCCO_1V0",
+				"Part_Name" : "TPS544B25",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.0,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x15",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"LP5_VDDQ_0V5" : {
+				"Name" : "LP5_VDDQ_0V5",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.5,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x22",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"GTYP_AVCC" : {
+				"Name" : "GTYP_AVCC",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.92,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x27",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"GTYP_AVTT" : {
+				"Name" : "GTYP_AVTT",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x25",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"GTYP_AVCCAUX" : {
+				"Name" : "GTYP_AVCCAUX",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.5,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x20",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"GTM_AVCC" : {
+				"Name" : "GTM_AVCC",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 1.5,
+				"Typical_Volt" : 0.92,
+				"Minimum_Volt" : 0.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x24",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"GTM_AVTT" : {
+				"Name" : "GTM_AVTT",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.2,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x1C",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"GTM_AVCCAUX" : {
+				"Name" : "GTM_AVCCAUX",
+				"Part_Name" : "TPS546B24A",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 1.5,
+				"Minimum_Volt" : 1,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x21",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : -1
+			},
+			"ADC_AVCC" : {
+				"Name" : "ADC_AVCC",
+				"Part_Name" : "MPM54522",
+				"Maximum_Volt" : 1,
+				"Typical_Volt" : 0.9,
+				"Minimum_Volt" : 0.8,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x61",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.6667
+			},
+			"DAC_AVCC" : {
+				"Name" : "DAC_AVCC",
+				"Part_Name" : "MPM54522",
+				"Maximum_Volt" : 1,
+				"Typical_Volt" : 0.9,
+				"Minimum_Volt" : 0.8,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x62",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.6667
+			},
+			"ADC_AVCCAUX" : {
+				"Name" : "ADC_AVCCAUX",
+				"Part_Name" : "MPM54322",
+				"Maximum_Volt" : 2,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x63",
+				"Page_Select" : -1,
+				"FB_Ratio" : 1.5
+			},
+			"DAC_AVCCAUX" : {
+				"Name" : "DAC_AVCCAUX",
+				"Part_Name" : "MPM54322",
+				"Maximum_Volt" : 2,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x64",
+				"Page_Select" : 0.0,
+				"FB_Ratio" : 1.5
+			},
+			"DAC_AVTT" : {
+				"Name" : "DAC_AVTT",
+				"Part_Name" : "MPM54322",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 2.85,
+				"Minimum_Volt" : 2.5,
+				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Address" : "0x64",
+				"Page_Select" : 1,
+				"FB_Ratio" : 0.2126
+			}
+		}
+	}
+}

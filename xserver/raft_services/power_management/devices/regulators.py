@@ -169,13 +169,16 @@ class PMBusRegulator:
             return self._rawvalue_2_value(raw_temp, self.temp_scaling)
 
     def read_vin(self):
-        return 0
+        return None
+
     def read_iin(self):
-        return 0
+        return None
+
     def read_pout(self):
-        return 0
+        return None
+
     def read_pin(self):
-        return 0
+        return None
 
     def read_telemetry_all(self):
         telemetry = []

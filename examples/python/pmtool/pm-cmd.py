@@ -32,10 +32,10 @@ def update_csv_data(csv_data, data, sample_rate, duration):
                         column_name = f"{key}-{rails_key}-{list(rails_value.keys())[0]}"
                         columns_order.append(column_name)
                         row_item.update({f"{column_name}": rails_value['Voltage']})
-                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[2]}"
+                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[1]}"
                         columns_order.append(column_name)
                         row_item.update({f"{column_name}": rails_value['Current']})
-                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[3]}"
+                        column_name = f"{key}-{rails_key}-{list(rails_value.keys())[2]}"
                         columns_order.append(column_name)
                         row_item.update({f"{column_name}": rails_value['Power']})
         column_name = f"{key}-TotalPower"
