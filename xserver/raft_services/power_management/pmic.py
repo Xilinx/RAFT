@@ -24,75 +24,20 @@ class PMIC(object):
     domains = []
     voltages = []
     power_sensors = []
-    boardinfo = {}
 
-    def __init__(self, eeprom, pm_domains, pm_powersensor, pm_voltages):
+    def __init__(self, pm_domains, pm_powersensor, pm_voltages):
         self.logger = self.GetLogger()
         self.domains = pm_domains
-
-        if eeprom:
-            i2c = I2C(eeprom.I2C_Bus)
-            bytes = bytearray(256)
-            try:
-                msgs = [I2C.Message([0x0, 0x0]), I2C.Message(bytes, read=True)]
-                i2c.transfer(eeprom.I2C_Addr, msgs)
-                eeprom_data = msgs[1].data
-                #print(''.join('{:02x} '.format(x) for x in eeprom_data))
-                offset = 0xA
-                self.boardinfo["Language"] = eeprom_data[offset]
-
-                if True: #isProdBoard
-                    self.boardinfo["Silicon Revision"] = "PROD"
-                else:
-                    self.boardinfo["Silicon Revision"] = ""
-
-                build_date = datetime.datetime(1996, 1, 1)
-                minutes  = (eeprom_data[0xd] << 16 | eeprom_data[0xc] << 8 | eeprom_data[0xb])
-                time_delta = datetime.timedelta(minutes=minutes)
-                build_date += time_delta
-                time_string = build_date.strftime('%c')
-                self.boardinfo['Manufacturing Date'] = time_string
-
-                offset = 0xe
-                length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-                length &= 0x3f
-                self.boardinfo["Manufacturer"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
-
-                offset = offset + length + 1
-                length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-                length &= 0x3f
-                self.boardinfo["Product Name"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
-
-                offset = offset + length + 1
-                length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-                length &= 0x3f
-                self.boardinfo["Board Serial Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
-
-                offset = offset + length + 1
-                length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-                length &= 0x3f
-                self.boardinfo["Board Part Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
-
-                offset = offset + length + 1
-                length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-                length &= 0x3f
-                #/* Skip FRU File ID */
-                offset = offset + length + 1
-                length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-                length &= 0x3f
-                self.boardinfo["Board Revision"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
-            except IOError:
-                logging.error(f"Onboard {eeprom.Name} Eeprom read failed!")
-            finally:
-                i2c.close()
 
         for ps in pm_powersensor:
             try:
                 match ps.part_name:
                     case 'INA226':
                         ps._sensor = INA226(ps.i2c_address, ps.i2c_bus)
-                    case 'INA700' | 'INA745':
-                        ps._sensor = INA7XX(ps.i2c_address, ps.i2c_bus)
+                    case 'INA700':
+                        ps._sensor = INA700(ps.i2c_address, ps.i2c_bus)
+                    case 'INA745A' | 'INA745B':
+                        ps._sensor = INA745x(ps.i2c_address, ps.i2c_bus)
                     case _:
                         ps._sensor = None
             except Exception as e:
@@ -167,6 +112,64 @@ class PMIC(object):
             self.logger.setLevel(logging.CRITICAL)
         return
 
+    def GetBoardInfo(self, eeprom, has_pdi):
+        boardinfo = {}
+        i2c = I2C(eeprom.I2C_Bus)
+        bytes = bytearray(256)
+        try:
+            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(bytes, read=True)]
+            i2c.transfer(eeprom.I2C_Addr, msgs)
+            eeprom_data = msgs[1].data
+            #print(''.join('{:02x} '.format(x) for x in eeprom_data))
+            offset = 0xA
+            boardinfo["Language"] = eeprom_data[offset]
+
+            if has_pdi is not None:
+                boardinfo["Silicon Revision"] = "PROD"
+            else:
+                boardinfo["Silicon Revision"] = ""
+
+            build_date = datetime.datetime(1996, 1, 1)
+            minutes  = (eeprom_data[0xd] << 16 | eeprom_data[0xc] << 8 | eeprom_data[0xb])
+            time_delta = datetime.timedelta(minutes=minutes)
+            build_date += time_delta
+            time_string = build_date.strftime('%c')
+            boardinfo['Manufacturing Date'] = time_string
+
+            offset = 0xe
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Manufacturer"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Product Name"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Board Serial Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Board Part Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            #/* Skip FRU File ID */
+            offset = offset + length + 1
+            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+            length &= 0x3f
+            boardinfo["Board Revision"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+        except IOError:
+            logging.error(f"Onboard {eeprom.Name} Eeprom read failed!")
+        finally:
+            i2c.close()
+        return boardinfo
+
     def EnableVoltage(self, o):
         self.logger.debug(f"EnableVoltage({o.addr}@{o.i2c.devpath})")
         o.enable_output()
@@ -234,10 +237,9 @@ class PMIC(object):
     def GetSensorValues(self, s):
         self.logger.debug("GetSensorValues(0x{0:02x}@{1})".format(s.addr, s.i2c.devpath))
         vbus = s.getBusVoltage()
-        vshunt =  s.getShuntVoltage()
         current = s.getCurrent()
         power = s.getPower()
-        return vbus, vshunt, current, power
+        return vbus, current, power
 
     def __del__(self):
         self.logger.info("Inside PMIC Destructor")

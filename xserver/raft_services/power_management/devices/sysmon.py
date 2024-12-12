@@ -36,9 +36,8 @@ class Sysmon(object):
                 msgs = [I2C.Message([0xc6, 0xd7, 0xe8, 0xf9, 0x03, 0x00, 0x08, 0x00])]
                 self._bus.transfer(self._address, msgs)
             except IOError:
-                logging.error("Create Sysmon iic device failed.")
-                del self
-                raise Exception("Create Sysmon iic device failed")
+                logging.error("Sysmon I2C device init failed.")
+                raise Exception("Sysmon I2C device init failed")
 
         elif self._device_type is Sysmon_Device_Type.PMBUS:
             self._address = int(address, 0)
@@ -47,9 +46,8 @@ class Sysmon(object):
                 msgs = [I2C.Message([0xc6, 0xd7, 0xe8, 0xf9, 0x03, 0x00, 0x08, 0x00])]
                 self._bus.transfer(self._address, msgs)
             except IOError:
-                logging.error("Create Sysmon pmbus device failed.")
-                raise Exception("Create Sysmon pmbus device failed")
-                del self
+                logging.error("Sysmon Pmbus device init failed.")
+                raise Exception("Sysmon Pmbus device init failed")
 
         elif self._device_type is Sysmon_Device_Type.SYSFS:
             for root, subdirs, files in os.walk("/sys/bus/iio/devices/"):
@@ -62,14 +60,12 @@ class Sysmon(object):
                                 temp_path = os.path.join(root, subdir)
                                 device_path = os.path.abspath(temp_path)
                                 self._device_path = device_path
-                                print(f"Sysmon root of {self._device_path}")
             if self._device_path is None:
-                logging.error("Create Sysmon Sysfs/Sysmon-I2C device failed.")
-                #raise Exception("Create Sysmon Sysfs/Sysmon-I2C device failed")
-                del self
+                logging.error("Sysmon Sysfs device init failed.")
+                raise Exception("Sysmon Sysfs device init failed.")
         else:
-            raise Exception("Create Sysmon None device failed")
-            del self
+            logging.error("Unknown Sysmon device type.")
+            raise Exception("Unknown Sysmon device type.")
 
     @staticmethod
     def twos_comp(val, bits):
@@ -78,13 +74,11 @@ class Sysmon(object):
         return val
 
     @staticmethod
-    def ConvertRawtoProcessed(self, first_byte, second_byte):
-        value = None
+    def ConvertRawtoProcessed(first_byte, second_byte):
         val1 = (second_byte << 8) + first_byte
         if (val1 & 0x8000) == 0x8000:
-            val1 = twos_comp(val1, 16)
+            val1 = Sysmon.twos_comp(val1, 16)
         val2 = 128
-
         return float(val1)/float(val2)
 
     def ReadSysmonTemperatures(self):
@@ -115,7 +109,7 @@ class Sysmon(object):
                 if ret == 0:
                     self._min_min = round(int(val)/1000, 3)
             else:
-               logging.error("Sysmon device path is None.")
+                logging.error("Sysmon device path is None.")
 
         elif self._device_type == Sysmon_Device_Type.I2C:
             try:
@@ -123,27 +117,32 @@ class Sysmon(object):
                 self._bus.transfer(self._address, msgs)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0x0c, 0x04, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._min = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._min = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0x0d, 0x04, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._temp = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._temp = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0xe3, 0x07, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._min_min = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._min_min = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0xe4, 0x07, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._max_max = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._max_max = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
             except IOError:
                 logging.error("Read Sysmon failed.")
@@ -154,27 +153,32 @@ class Sysmon(object):
                 self._bus.transfer(self._address, msgs)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0x0c, 0x04, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._min = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._min = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0x0d, 0x04, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._temp = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._temp = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0xe3, 0x07, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._min_min = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._min_min = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
                 msgs = [I2C.Message([0x00, 0x00, 0x00, 0x00, 0xe4, 0x07, 0x04, 0x00]), I2C.Message([0x00, 0x00, 0x00, 0x00], read=True)]
+                self._bus.transfer(self._address, msgs)
                 logging.debug("{0}: 0x{1:02x}{2:02x}{2:02x}{3:02x}".format(self._address, msgs[1].data[0], msgs[1].data[1], msgs[1].data[2], msgs[1].data[3]))
 
-                self._max_max = ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1])
+                self._max_max = round(self.ConvertRawtoProcessed(msgs[1].data[0], msgs[1].data[1]), 3)
 
             except IOError:
                 logging.error("Read Sysmon failed.")

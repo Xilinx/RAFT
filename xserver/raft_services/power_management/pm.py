@@ -27,7 +27,7 @@ class PM(object):
     sensors = []
     voltages = []
     pmic = None
-    sysmons = []
+    sysmon = None
     status = None
     pdi_file = ""
 
@@ -36,6 +36,7 @@ class PM(object):
         self.boardeeprom = eeprom
         self.board_name = board_name
         board_data = json_data[board_name]
+        self.pdi_file = None
 
         if 'FEATURE' in board_data:
             feature_list = board_data['FEATURE']['List']
@@ -65,11 +66,9 @@ class PM(object):
 
         if 'temp' in feature_list:
             if 'Temperature' in board_data:
-                if "versal-isa-0000" in board_data['Temperature']['Sensor']:
+                if "versal-isa" in board_data['Temperature']['Sensor']:
                     try:
-                        temp_s = Sysmon(None, None, Sysmon_Device_Type.SYSFS)
-                        if temp_s is not None:
-                            self.sysmons.append(temp_s)
+                        self.sysmon = Sysmon(None, None, Sysmon_Device_Type.SYSFS)
                     except Exception as e:
                         print(e)
                 elif "i2c" in board_data['Temperature']['Sensor']:
@@ -77,14 +76,12 @@ class PM(object):
                     address = tokens[3]
                     device_path = "/dev/i2c-" + tokens[2]
                     try:
-                        temp_s = Sysmon(address, device_path, Sysmon_Device_Type.I2C)
-                        if temp_s is not None:
-                            self.sysmons.append(temp_s)
+                        self.sysmon = Sysmon(address, device_path, Sysmon_Device_Type.I2C)
                     except Exception as e:
                         print(e)
 
         if 'Boot Config' in board_data:
-            pdi_file = board_data['Boot Config']['PDI']
+            self.pdi_file = board_data['Boot Config']['PDI']
 
         try:
             self.status = Stats()
@@ -95,7 +92,7 @@ class PM(object):
             self.exit_program()
 
         try:
-            self.pmic = PMIC(self.boardeeprom, self.domains, self.sensors, self.voltages)
+            self.pmic = PMIC(self.domains, self.sensors, self.voltages)
         except Exception as e:
             print(traceback.format_exc())
             self.exit_program()
@@ -169,7 +166,13 @@ class PM(object):
         :param : None
         :return: Board Info
         """
-        return self.pmic.boardinfo
+        data = {}
+        if self.boardeeprom is None:
+            data['Success'] = False
+            data['Message'] = f'Board Eeprom undefined'
+        else:
+            data = self.pmic.GetBoardInfo(self.boardeeprom, self.pdi_file)
+        return data
 
     def GetPSTemperature(self):
         """
@@ -296,20 +299,16 @@ class PM(object):
 
     def GetSysmonTemperatures(self):
         data = {}
-        if len(self.sysmons) == 0:
+        if self.sysmon is None:
             data['Success'] = False
             data['Message'] = f"Sysmon is not available."
-            return data
         else:
-            list_s = []
-            for s in self.sysmons:
-                temperature, minimum, max_max, min_min = s.ReadSysmonTemperatures()
-                data['TEMP'] = temperature
-                data['MIN'] = minimum
-                data['MAX_MAX'] = max_max
-                data['MIN_MIN'] = min_min
-                list_s.append(data)
-            return list_s
+            temp, minimum, max_max, min_min = self.sysmon.ReadSysmonTemperatures()
+            data['TEMP'] = temp
+            data['MIN'] = minimum
+            data['MAX_MAX'] = max_max
+            data['MIN_MIN'] = min_min
+        return data
 
     def GetSystemStats(self):
         data = {}
@@ -352,9 +351,8 @@ class PM(object):
                 data['Message'] = f'{sensor_name} sensor is not defined'
                 self.logger.error(f'GetPowerSensor({sensor_name}) sensor is not defined')
             else:
-                vb, vs, i, p = self.pmic.GetSensorValues(ps._sensor)
-                values['Voltage'] = round(vb, 4)
-                values['Vshunt'] = round(vs, 4)
+                v, i, p = self.pmic.GetSensorValues(ps._sensor)
+                values['Voltage'] = round(v, 4)
                 values['Current'] = round(i, 4)
                 values['Power'] = round(p, 4)
                 data[sensor_name] = values
@@ -374,11 +372,10 @@ class PM(object):
                 data['Message'] = f'{sensor_name} sensor is not defined'
                 self.logger.error(f'GetPowerCalSensor({sensor_name}) sensor is not defined')
             else:
-                vb, vs, i, p = self.pmic.GetSensorValues(ps._sensor)
-                values['voltage'] = round(vb, 4)
-                values['vshunt'] = round(vs, 4)
-                values['current'] = round(i, 4)
-                values['power'] = round(p, 4)
+                v, i, p = self.pmic.GetSensorValues(ps._sensor)
+                values['Voltage'] = round(v, 4)
+                values['Current'] = round(i, 4)
+                values['Power'] = round(p, 4)
                 data[sensor_name] = values
         return data
 

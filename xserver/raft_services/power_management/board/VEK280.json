@@ -6,15 +6,6 @@
 		"FEATURE": {
 			"List" : ["temp", "power", "powerdomain"]
 		},
-		"BOOTMODES": {
-			"Mode_Lines": ["SYSCTLR_VERSAL_MODE0", "SYSCTLR_VERSAL_MODE1",
-				"SYSCTLR_VERSAL_MODE2", "SYSCTLR_VERSAL_MODE3"],
-			"Modes": {
-				"JTAG": "0x0",
-				"OSPI": "0x8",
-				"SD": "0xe"
-			}
-		},
 		"POWER_SENSORS" : {
 			"VCCINT": {
 				"Name": "VCCINT",
