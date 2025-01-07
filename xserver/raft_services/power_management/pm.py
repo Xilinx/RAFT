@@ -86,19 +86,20 @@ class PM(object):
         try:
             self.status = Stats()
             if self.status is None:
-                self.logger.error(f"PM: InitStats failed.")
+                self.logger.error(f"InitStats failed.")
         except Exception as e:
-            self.logger.error(f"PM: InitStats failed.")
+            self.logger.error(f"InitStats failed. ({e})")
             self.exit_program()
 
         try:
             self.pmic = PMIC(self.domains, self.sensors, self.voltages)
         except Exception as e:
-            print(traceback.format_exc())
+            self.logger.error(f"InitPmic failed. ({e})")
             self.exit_program()
 
         if self.pmic is None:
-            self.logger.error(f"PM: InitPmic failed.")
+            self.logger.error(f"PMIC not found.")
+            self.exit_program()
         self.logger.info("Inside PM Constructor")
 
     @staticmethod
@@ -238,9 +239,18 @@ class PM(object):
             data[domainname] = {}
             data[domainname]['Rails'] = []
             for railname in domain.railnames:
-                rail_value = self.GetPowerSensor(railname)
-                data[domainname]['Rails'].append(rail_value)
-                total_power += rail_value[railname]['Power']
+                ps = self._find_power_sensor(railname)
+                if ps is not None:
+                    v, i, p = self.pmic.GetSensorValues(ps._sensor)
+                    rail_value = {
+                        railname: {
+                        'Voltage': v,
+                        'Current': i,
+                        'Power': p
+                        }
+                    }
+                    data[domainname]['Rails'].append(rail_value)
+                    total_power += rail_value[railname]['Power']
             data[domainname]['Total Power'] = round(total_power, 4)
         return data
 
@@ -261,9 +271,11 @@ class PM(object):
             data[domainname] = {}
             domain_power = 0.0
             for railname in domain.railnames:
-                temp_ps = self.GetPowerSensor(railname)
-                domain_power += temp_ps[railname]['Power']
-                data[domainname]['Power'] = round(domain_power, 4)
+                ps = self._find_power_sensor(railname)
+                if ps is not None:
+                    _, _, p = self.pmic.GetSensorValues(ps._sensor)
+                    domain_power += p
+            data[domainname]['Power'] = domain_power
         return data
 
     def GetPowersAll(self):
@@ -352,9 +364,9 @@ class PM(object):
                 self.logger.error(f'GetPowerSensor({sensor_name}) sensor is not defined')
             else:
                 v, i, p = self.pmic.GetSensorValues(ps._sensor)
-                values['Voltage'] = round(v, 4)
-                values['Current'] = round(i, 4)
-                values['Power'] = round(p, 4)
+                values['Voltage'] = v
+                values['Current'] = i
+                values['Power'] = p
                 data[sensor_name] = values
         return data
 
@@ -373,9 +385,9 @@ class PM(object):
                 self.logger.error(f'GetPowerCalSensor({sensor_name}) sensor is not defined')
             else:
                 v, i, p = self.pmic.GetSensorValues(ps._sensor)
-                values['Voltage'] = round(v, 4)
-                values['Current'] = round(i, 4)
-                values['Power'] = round(p, 4)
+                values['Voltage'] = v
+                values['Current'] = i
+                values['Power'] = p
                 data[sensor_name] = values
         return data
 
@@ -401,7 +413,7 @@ class PM(object):
         if ps is None:
             data['Success'] = False
             data['Message'] = f'{sensor_name} does not exits'
-            self.logger.error(f'EnableVoltage({sensor_name}) does not exits')
+            self.logger.error(f'SetPowerSensorConf({sensor_name}) does not exits')
         else:
             if ps._sensor is None:
                 data['Success'] = False

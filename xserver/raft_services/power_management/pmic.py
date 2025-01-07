@@ -30,18 +30,15 @@ class PMIC(object):
         self.domains = pm_domains
 
         for ps in pm_powersensor:
-            try:
-                match ps.part_name:
-                    case 'INA226':
-                        ps._sensor = INA226(ps.i2c_address, ps.i2c_bus)
-                    case 'INA700':
-                        ps._sensor = INA700(ps.i2c_address, ps.i2c_bus)
-                    case 'INA745A' | 'INA745B':
-                        ps._sensor = INA745x(ps.i2c_address, ps.i2c_bus)
-                    case _:
-                        ps._sensor = None
-            except Exception as e:
-                print(e)
+            match ps.part_name:
+                case 'INA226':
+                    ps._sensor = INA226(ps.i2c_address, ps.i2c_bus)
+                case 'INA700':
+                    ps._sensor = INA700(ps.i2c_address, ps.i2c_bus)
+                case 'INA745A' | 'INA745B':
+                    ps._sensor = INA745x(ps.i2c_address, ps.i2c_bus)
+                case _:
+                    ps._sensor = None
 
             if ps._sensor is None:
                 self.logger.error(f"Sensor({ps.name}) device initialization is Failed.")
@@ -194,7 +191,7 @@ class PMIC(object):
     def GetVoltage(self, o):
         self.logger.debug("GetVoltage(0x{0:02x}@{1})".format(o.addr, o.i2c.devpath))
         data = {}
-        data['Voltage'] = round(o.read_voltage(), 4)
+        data['Voltage'] = o.read_voltage()
         return data
 
     def SetVoltage(self, o, val):
@@ -236,9 +233,9 @@ class PMIC(object):
 
     def GetSensorValues(self, s):
         self.logger.debug("GetSensorValues(0x{0:02x}@{1})".format(s.addr, s.i2c.devpath))
-        vbus = s.getBusVoltage()
-        current = s.getCurrent()
-        power = s.getPower()
+        vbus = round(s.getBusVoltage(), 4)
+        current = round(s.getCurrent(), 4)
+        power = round(s.getPower(), 4)
         return vbus, current, power
 
     def __del__(self):
