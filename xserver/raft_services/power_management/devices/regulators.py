@@ -63,6 +63,7 @@ class PMBusRegulator:
         self.page = page
         self.pmbus_vout_mode = pmbus_vout_mode
         self.phase = phase
+        self.vout_mode = 0
 
         match self.name:
             case 'TPS53681':
@@ -72,10 +73,7 @@ class PMBusRegulator:
                 self.vout_scaling = ScalingType.LINEAR16
 
         if self.pmbus_vout_mode <= 0:
-            #self.vout_exponent = -8
             self.vout_mode = 0x18 # 0x18 - 0x20 = -8
-        else:
-            self.vout_mode = self._get_vout_mode()
 
         # Initialize ALERT pin if provided
         self.alert_gpio = GPIO(alert_gpio_pin, "in") if alert_gpio_pin is not None else None
@@ -126,6 +124,7 @@ class PMBusRegulator:
         pm_print(f"set_voltage({value})")
         if self.page > 0:
             self._select_page()
+        self._get_vout_mode()
         raw_value = self._value_2_rawvalue(value, self.vout_scaling)
         self._write_word(PMBUS.VOUT_COMMAND, raw_value)
         pm_print("raw_value 0x{0:04x}".format(raw_value))
@@ -135,12 +134,13 @@ class PMBusRegulator:
         """Read and scale output voltage using READ_VOUT command."""
         if self.page >= 0:
             self._select_page()
+        self._get_vout_mode()
         raw_voltage = self._read_word(PMBUS.READ_VOUT)
         if not raw_voltage:
             return None
         else:
             pm_print("raw_voltage 0x{0:04x}".format(raw_voltage))
-            return self._rawvalue_2_value(raw_voltage, self.vout_scaling)
+            return round(self._rawvalue_2_value(raw_voltage, self.vout_scaling), 4)
 
     def read_current(self):
         """Read and scale output current using READ_IOUT command."""
@@ -194,10 +194,6 @@ class PMBusRegulator:
     def clear_faults(self):
         """Clear all recorded faults."""
         self._write_byte(PMBUS.CLEAR_FAULTS, 0x00)
-
-    def _get_vout_mode(self):
-        """Retrieve VOUT_MODE scaling exponent."""
-        return self._read_byte(PMBUS.VOUT_MODE)
 
     def _linear11_to_float(self, linear11):
         """ Convert a Linear11 formatted value to a float. """
@@ -319,7 +315,13 @@ class PMBusRegulator:
 
     def _select_page(self):
         """Set the PMBus page for output control."""
+        pm_print("set page to 0x{0:02x}".format(self.page))
         self._write_byte(PMBUS.PAGE, self.page)
+
+    def _get_vout_mode(self):
+        """Retrieve VOUT_MODE scaling exponent."""
+        self.vout_mode = self._read_byte(PMBUS.VOUT_MODE)
+        pm_print("raw_vout_mode 0x{0:02x}".format(self.vout_mode))
 
     def _write_word(self, command, value):
         try:
@@ -362,10 +364,12 @@ class MPSRegulator:
         """
         Initialize a MPS(MPM54) device with a specific page (output).
 
-        :param bus_number: I2C bus number (e.g., 1 for /dev/i2c-1)
+        :param device_path: I2C bus number (e.g., 1 for /dev/i2c-1)
         :param device_address: I2C address of the PMIC
-        :param page: PMBus page number corresponding to the output
-        :param alert_gpio_pin: Optional GPIO pin for PMBus ALERT (None if not used)
+        :param page: Page number corresponding to the output
+        :param phase: Phase number corresponding to the output
+        :param fb_ratio: Feedback Ratio corresponding to the output
+        :param alert_gpio_pin: Optional GPIO pin for ALERT (None if not used)
         """
         self.i2c = I2C(device_path)
         self.addr = int(device_address, 0)
@@ -413,7 +417,6 @@ class MPSRegulator:
 
     def shutdown_output(self):
         pm_print("shutdown_output")
-        """Disable output via OPERATION command."""
         OPERATION = 0x0D
         temp = self._read_byte(OPERATION)
         mask = 0
@@ -443,17 +446,15 @@ class MPSRegulator:
         return values
 
     def read_voltage(self):
-        """Read and scale output voltage using READ_VOUT command."""
         READ_VOUT = 0x12
         if self.page >= 0:
             READ_VOUT += self.page * 2
         raw_voltage = self._read_byte(READ_VOUT)
         pm_print("raw_voltage(0x{0:02x}) 0x{1:02x}".format(READ_VOUT, raw_voltage))
         voltage = ((raw_voltage * 16) / 1000) / self.fb_ratio # 16mV per LSB and mV to V
-        return voltage
+        return round(voltage, 4)
 
     def read_current(self):
-        """Read and scale output current using READ_IOUT command."""
         READ_IOUT = 0x13
         if self.page >= 0:
             READ_IOUT += self.page * 2
