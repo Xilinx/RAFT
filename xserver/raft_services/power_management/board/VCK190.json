@@ -4,7 +4,7 @@
 
 	"VCK190" : {
 		"FEATURE" : {
-			"List" : ["power", "powerdomain"]
+			"List" : ["voltage", "power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"VCCINT" : {
@@ -79,8 +79,8 @@
 				"Maximum_Current" : 500,
 				"Phase_Multiplier" : 1
 			},
-			"VCC_MIO" : {
-				"Name" : "VCC_MIO",
+			"VCCO_MIO" : {
+				"Name" : "VCCO_MIO",
 				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-6",
 				"I2C_Address" : "0x45",
@@ -107,7 +107,7 @@
 				"Phase_Multiplier" : 1
 			},
 			"VCC1V2_DDR4" : {
-				"Name" : "VCC_DDR4",
+				"Name" : "VCC1V2_DDR4",
 				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-6",
 				"I2C_Address" : "0x48",
@@ -178,7 +178,7 @@
 			},
 			"PD_PMC" : {
 				"Name" : "PMC",
-				"Rails" : ["VCC_PMC", "VCC_MIO", "VCCAUX_PMC"]
+				"Rails" : ["VCC_PMC", "VCCO_MIO", "VCCAUX_PMC"]
 			},
 			"PD_GTY" : {
 				"Name" : "GTY",
@@ -205,8 +205,8 @@
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : 0.0
 			},
-			"VOLTAGE_VCCINT_SOC" : {
-				"Name" : "VCCINT_SOC",
+			"VOLTAGE_VCC_SOC" : {
+				"Name" : "VCC_SOC",
 				"Part_Name" : "IR35215",
 				"Maximum_Volt" : 0.83,
 				"Typical_Volt" : 0.8,
@@ -391,6 +391,17 @@
 				"I2C_Address" : "0x4D",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : 3
+			},
+			"VOLTAGE_MGTYAVCCAUX" : {
+				"Name" : "MGTYVCCAUX",
+				"Part_Name" : "IRPS5401",
+				"Maximum_Volt" : 1.65,
+				"Typical_Volt" : 1.5,
+				"Minimum_Volt" : 1.35,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x4D",
+				"PMBus_VOUT_MODE" : 1,
+				"Page_Select" : 4
 			}
 		}
 	}
