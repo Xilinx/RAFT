@@ -125,12 +125,15 @@ class INA226(object):
             pm_print("register[0x{0:02x}] = 0x{1:04x}".format(index, reg_val))
         return registers
 
-    def writeRegisterValues(self, list_registers):
-        for reg in list_registers:
-            for k, v in reg.items():
-                pm_print(f"{k}:{v}")
-                #self._writeRegister(reg, v)
-        pass
+    def writeRegisterValues(self, reg_val):
+        pm_print("0x{0:04x}".format(reg_val[0]))
+        pm_print("0x{0:04x}".format(reg_val[1]))
+        pm_print("0x{0:04x}".format(reg_val[2]))
+        pm_print("0x{0:04x}".format(reg_val[3]))
+        self._writeRegister(INA226.CONFIGURATION, reg_val[0])
+        self._writeRegister(INA226.CALIBRATION, reg_val[1])
+        self._writeRegister(INA226.MASK_ENABLE, reg_val[2])
+        self._writeRegister(INA226.ALERT_LIMIT, reg_val[3])
 
     def _readRegister(self, register):
         val = 0

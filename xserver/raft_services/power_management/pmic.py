@@ -175,24 +175,13 @@ class PMIC(object):
         self.logger.debug(f"DisableVoltage({o.addr}@{o.i2c.devpath})")
         o.shutdown_output()
 
-    def GetRegulatorAll(self, o):
-        self.logger.debug(f"GetRegulatorAll({o.addr}@{o.i2c.devpath})")
-        data = {}
-        telemetry = o.read_telemetry_all()
-        data['vin'] = telemetry[0]
-        data['iin'] = telemetry[1]
-        data['vout'] = telemetry[2]
-        data['iout'] = telemetry[3]
-        data['temp'] = telemetry[4]
-        data['pout'] = telemetry[5]
-        data['pin'] = telemetry[6]
-        return data
+    def GetRegulator(self, o):
+        self.logger.debug(f"GetRegulator({o.addr}@{o.i2c.devpath})")
+        return o.read_telemetry_all()
 
     def GetVoltage(self, o):
         self.logger.debug("GetVoltage(0x{0:02x}@{1})".format(o.addr, o.i2c.devpath))
-        data = {}
-        data['Voltage'] = o.read_voltage()
-        return data
+        return o.read_voltage()
 
     def SetVoltage(self, o, val):
         self.logger.debug("SetVoltage(0x{0:02x}@{1}, {2})".format(o.addr, o.i2c.devpath, val))
@@ -214,22 +203,7 @@ class PMIC(object):
 
     def SetPowerSensorConf(self, s, data):
         self.logger.debug("SetPowerSensorConf(0x{0:02x}@{1})".format(s.addr, s.i2c.devpath))
-        list_regs = []
-        for reg in data:
-            for k, v in reg.items():
-                temp = None
-                match k:
-                    case 'Configuration':
-                        temp = {INA226.CONFIGURATION : v}
-                    case 'Calibration':
-                        temp = {INA226.CALIBRATION : v}
-                    case 'Mask_Enable':
-                        temp = {INA226.MASK_ENABLE : v}
-                    case 'Alert_Limit':
-                        temp = {INA226.ALERT_LIMIT : v}
-                if temp is not None:
-                    list_regs.append(temp)
-        s.writeRegisterValues(list_regs)
+        s.writeRegisterValues(data)
 
     def GetSensorValues(self, s):
         self.logger.debug("GetSensorValues(0x{0:02x}@{1})".format(s.addr, s.i2c.devpath))

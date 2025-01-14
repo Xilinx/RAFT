@@ -56,92 +56,106 @@ def pm_csv_dump(csv_data, columns_order, filepath, filename):
     except IOError:
         print(f"I/O error while opening {csv_file} to write")
 
+
+def print_response(response):
+    print(json.dumps(response, indent=2))
+
 def main():
     client = PM_Client()
 
     parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-    parser.add_argument("-c", "--command", required=True, choices=["boardinfo", "domains", "powervalue", "rails", "raildetail", "railvalue", "loglevel", "pstemp", "sysmon", "stats",
+    parser.add_argument("-c", "--command", required=True, choices=[
+                        "boardinfo", "domains", "powervalue", "allvalue", "rails", "railvalue",
                         "listpower", "getpower", "getcalpower", "getinaconf", "setinaconf",
                         "listvoltage", "enablevoltage", "disablevoltage", "getvoltage", "setvoltage", "setbootvoltage", "restorevoltage", "getregulator",
-                        "output-csv"],
+                        "loglevel", "sysmon",
+                        "output-csv",
+                        "listunits", "getunit", "availablescales", "setscale"],
                         help="Specify the command (boardinfo, domains, rails or railvalue ...)")
-
     args, remaining_args = parser.parse_known_args()
-
-    if args.command:
-        if args.command == "rails":
+    match args.command:
+        case "boardinfo":
+            print_response(client.GetBoardInfo())
+        case "domains":
+            print_response(client.ListPowerDomains())
+        case "powervalue":
+            print_response(client.GetPowersAll())
+        case "allvalue":
+            print_response(client.GetValuesAll())
+        case "rails":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
             if target_args.target:
-                print(json.dumps(client.GetRailsOfDomain(target_args.target)))
-
-        elif args.command == "railvalue":
+                print_response(client.ListRailsOfDomain(target_args.target))
+        case "railvalue":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
             if target_args.target:
-                print(json.dumps(client.GetValueOfRail(target_args.target)))
-        elif args.command == "raildetail":
-            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
-            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-            if target_args.target:
-                print(json.dumps(client.GetRailDetails(target_args.target)))
-
-        elif args.command == "boardinfo":
-            print(json.dumps(client.GetBoardInfo(), indent=2))
-
-        elif args.command == "domains":
-            print(json.dumps(client.GetPowerDomains(), indent=2))
-
-        elif args.command == "powervalue":
-            print(json.dumps(client.GetPowersAll(), indent=2))
-
-        elif args.command == "loglevel":
+                print_response(client.GetValueOfRail(target_args.target))
+        case "loglevel":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=False, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
             if target_args.target is None:
-                print(json.dumps(client.logger.level))
+                print_response(client.logger.level)
             else:
                 if target_args.target:
                     print(f"Target: {target_args.target}")
-
-        elif args.command == "sysmon":
-            print(json.dumps(client.GetSysmonTemperatures(), indent=2))
-
-        elif args.command == "pstemp":
-            print(json.dumps(client.GetPSTemperature(), indent=2))
-
-        elif args.command == "stats":
-            print(json.dumps(client.GetSystemStats(), indent=2))
-
-        elif args.command == "listpower":
-            print(json.dumps(client.ListPowerSensors(), indent=2))
-
-        elif args.command == "getpower":
+        case "sysmon":
+            print_response(client.GetSysmonTemperatures())
+        case "listpower":
+            print_response(client.ListPowerSensors())
+        case "getpower":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
             if target_args.target:
-                print(json.dumps(client.GetPowerSensor(target_args.target), indent=2))
-
-        elif args.command == "getcalpower":
+                print_response(client.GetPowerSensor(target_args.target))
+        case "getcalpower":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
             if target_args.target:
-                print(json.dumps(client.GetCalPowerSensor(target_args.target), indent=2))
-
-        elif args.command == "getinaconf":
+                print_response(client.GetCalPowerSensor(target_args.target))
+        case "getinaconf":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
             if target_args.target:
-                print(json.dumps(client.GetPowerSensorConf(target_args.target), indent=2))
-
-        elif args.command == "setinaconf":
+                print_response(client.GetPowerSensorConf(target_args.target))
+        case "setinaconf":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                value_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+                value_parser.add_argument('-l', '--list', type=json.loads, required=True, help="Specify the target")
+                value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
+                if value_args.list:
+                    print_response(client.SetPowerSensorConf(target_args.target, value_args.list))
+        case "listvoltage":
+            print_response(client.ListVoltages())
+        case "enablevoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print_response(client.EnableVoltage(target_args.target))
+        case "disablevoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print_response(client.DisableVoltage(target_args.target))
+        case "getvoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print_response(client.GetVoltage(target_args.target))
+        case "setvoltage":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
@@ -150,36 +164,8 @@ def main():
                 value_parser.add_argument("-v", "--value", required=True, help="Specify the target")
                 value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
                 if value_args.value:
-                    print(value_args.value)
-                    conf_data = json.loads(value_args.value)
-                    print(conf_data)
-                    print(json.dumps(client.SetPowerSensorConf(target_args.target, conf_data), indent=2))
-
-        elif args.command == "listvoltage":
-            print(json.dumps(client.ListVoltages(), indent=2))
-
-        elif args.command == "enablevoltage":
-            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
-            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-            if target_args.target:
-                print(json.dumps(client.EnableVoltage(target_args.target), indent=2))
-
-        elif args.command == "disablevoltage":
-            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
-            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-            if target_args.target:
-                print(json.dumps(client.DisableVoltage(target_args.target), indent=2))
-
-        elif args.command == "getvoltage":
-            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
-            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-            if target_args.target:
-                print(json.dumps(client.GetVoltage(target_args.target), indent=2))
-
-        elif args.command == "setvoltage":
+                    print_response(client.SetVoltage(target_args.target, round(float(value_args.value), 3)))
+        case "setbootvoltage":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
@@ -188,9 +174,34 @@ def main():
                 value_parser.add_argument("-v", "--value", required=True, help="Specify the target")
                 value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
                 if value_args.value:
-                    print(json.dumps(client.SetVoltage(target_args.target, round(float(value_args.value), 3)), indent=2))
-
-        elif args.command == "setbootvoltage":
+                    print_response(client.SetBootVoltage(target_args.target, round(float(value_args.value), 3)))
+        case "restorevoltage":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                    print_response(client.RestoreVoltage(target_args.target))
+        case "getregulator":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print_response(client.GetRegulator(target_args.target))
+        case "listunits":
+                print_response(client.ListUnits())
+        case "getunit":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print_response(client.GetUnit(target_args.target))
+        case "availablescales":
+            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
+            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
+            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
+            if target_args.target:
+                print_response(client.GetAvailableScales(target_args.target))
+        case "setscale":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
             target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
@@ -199,23 +210,8 @@ def main():
                 value_parser.add_argument("-v", "--value", required=True, help="Specify the target")
                 value_args, value_remining_args = value_parser.parse_known_args(target_remining_args)
                 if value_args.value:
-                    print(json.dumps(client.SetBootVoltage(target_args.target, round(float(value_args.value), 3)), indent=2))
-        
-        elif args.command == "restorevoltage":
-            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
-            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-            if target_args.target:
-                    print(json.dumps(client.RestoreVoltage(target_args.target), indent=2))
-        
-        elif args.command == "getregulator":
-            target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
-            target_parser.add_argument("-t", "--target", required=True, help="Specify the target")
-            target_args, target_remining_args = target_parser.parse_known_args(remaining_args)
-            if target_args.target:
-                print(json.dumps(client.GetRegulatorAll(target_args.target), indent=2))
-
-        elif args.command == "output-csv":
+                    print_response(client.SetScale(target_args.target, value_args.value))
+        case "output-csv":
             target_parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
             target_parser.add_argument("-d", "--duration", required=True, help="Specify the duration in seconds")
             target_parser.add_argument("-s", "--samplingrate", required=True, help="Specify the sampling rate")
@@ -235,18 +231,17 @@ def main():
             if not os.path.exists(filepath):
                 print(f"The path {filepath} is valid.")
                 sys.exit(1)
-
             # Find the sleep time from the sample rate
             sleeptime = 1/sample_rate
-
             csv_data = []
             # Mark the start time
             start_datetime = datetime.datetime.now()
             start_time = time.time()
             while True:
                 operation_start_time = time.time()
-                values = client.GetValuesAll()
-                csv_data, columns_order = update_csv_data(csv_data, values, sample_rate, duration)
+                ret = client.GetValuesAll()
+                if ret["status"] == "success":
+                    csv_data, columns_order = update_csv_data(csv_data, ret["data"], sample_rate, duration)
                 operation_exec_time = time.time() - operation_start_time
                 # If operation execution time is higher than sleep time, no need to sleep
                 if (sleeptime - operation_exec_time) > 0:
@@ -255,8 +250,7 @@ def main():
                     break
             filename = start_datetime.strftime(f"pmtool_s-{sample_rate}_d-{duration}_%Y-%m-%d_%H-%M-%S.csv")
             pm_csv_dump(csv_data, columns_order, filepath, filename)
-
-        else:
+        case _:
             args = parser.parse_args(remaining_args)
 
 if __name__ == "__main__":
