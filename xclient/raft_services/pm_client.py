@@ -117,6 +117,16 @@ class PM_Client(object):
         self.logger.debug("GetBoardInfo()")
         return self.PM.GetBoardInfo()
 
+    def ListFeature(self):
+        """
+        Gets feature list
+
+        :param : None
+        :return: Feature List
+        """
+        self.logger.debug("ListFeature()")
+        return self.PM.ListFeature()
+
     def ListPowerDomains(self):
         """
         Gets list of Power Domains.
