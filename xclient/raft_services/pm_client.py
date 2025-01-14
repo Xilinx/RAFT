@@ -274,8 +274,8 @@ class PM_Client(object):
         self.logger.debug("SetScale()")
         return self.PM.SetScale(quantity, scale)
 
-    def GetAvailableScales(self, quantity):
-        self.logger.debug("GetAvailableScales()")
-        return self.PM.GetAvailableScales(quantity)
+    def ListAvailableScales(self, quantity):
+        self.logger.debug("ListAvailableScales()")
+        return self.PM.ListAvailableScales(quantity)
 
 pm = PM_Client()

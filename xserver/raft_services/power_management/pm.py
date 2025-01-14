@@ -325,9 +325,9 @@ class PM(object):
         self.logger.info(f"SetBootVoltage({voltage_name}, {new_value})")
         return self.handle_request(self._set_boot_voltage, voltage_name, new_value)
 
-    def RestoreVoltage(self, voltage_name, new_value):
-        self.logger.info(f"SetVoltage({voltage_name}, {new_value})")
-        return self.handle_request(self._restore_voltage, voltage_name, new_value)
+    def RestoreVoltage(self, voltage_name):
+        self.logger.info(f"SetVoltage({voltage_name})")
+        return self.handle_request(self._restore_voltage, voltage_name)
 
     def GetSysmonTemperatures(self):
         self.logger.info(f"GetSysmonTemperatures()")
@@ -341,9 +341,9 @@ class PM(object):
         self.logger.info(f"GetUnit()")
         return self.handle_request(self._get_unit, quantity)
 
-    def GetAvailableScales(self, quantity):
-        self.logger.info(f"GetAvailableUnits()")
-        return self.handle_request(self._get_available_scales, quantity)
+    def ListAvailableScales(self, quantity):
+        self.logger.info(f"ListAvailableScales()")
+        return self.handle_request(self._list_available_scales, quantity)
 
     def SetScale(self, quantity, unit):
         self.logger.info(f"SetUnit()")
@@ -391,7 +391,7 @@ class PM(object):
             raise ValueError(f"Unsupported scale for {quantity}: {scale}")
         self.scales[quantity] = scale
     
-    def _get_available_scales(self, quantity):
+    def _list_available_scales(self, quantity):
         if self.scales is None:
             raise Exception(f'Unsupported feature: Enable "Units" in config')
         if quantity not in self.unit_config:
