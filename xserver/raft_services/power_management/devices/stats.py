@@ -242,7 +242,7 @@ class Stats(object):
             voltages["Voltage Info"]["AMS CTRL"].update({"VCC_PSINTFP_DDR": val})
         return voltages
 
-    def getTemperatures(self):
+    def GetTemperatures(self):
         temps = {"Temperature Info": {}}
         ret1, pl_temp = subprocess.getstatusoutput('cat ' + self.path2channel("in_temp20_input"))
         ret2, lpd_temp = subprocess.getstatusoutput('cat ' + self.path2channel('in_temp7_input'))
@@ -258,6 +258,6 @@ class Stats(object):
         status.update(self.getCpuUtilization())
         status.update(self.getCpuFrequencies())
         status.update(self.getMemoryUsage())
-        status.update(self.getTemperatures())
+        status.update(self.GetTemperatures())
         status.update(self.getVoltages())
         return status

@@ -9,7 +9,6 @@ import sys
 import logging
 import dbm.dumb
 
-
 RAFT_DIR = '/usr/share/raft/'
 sys.path.append(RAFT_DIR + 'xserver/utils')
 sys.path.append(RAFT_DIR + 'xserver/raft_services/power_management/devices')
@@ -20,12 +19,15 @@ from devices.sysmon import Sysmon
 from utils import get_python_log_levels
 from pm_types import *
 
+class HardwareError(Exception):
+    pass
 
 class PM(object):
     logger = None
     domains = []
     sensors = []
     voltages = []
+    scales = None
     pmic = None
     sysmon = None
     status = None
@@ -39,9 +41,42 @@ class PM(object):
         self.pdi_file = None
 
         if 'FEATURE' in board_data:
-            feature_list = board_data['FEATURE']['List']
+            self.feature_list = board_data['FEATURE']['List']
 
-        if 'powerdomain' in feature_list:
+        self.unit_config = {
+            "voltage": {
+                "base_unit": "V",
+                "available_scales": {
+                    "base": 1,
+                    "milli": 1e-3,
+                }
+            },
+            "current": {
+                "base_unit": "A",
+                "available_scales": {
+                    "base": 1,
+                    "milli": 1e-3,
+                    "micro": 1e-6,
+                }
+            },
+            "power": {
+                "base_unit": "W",
+                "available_scales": {
+                    "base": 1,
+                    "milli": 1e-3,
+                }
+            },
+            "temperature": {
+                "base_unit": "C",
+                "available_scales": {
+                    "base": 1,
+                    "milli": 1e-3,
+                }
+            }
+        }
+        self.scales = {param: "base" for param in self.unit_config}
+
+        if 'powerdomain' in self.feature_list:
             if 'POWER DOMAIN' in board_data:
                 for key, val in board_data['POWER DOMAIN'].items():
                     temp_d = Domain(**val)
@@ -52,19 +87,19 @@ class PM(object):
                                     temp_d.railnames[index] = v['Name']
                     self.domains.append(temp_d)
 
-        if 'power' in feature_list:
+        if 'power' in self.feature_list:
             if 'POWER_SENSORS' in board_data:
                 for k, v in board_data['POWER_SENSORS'].items():
                     temp_r = Rails(**v)
                     self.sensors.append(temp_r)
 
-        if 'voltage' in feature_list:
+        if 'voltage' in self.feature_list:
             if 'VOLTAGE' in board_data:
                 for k, v in board_data['VOLTAGE'].items():
                     tempVolt = Rails(**v)
                     self.voltages.append(tempVolt)
 
-        if 'temp' in feature_list:
+        if 'temp' in self.feature_list:
             if 'Temperature' in board_data:
                 if "versal-isa" in board_data['Temperature']['Sensor']:
                     try:
@@ -160,417 +195,472 @@ class PM(object):
             self.logger.setLevel(logging.CRITICAL)
         return
 
+    def handle_request(self, process_function, *args, **kwargs):
+        try:
+            data = process_function(*args, **kwargs)
+            return {
+                "status": "success",
+                "data": data,
+                "message": "Operation completed successfully."
+            }
+        except HardwareError as e:
+            return {
+                "status": "failure",
+                "data": None,
+                "message": f"Hardware error: {str(e)}"
+            }
+        except ValueError as e:
+            self.logger.error(f'{sys._getframe(1).f_code.co_name}{args} : {str(e)}')
+            return {
+                "status": "failure",
+                "data": None,
+                "message": f"Value error: {str(e)}"
+            }
+        except Exception as e:
+            self.logger.error(f'{sys._getframe(1).f_code.co_name}{args} : {str(e)}')
+            return {
+                "status": "failure",
+                "data": None,
+                "message": f"Unexpected error: {str(e)}"
+            }
+
+    # Call APIs
     def GetBoardInfo(self):
-        """
-        Gets Board's Info
+        self.logger.info(f"GetBoardInfo()")
+        return self.handle_request(self._get_board_info)
 
-        :param : None
-        :return: Board Info
-        """
-        data = {}
+    def ListPowerDomains(self):
+        self.logger.info(f"ListPowerSensors()")
+        return self.handle_request(self._list_power_domains)
+
+    def ListRailsOfDomain(self, domain_name):
+        self.logger.info(f"ListRailsOfDomain()")
+        return self.handle_request(self._list_rails_of_domain, domain_name)
+
+    def GetValueOfDomain(self, domain_name):
+        self.logger.info(f"GetValueOfDomain()")
+        return self.handle_request(self._get_value_of_domain, domain_name)
+
+    def GetPowersAll(self):
+        self.logger.info(f"GetPowersAll()")
+        return self.handle_request(self._get_powers_all)
+
+    def GetValuesAll(self):
+        self.logger.info(f"GetValuesAll()")
+        return self.handle_request(self._get_values_all)
+
+    """
+    Power Sensor APIs
+    """
+    def ListPowerSensors(self):
+        self.logger.info(f"ListPowerSensors()")
+        return self.handle_request(self._list_power_sensor)
+
+    def GetPowerSensor(self, sensor_name):
+        self.logger.info(f"GetPowerSensor({sensor_name})")
+        return self.handle_request(self._get_power_sensor, sensor_name)
+
+    def GetCalPowerSensor(self, sensor_name):
+        self.logger.info(f"GetCalPowerSensor({sensor_name})")
+        return self.handle_request(self._get_cal_power_sensor, sensor_name)
+
+    def GetPowerSensorConf(self, sensor_name):
+        self.logger.info(f"GetPowerSensorConf({sensor_name})")
+        return self.handle_request(self._get_power_sensor_conf, sensor_name)
+
+    def SetPowerSensorConf(self, sensor_name, conf):
+        self.logger.info(f"SetPowerSensorConf({sensor_name, conf})")
+        return self.handle_request(self._set_power_sensor_conf, sensor_name, conf)
+
+    """
+    Voltage Regulator APIs
+    """
+    def ListVoltages(self):
+        self.logger.info(f"ListVoltages")
+        return self.handle_request(self._list_voltages)
+
+    def EnableVoltage(self, voltage_name):
+        self.logger.info(f"EnableVoltage({voltage_name})")
+        return self.handle_request(self._enable_voltage, voltage_name)
+
+    def DisableVoltage(self, voltage_name):
+        self.logger.info(f"DisableVoltage({voltage_name})")
+        return self.handle_request(self._disable_voltage, voltage_name)
+
+    def GetRegulator(self, voltage_name):
+        self.logger.info(f"GetRegulator({voltage_name})")
+        return self.handle_request(self._get_regulator, voltage_name)
+
+    def GetVoltage(self, voltage_name):
+        self.logger.info(f"GetVoltage({voltage_name})")
+        return self.handle_request(self._get_voltage, voltage_name)
+
+    def SetVoltage(self, voltage_name, new_value):
+        self.logger.info(f"SetVoltage({voltage_name}, {new_value})")
+        return self.handle_request(self._set_voltage, voltage_name, new_value)
+
+    def SetBootVoltage(self, voltage_name, new_value):
+        self.logger.info(f"SetBootVoltage({voltage_name}, {new_value})")
+        return self.handle_request(self._set_boot_voltage, voltage_name, new_value)
+
+    def RestoreVoltage(self, voltage_name, new_value):
+        self.logger.info(f"SetVoltage({voltage_name}, {new_value})")
+        return self.handle_request(self._restore_voltage, voltage_name, new_value)
+
+    def GetSysmonTemperatures(self):
+        self.logger.info(f"GetSysmonTemperatures()")
+        return self.handle_request(self._get_temperatures)
+
+    def ListUnits(self):
+        self.logger.info(f"ListUnits()")
+        return self.handle_request(self._list_units)
+
+    def GetUnit(self, quantity):
+        self.logger.info(f"GetUnit()")
+        return self.handle_request(self._get_unit, quantity)
+
+    def GetAvailableScales(self, quantity):
+        self.logger.info(f"GetAvailableUnits()")
+        return self.handle_request(self._get_available_scales, quantity)
+
+    def SetScale(self, quantity, unit):
+        self.logger.info(f"SetUnit()")
+        return self.handle_request(self._set_scale, quantity, unit)
+
+    def _list_units(self):
+        if self.scales is None:
+            raise Exception(f'Unsupported feature: Enable "Units" in config')
+        return {
+            param: {
+                "current_scale": self.scales[param],
+                "current_unit": self._get_unit(param),
+                "available_scales": list(self.unit_config[param]["available_scales"].keys()),
+                "base_unit": self.unit_config[param]["base_unit"]
+            }
+            for param in self.unit_config
+        }
+
+    def _get_unit(self, quantity):
+        if self.scales is None:
+            raise Exception(f'Unsupported feature: Enable "Units" in config')
+        if quantity not in self.scales:
+            raise ValueError(f"Unsupported quantity: {quantity}")
+        scale = self.scales[quantity]
+        base_unit = self.unit_config[quantity]["base_unit"]
+
+        # Define prefixes for scales
+        scale_prefix_map = {
+            "base": "",
+            "milli": "m",
+            "micro": "µ",
+            "kilo": "k",
+        }
+
+        # Return the correctly formatted unit
+        prefix = scale_prefix_map.get(scale, "")
+        return f"{prefix}{base_unit}"
+
+    def _set_scale(self, quantity, scale):
+        if self.scales is None:
+            raise Exception(f'Unsupported feature: Enable "Units" in config')
+        if quantity not in self.unit_config:
+            raise ValueError(f"Unsupported quantity: {quantity}")
+        if scale not in self.unit_config[quantity]["available_scales"]:
+            raise ValueError(f"Unsupported scale for {quantity}: {scale}")
+        self.scales[quantity] = scale
+    
+    def _get_available_scales(self, quantity):
+        if self.scales is None:
+            raise Exception(f'Unsupported feature: Enable "Units" in config')
+        if quantity not in self.unit_config:
+            raise ValueError(f"Unsupported value: {quantity}")
+        return list(self.unit_config[quantity]["available_scales"].keys())
+
+    def _scale(self, value, quantity):
+        if value is None:
+            return value
+        if self.scales is None:
+            return value
+        if quantity not in self.scales:
+            raise ValueError(f"Unsupported value: {quantity}")
+        scale = self.scales[quantity]
+        factor = self.unit_config[quantity]["available_scales"][scale]
+        return round((value / factor), 3)
+
+    def _unscale(self, value, quantity):
+        if value is None:
+            return value
+        if self.scales is None:
+            return value
+        if quantity not in self.scales:
+            raise ValueError(f"Unsupported value: {quantity}")
+        scale = self.scales[quantity]
+        factor = self.unit_config[quantity]["available_scales"][scale]
+        return round((value * factor), 3)
+
+    ## Process functions
+    def _get_board_info(self):
         if self.boardeeprom is None:
-            data['Success'] = False
-            data['Message'] = f'Board Eeprom undefined'
+            raise ValueError(f'Board Eeprom undefined')
         else:
-            data = self.pmic.GetBoardInfo(self.boardeeprom, self.pdi_file)
-        return data
+            return self.pmic.GetBoardInfo(self.boardeeprom, self.pdi_file)
 
-    def GetPSTemperature(self):
-        """
-        Gets SysCtl's Temperature Info
-
-        :param : None
-        :return: SysCtl's Temperature Info
-        """
-        return self.status.getTemperatures()
-
-    def GetPowerDomains(self):
-        """
-        Gets list of Power Domains.
-
-        :param : None
-        :return: Domains
-        """
-        powerdomains = {}
-        powerdomains['POWER DOMAINS'] = []
-        for d in self.domains:
-            powerdomains['POWER DOMAINS'].append({'name': d.name})
-        return powerdomains
-
-    def _find_domain(self, domainname):
+    def __find_domain(self, domain_name):
         temp_d = None
         for d in self.domains:
-            if d.name == domainname:
+            if d.name == domain_name:
                 temp_d = d
         return temp_d
 
-    def GetRailsOfDomain(self, domainname):
-        """
-        Gets list of Rails given domain name.
-
-        :param domainname: string of a "domainname"
-        :return: Rails
-        """
-        data = {}
-        domain = self._find_domain(domainname)
-        if domain is None:
-            data['Success'] = False
-            data['Message'] = f'{domainname} does not exists'
-        else:
-            data[domainname] = []
-            for name in domain.railnames:
-                data[domainname].append({'name': name})
+    def _list_power_domains(self):
+        data = []
+        for d in self.domains:
+            data.append(d.name)
+        if len(data) == 0:
+            raise Exception(f'Power domains list is empty')
         return data
 
-    def GetValueOfDomain(self, domainname):
-        """
-        Gets the domain's all rail sensor values given domain name.
+    def _list_rails_of_domain(self, domain_name):
+        data = []
+        domain = self.__find_domain(domain_name)
+        if domain is None:
+            raise ValueError(f'{domain_name} does not exists')
+        else:
+            for railname in domain.railnames:
+                data.append(railname)
+            if len(data) == 0:
+                raise Exception(f'Rails list is empty')
+        return data
 
-        :param : string of a "domainname"
-        :return: The domain's all rails sensor values of the Rail
-        """
+    def _get_value_of_domain(self, domain_name):
         total_power = 0.0
         data = {}
-        domain = self._find_domain(domainname)
+        domain = self.__find_domain(domain_name)
         if domain is None:
-            data['Success'] = False
-            data['Message'] = f'{domainname} does not exists'
+            raise ValueError(f'{domain_name} does not exists')
         else:
-            data[domainname] = {}
-            data[domainname]['Rails'] = []
+            data[domain_name] = {}
+            data[domain_name]['Rails'] = []
             for railname in domain.railnames:
-                ps = self._find_power_sensor(railname)
-                if ps is not None:
+                ps = self.__find_power_sensor(railname)
+                if ps is None:
+                    raise Exception(f'{domain_name} sensor is not defined')
+                else:
                     v, i, p = self.pmic.GetSensorValues(ps._sensor)
                     rail_value = {
                         railname: {
-                        'Voltage': v,
-                        'Current': i,
-                        'Power': p
+                        'Voltage': self._scale(v, "voltage"),
+                        'Current': self._scale(i, "current"),
+                        'Power': self._scale(p, "power")
                         }
                     }
-                    data[domainname]['Rails'].append(rail_value)
-                    total_power += rail_value[railname]['Power']
-            data[domainname]['Total Power'] = round(total_power, 4)
+                    data[domain_name]['Rails'].append(rail_value)
+                    total_power += self._scale(rail_value[railname]['Power'], "power")
+            data[domain_name]['Total Power'] = total_power
         return data
 
-    def GetPowerValueOfDomain(self, domainname):
-        """
-        Gets the domain's power value given domain name.
-
-        :param : string of a "domainname"
-        :return: The domain's power value
-        """
+    def _get_power_value_of_domain(self, domain_name):
         domain_power = 0.0
         data = {}
-        domain = self._find_domain(domainname)
+        domain = self.__find_domain(domain_name)
         if domain is None:
-            data['Success'] = False
-            data['Message'] = f'{domainname} does not exists'
+            raise ValueError(f'{domain_name} does not exists')
         else:
-            data[domainname] = {}
+            data[domain_name] = {}
             domain_power = 0.0
             for railname in domain.railnames:
-                ps = self._find_power_sensor(railname)
-                if ps is not None:
+                ps = self.__find_power_sensor(railname)
+                if ps is None:
+                    raise Exception(f'{railname} sensor is not defined')
+                else:
                     _, _, p = self.pmic.GetSensorValues(ps._sensor)
-                    domain_power += p
-            data[domainname]['Power'] = domain_power
+                    domain_power += self._scale(p, "power")
+            data[domain_name]['Power'] = domain_power
         return data
 
-    def GetPowersAll(self):
-        """
-        Gets the boards's all domain's and total power values
-
-        :param : None
-        :return: The boards's all domain's and total power values
-        """
+    def _get_powers_all(self):
         data = {}
         data[self.board_name] = {}
         data[self.board_name]['Power Domains'] = []
         total_power = 0.0
         for domain in self.domains:
-            temp_p = self.GetPowerValueOfDomain(domain.name)
-            total_power += temp_p[domain.name]['Power']
+            temp_p = self._get_power_value_of_domain(domain.name)
+            total_power += self._scale(temp_p[domain.name]['Power'], "power")
             data[self.board_name]['Power Domains'].append(temp_p)
-        data[self.board_name]['Total Power'] = round(total_power, 4)
+        data[self.board_name]['Total Power'] = total_power
         return data
 
-    def GetValuesAll(self):
-        """
-        Gets the boards's all domain's rails sensor values
-
-        :param : None
-        :return: The board's all rails sensor values of the Rail
-        """
+    def _get_values_all(self):
         data = {}
         data[self.board_name] = []
         for domain in self.domains:
-            data[self.board_name].append(self.GetValueOfDomain(domain.name))
+            data[self.board_name].append(self._get_value_of_domain(domain.name))
         return data
 
-    def GetSysmonTemperatures(self):
-        data = {}
-        if self.sysmon is None:
-            data['Success'] = False
-            data['Message'] = f"Sysmon is not available."
-        else:
-            temp, minimum, max_max, min_min = self.sysmon.ReadSysmonTemperatures()
-            data['TEMP'] = temp
-            data['MIN'] = minimum
-            data['MAX_MAX'] = max_max
-            data['MIN_MIN'] = min_min
-        return data
-
-    def GetSystemStats(self):
-        data = {}
-        data = self.status.getLastStatus()
-        return data
-
-    def ListPowerSensors(self):
-        self.logger.info(f"ListPowerSensors()")
-        data = {}
-        list_ps = []
-        for s in self.pmic.power_sensors:
-            list_ps.append(s.name)
-        data['power_sensors'] = list_ps
-        return data
-
-    def _find_power_sensor(self, sensor_name):
+    def __find_power_sensor(self, sensor_name):
         temp_s = None
         for ps in self.pmic.power_sensors:
             if ps.name == sensor_name:
                 temp_s = ps
         return temp_s
-    
-    def _error_message(message_str):
-        data = {}
-        data['Success'] = False
-        data['Message'] = message_str
 
-    def GetPowerSensor(self, sensor_name):
-        self.logger.info(f"GetPowerSensor({sensor_name})")
-        data = {}
-        values = {}
-        ps = self._find_power_sensor(sensor_name)
+    def _list_power_sensor(self):
+        data = []
+        if len(self.pmic.power_sensors) == 0:
+            raise ValueError(f"Power Sensor list is empty")
+        for s in self.pmic.power_sensors:
+            data.append(s.name)
+        return data
+
+    def _get_power_sensor(self, sensor_name):
+        ps = self.__find_power_sensor(sensor_name)
         if ps is None:
-            data['Success'] = False
-            data['Message'] = f'{sensor_name} does not exits'
-            self.logger.error(f'GetPowerSensor({sensor_name}) does not exits')
+            raise ValueError(f'{sensor_name} does not exits')
         else:
             if ps._sensor is None:
-                data['Success'] = False
-                data['Message'] = f'{sensor_name} sensor is not defined'
-                self.logger.error(f'GetPowerSensor({sensor_name}) sensor is not defined')
+                raise Exception(f'{sensor_name} sensor is not defined')
             else:
                 v, i, p = self.pmic.GetSensorValues(ps._sensor)
-                values['Voltage'] = v
-                values['Current'] = i
-                values['Power'] = p
-                data[sensor_name] = values
+                data = {
+                    'Voltage' : self._scale(v, "voltage"),
+                    'Current' : self._scale(i, "current"),
+                    'Power' : self._scale(p, "power")
+                }
         return data
 
-    def GetPowerCalSensor(self, sensor_name):
-        data = {}
-        values = {}
-        ps = self._find_power_sensor(sensor_name)
+    def _get_cal_power_sensor(self, sensor_name):
+        ps = self.__find_power_sensor(sensor_name)
         if ps is None:
-            data['Success'] = False
-            data['Message'] = f'{sensor_name} does not exits'
-            self.logger.error(f'GetPowerCalSensor({sensor_name}) does not exits')
+            raise ValueError(f'{sensor_name} does not exits')
         else:
             if ps._sensor is None:
-                data['Success'] = False
-                data['Message'] = f'{sensor_name} sensor is not defined'
-                self.logger.error(f'GetPowerCalSensor({sensor_name}) sensor is not defined')
+                raise Exception(f'{sensor_name} sensor is not defined')
             else:
                 v, i, p = self.pmic.GetSensorValues(ps._sensor)
-                values['Voltage'] = v
-                values['Current'] = i
-                values['Power'] = p
-                data[sensor_name] = values
+                data = {
+                    'Voltage' : self._scale(v, "voltage"),
+                    'Current' : self._scale(i, "current"),
+                    'Power' : self._scale(p, "power")
+                }
         return data
 
-    def GetPowerSensorConf(self, sensor_name):
-        data = {}
-        ps = self._find_power_sensor(sensor_name)
+    def _get_power_sensor_conf(self, sensor_name):
+        ps = self.__find_power_sensor(sensor_name)
         if ps is None:
-            data['Success'] = False
-            data['Message'] = f'{sensor_name} does not exits'
-            self.logger.error(f'GetPowerSensorConf({sensor_name}) does not exits')
+            raise ValueError(f'{sensor_name} does not exits')
         else:
             if ps._sensor is None:
-                data['Success'] = False
-                data['Message'] = f'{sensor_name} sensor is not defined'
-                self.logger.error(f'GetPowerSensorConf({sensor_name}) sensor is not defined')
-            else:
-                data[sensor_name] = self.pmic.GetPowerSensorConf(ps._sensor)
-        return data
+                raise Exception(f'{sensor_name} sensor is not defined')
+        return self.pmic.GetPowerSensorConf(ps._sensor)
 
-    def SetPowerSensorConf(self, sensor_name, conf):
-        data = {}
-        ps = self._find_power_sensor(sensor_name)
+    def _set_power_sensor_conf(self, sensor_name, conf):
+        ps = self.__find_power_sensor(sensor_name)
         if ps is None:
-            data['Success'] = False
-            data['Message'] = f'{sensor_name} does not exits'
-            self.logger.error(f'SetPowerSensorConf({sensor_name}) does not exits')
+            raise ValueError(f'{sensor_name} does not exits')
         else:
             if ps._sensor is None:
-                data['Success'] = False
-                data['Message'] = f'{sensor_name} sensor is not defined'
-                self.logger.error(f'SetPowerSensorConf({sensor_name}) sensor is not defined')
-            else:
-                self.pmic.SetPowerSensorConf(ps._sensor, conf)
-                data['Success'] = True
-        return data
+                raise Exception(f'{sensor_name} sensor is not defined')
+        return self.pmic.SetPowerSensorConf(ps._sensor, conf)
 
-    def ListVoltages(self):
-        self.logger.info(f"ListVoltages")
-        data = {}
-        list_v = []
-        for v in self.pmic.voltages:
-            voltage = {}
-            voltage[v.name] = {
-                'typical_volt' : v.typical_volt
-            }
-            list_v.append(voltage)
-        data['voltages'] = list_v
-        return data
-
-    def _find_voltage(self, voltage_name):
+    def __find_voltage(self, voltage_name):
         temp_voltage = None
         for v in self.pmic.voltages:
             if v.name == voltage_name:
                 temp_voltage = v
         return temp_voltage
 
-    def EnableVoltage(self, voltage_name):
+    def _list_voltages(self):
+        if len(self.pmic.voltages) == 0:
+            raise ValueError(f"Voltage list is empty")
+        data = []
+        for v in self.pmic.voltages:
+            data.append({
+                v.name : {
+                    'typical_volt' : self._scale(v.typical_volt, "voltage")
+                }
+            })
+        return data
+
+    def _enable_voltage(self, voltage_name):
         self.logger.info(f"EnableVoltage({voltage_name})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'{voltage_name} does not exits')
+            raise ValueError(f'{voltage_name} does not exits')
         else:
             if v._output is None:
-                data['Success'] = False
-                data['Message'] = f'{voltage_name} regulator is not defined'
-                self.logger.error(f'EnableVoltage({voltage_name}) regulator is not defined')
+                raise Exception(f'{voltage_name} regulator is not defined')
             else:
                 self.pmic.EnableVoltage(v._output)
-                data['Success'] = True
-        return data
 
-    def DisableVoltage(self, voltage_name):
-        self.logger.info(f"DisableVoltage({voltage_name})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+    def _disable_voltage(self, voltage_name):
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'{voltage_name} does not exits')
+            raise ValueError(f'{voltage_name} does not exits')
         else:
             if v._output is None:
-                data['Success'] = False
-                data['Message'] = f'{voltage_name} regulator is not defined'
-                self.logger.error(f'DisableVoltage({voltage_name}) regulator is not defined')
+                raise Exception(f'{voltage_name} regulator is not defined')
             else:
                 self.pmic.DisableVoltage(v._output)
-                data['Success'] = True
-        return data
 
-    def GetRegulatorAll(self, voltage_name):
-        self.logger.info(f"GetRegulatorAll({voltage_name})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+    def _get_regulator(self, voltage_name):
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'{voltage_name} does not exits')
+            raise ValueError(f'{voltage_name} does not exits')
         else:
             if v._output is None:
-                data['Success'] = False
-                data['Message'] = f'{voltage_name} regulator is not defined'
-                self.logger.error(f'GetVoltage({voltage_name}) regulator is not defined')
+                raise Exception(f'{voltage_name} regulator is not defined')
             else:
-                data[voltage_name] = self.pmic.GetRegulatorAll(v._output)
+                regulator_vals = self.pmic.GetRegulator(v._output)
+                data = {
+                    "vin" : self._scale(regulator_vals[0], "voltage"),
+                    "iin" : self._scale(regulator_vals[1], "current"),
+                    "vout" : self._scale(regulator_vals[2], "voltage"),
+                    "iout" : self._scale(regulator_vals[3], "current"),
+                    "temp" : self._scale(regulator_vals[4], "temperature"),
+                    "pout" : self._scale(regulator_vals[5], "power"),
+                    "pin" : self._scale(regulator_vals[6], "power"),
+                }
         return data
 
-    def GetVoltage(self, voltage_name):
-        self.logger.info(f"GetVoltage({voltage_name})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+    def _get_voltage(self, voltage_name):
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'{voltage_name} does not exits')
+            raise ValueError(f'{voltage_name} does not exits')
         else:
             if v._output is None:
-                data['Success'] = False
-                data['Message'] = f'{voltage_name} pmbus regulator is not defined'
-                self.logger.error(f'GetVoltage({voltage_name}) pmbus regulator is not defined')
+                raise Exception(f'{voltage_name} regulator is not defined')
             else:
-                data[voltage_name] = self.pmic.GetVoltage(v._output)
+                data = {"Voltage" : self._scale(self.pmic.GetVoltage(v._output), "voltage")}
         return data
 
-    def SetVoltage(self, voltage_name, new_value):
-        self.logger.info(f"SetVoltage({voltage_name}, {new_value})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+    def _set_voltage(self, voltage_name, new_value):
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'SetVoltage({voltage_name}, {new_value}) {voltage_name} does not exits')
-            return data
+            raise ValueError(f'{voltage_name} does not exits')
         else:
-            if new_value < v.minimum_volt:
-                data['Success'] = False
-                data['Message'] = f'asked value({new_value}) below minimum({v.minimum_volt}) for {v.name}'
-                self.logger.error(f'SetVoltage({voltage_name}, {new_value}) asked value below minimum({v.minimum_volt})')
-                return data
-            elif new_value > v.maximum_volt:
-                data['Success'] = False
-                data['Message'] = f'asked value({new_value}) above maximum({v.maximum_volt}) for {v.name}'
-                self.logger.error(f'SetVoltage({voltage_name}, {new_value}) asked value above maximum({v.maximum_volt})')
-                return data
+            if new_value < self._scale(v.minimum_volt, "voltage"):
+                raise ValueError(f'asked value({new_value}) below minimum({self._scale(v.minimum_volt, "voltage")}) for {v.name}')
+            elif new_value > self._scale(v.maximum_volt, "voltage"):
+                raise ValueError(f'asked value({new_value}) above maximum({self._scale(v.maximum_volt, "voltage")}) for {v.name}')
             else:
                 if v._output is None:
-                    data['Success'] = False
-                    data['Message'] = f'{voltage_name} pmbus regulator is not defined'
-                    self.logger.error(f'GetVoltage({voltage_name}) pmbus regulator is not defined')
-                    return data
+                    raise Exception(f'{voltage_name} regulator is not defined')
                 else:
-                    self.pmic.SetVoltage(v._output, new_value)
-                    data['Success'] = True
-        return data
+                    self.pmic.SetVoltage(v._output, self._unscale(new_value, "voltage"))
 
-    def SetBootVoltage(self, voltage_name, boot_value):
+    def _set_boot_voltage(self, voltage_name, boot_value):
         self.logger.info(f"SetBootVoltage({voltage_name}, {boot_value})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'SetBootVoltage({voltage_name}, {boot_value}) {voltage_name} does not exits')
-            return data
+            raise ValueError(f'{voltage_name} does not exits')
         else:
-            if boot_value < v.minimum_volt:
-                data['Success'] = False
-                data['Message'] = f'asked value({boot_value}) below minimum({v.minimum_volt}) for {v.name}'
-                self.logger.error(f'SetBootVoltage({voltage_name}, {boot_value}) asked value({boot_value}) below minimum({v.minimum_volt})')
-                return data
-            elif boot_value > v.maximum_volt:
-                data['Success'] = False
-                data['Message'] = f'asked value({boot_value}) above maximum({v.maximum_volt}) for {v.name}'
-                self.logger.error(f'SetBootVoltage({voltage_name}, {boot_value}) asked value({boot_value}) above maximum({v.maximum_volt})')
-                return data
+            if boot_value < self._scale(v.minimum_volt, "voltage"):
+                raise ValueError(f'asked value({boot_value}) below minimum({self._scale(v.minimum_volt, "voltage")}) for {v.name}')
+            elif boot_value > self._scale(v.maximum_volt, "voltage"):
+                raise ValueError(f'asked value({boot_value}) above maximum({self._scale(v.maximum_volt, "voltage")}) for {v.name}')
             else:
                 if v._output is None:
-                    data['Success'] = False
-                    data['Message'] = f'{voltage_name} pmbus regulator is not defined'
-                    self.logger.error(f'SetBootVoltage({voltage_name}, {boot_value}) pmbus regulator is not defined')
-                    return data
+                    raise Exception(f'{voltage_name} regulator is not defined')
 
         directory = os.path.dirname(RAFT_DIR + '.raft/')
         if directory and not os.path.exists(directory):
@@ -579,40 +669,41 @@ class PM(object):
 
         try:
             with dbm.dumb.open(bootvoltage_path, 'c') as db:
-                db[voltage_name] = "{:.3f}".format(round(boot_value, 3))
-                data['Success'] = True
+                db[voltage_name] = "{:.3f}".format(round(self._unscale(boot_value, "voltage"), 3))
         except Exception as err:
-            self.logger.error(f'SetBootVoltage({voltage_name}, {boot_value}) unknown error as {err}')
-            data['Success'] = False
-            data['Message'] = f"Unknown error: {err}"
+            raise Exception(f"Unknown error: {err}")
         finally:
             db.sync()
             db.close()
-        return data
 
-    def RestoreVoltage(self, voltage_name):
+    def _restore_voltage(self, voltage_name):
         self.logger.info(f"RestoreVoltage({voltage_name})")
-        data = {}
-        v = self._find_voltage(voltage_name)
+        v = self.__find_voltage(voltage_name)
         if v is None:
-            data['Success'] = False
-            data['Message'] = f'{voltage_name} does not exits'
-            self.logger.error(f'RestoreVoltage({voltage_name}) {voltage_name} does not exits')
+            raise ValueError(f'{voltage_name} does not exits')
         else:
-            self.SetVoltage(voltage_name, v.typical_volt)
+            self._set_voltage(voltage_name, self._scale(v.typical_volt, "voltage"))
             directory = os.path.dirname(RAFT_DIR + '.raft/')
             bootvoltage_path = os.path.join(directory, 'bootvoltage')
             try:
                 with dbm.dumb.open(bootvoltage_path, 'w') as db:
                     del db[voltage_name]
-                    data['Success'] = True
             except KeyError:
-                self.logger.error(f"RestoreVoltage({voltage_name}) voltage is not in bootvoltage list")
-                data['Success'] = False
-                data['Message'] = f"{voltage_name} voltage is not in bootvoltage list"
+                raise Exception(f"{voltage_name} voltage is not in bootvoltage list")
             finally:
                 db.sync()
                 db.close()
+
+    def _get_temperatures(self):
+        data = {}
+        if self.sysmon is None:
+            raise ValueError(f'Sysmon is not available')
+        else:
+            temp, minimum, max_max, min_min = self.sysmon.ReadSysmonTemperatures()
+            data['TEMP'] = self._scale(temp, "temperature")
+            data['MIN'] = self._scale(minimum, "temperature")
+            data['MAX_MAX'] = self._scale(max_max, "temperature")
+            data['MIN_MIN'] = self._scale(min_min, "temperature")
         return data
 
     def __del__(self):

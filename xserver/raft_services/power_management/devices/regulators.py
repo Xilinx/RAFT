@@ -320,6 +320,8 @@ class PMBusRegulator:
 
     def _get_vout_mode(self):
         """Retrieve VOUT_MODE scaling exponent."""
+        if self.pmbus_vout_mode <= 0:
+            return
         self.vout_mode = self._read_byte(PMBUS.VOUT_MODE)
         pm_print("raw_vout_mode 0x{0:02x}".format(self.vout_mode))
 

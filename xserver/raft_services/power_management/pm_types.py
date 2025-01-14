@@ -64,3 +64,18 @@ class Domain:
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
             sort_keys=True, indent=4)
+
+class Unit:
+    def __init__(self, base_unit, available_scales):
+        self.base_unit = base_unit
+        self.available_scales = available_scales
+        self.current_unit = None
+        self.quantity = None
+
+    def __str__(self):
+        str_info = {
+            k: v
+            for k, v in self.__dict__.items()
+            if k and v
+        }
+        return str(str_info)

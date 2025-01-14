@@ -117,36 +117,25 @@ class PM_Client(object):
         self.logger.debug("GetBoardInfo()")
         return self.PM.GetBoardInfo()
 
-    def GetPowerDomains(self):
+    def ListPowerDomains(self):
         """
         Gets list of Power Domains.
 
         :param : None
         :return: Domains
         """
-        self.logger.debug("GetPowerDomains()")
-        return self.PM.GetPowerDomains()
+        self.logger.debug("ListPowerDomains()")
+        return self.PM.ListPowerDomains()
 
-    def GetRailsOfDomain(self, domainname):
+    def ListRailsOfDomain(self, domainname):
         """
         Gets list of Rails given domain name.
 
         :param domainname: string of a "domainname"
-        :return: Rails
+        :return: Rails name list
         """
-        self.logger.debug("GetRailsOfDomain()")
-        return self.PM.GetRailsOfDomain(domainname)
-
-    def GetRailDetails(self, railname):
-        """
-        Gets list of the rail's details given rail name.
-
-        :param railname: string of a "railname"
-        :return: Details of the Rail
-        """
-        self.logger.debug(f"GetRailDetails({railname})")
-        return  self.PM.GetPowerSensorConf(railname)
-
+        self.logger.debug("ListRailsOfDomain()")
+        return self.PM.ListRailsOfDomain(domainname)
 
     def GetValueOfRail(self, railname):
         """
@@ -198,26 +187,6 @@ class PM_Client(object):
         self.logger.debug("GetSysmonTemperatures()")
         return self.PM.GetSysmonTemperatures()
 
-    def GetPSTemperature(self):
-        """
-        Gets the PS temperature value
-
-        :param : None
-        :return: The PS temperature value
-        """
-        self.logger.debug("GetPSTemperature()")
-        return self.PM.GetPSTemperature()
-
-    def GetSystemStats(self):
-        """
-        Get the System Status value
-
-        :param : None
-        :return: The System Status value
-        """
-        self.logger.debug("GetSystemStats()")
-        return self.PM.GetSystemStats()
-
     def ListPowerSensors(self):
         self.logger.debug("ListPowerSensors()")
         return self.PM.ListPowerSensors()
@@ -250,9 +219,9 @@ class PM_Client(object):
         self.logger.debug("DisableVoltage()")
         return self.PM.DisableVoltage(name)
 
-    def GetRegulatorAll(self, name):
-        self.logger.debug("GetRegulatorAll()")
-        return self.PM.GetRegulatorAll(name)
+    def GetRegulator(self, name):
+        self.logger.debug("GetRegulator()")
+        return self.PM.GetRegulator(name)
 
     def GetVoltage(self, name):
         self.logger.debug("GetVoltage()")
@@ -282,5 +251,21 @@ class PM_Client(object):
         """
         self.logger.debug("RestoreVoltage()")
         return self.PM.RestoreVoltage(name)
+
+    def ListUnits(self):
+        self.logger.debug("ListUnits()")
+        return self.PM.ListUnits()
+
+    def GetUnit(self, quantity):
+        self.logger.debug("GetUnit()")
+        return self.PM.GetUnit(quantity)
+
+    def SetScale(self, quantity, scale):
+        self.logger.debug("SetScale()")
+        return self.PM.SetScale(quantity, scale)
+
+    def GetAvailableScales(self, quantity):
+        self.logger.debug("GetAvailableScales()")
+        return self.PM.GetAvailableScales(quantity)
 
 pm = PM_Client()

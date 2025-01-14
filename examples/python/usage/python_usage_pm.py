@@ -60,83 +60,67 @@ if (sys.argv[1] == 'xclient'):
     #handle.SetClientLogLevel(PythonLogLevels["DEBUG"])
 
 
-print(f'######## BOARD INFO ########')
+def print_response(response):
+    if ret['status'] == 'success':
+        print(json.dumps(ret['data'], indent=2))
+    else:
+        print(json.dumps(ret['message'], indent=2))
+
+def print_header(section_name):
+    print(f'\n######## {section_name} ########')
+
 #Description:
 #   Gets Board info.
 #Input Arguments:
 #
 #Return:
-#   ret:BoardInfo in Json format.
+#   ret:BoardInfo in dict format.
 ret = handle.GetBoardInfo()
 print(json.dumps(ret, indent=2))
-print(f'#################################')
 
-print(f'######## LIST OF DOMAINS ########')
 
+print_header("LIST OF DOMAINS")
 #Description:
-#   Gets Power domains list.
+#   Lists Power domains .
 #Input Arguments:
 #   None
 #Return:
-#   ret: Power Domains in Json format.
-ret = handle.GetPowerDomains()
+#   ret: Power Domains List.
+ret = handle.ListPowerDomains()
 print(json.dumps(ret, indent=2))
-print(f'#################################')
 
 
-print(f'######## LIST OF "PLD" RAILS ########')
-domain_name = "FPD"
-
+print_header('LIST OF "FPD" RAILS')
 #Description:
 #   Gets Rail list of asked domain
 #Input Arguments:
 #   domain_name: Domain Name
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.GetRailsOfDomain(domain_name)
+ret = handle.ListRailsOfDomain("FPD")
 print(json.dumps(ret, indent=2))
-print(f'#####################################')
 
-print(f'######## DETAILS OF "VCCINT_PSFP" RAIL ########')
-rail_name = "VCCINT_PSFP"
-
-#Description:
-#   Gets rail details.
-#Input Arguments:
-#   rail_name: Rail Name
-#Return:
-#   ret: List of rails for asked domain.
-ret = handle.GetRailDetails(rail_name)
-print(json.dumps(ret, indent=2))
-print(f'###########################################')
-
-print(f'######## VALUES OF "VCCINT_PSFP" RAIL ########')
-rail_name = "VCCINT_PSFP"
-
+print_header('VALUES OF "VCCINT_PSFP" RAIL')
 #Description:
 #   Gets power/sensor values of a rail.
 #Input Arguments:
 #   rail_name: Rail Name
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.GetValueOfRail(rail_name)
+ret = handle.GetValueOfRail("VCCINT_PSFP")
 print(json.dumps(ret, indent=2))
-print(f'##########################################')
 
-print(f'######## VALUES OF "PLD" DOMAIN ########')
-domain_name = "PLD"
-
+print_header(f'######## VALUES OF "PLD" DOMAIN ########')
 #Description:
 #   Gets power/sensor values of a domain.
 #Input Arguments:
 #   rail_name: Domain Name
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.GetValueOfDomain(domain_name)
+ret = handle.GetValueOfDomain("PLD")
 print(json.dumps(ret, indent=2))
-print(f'########################################')
 
-print(f'######## GET ALL DOMAINS POWER VALUES AT ONCE ##########')
+print_header(f'######## GET ALL DOMAINS POWER VALUES AT ONCE ##########')
 #Description:
 #   Gets domains and total power values of the board.
 #Input Arguments:
@@ -145,9 +129,8 @@ print(f'######## GET ALL DOMAINS POWER VALUES AT ONCE ##########')
 #   ret: List of power values of the board.
 ret = handle.GetPowersAll()
 print(json.dumps(ret, indent=2))
-print(f'########################################')
 
-print(f'######## GET ALL DOMAINS VALUES AT ONCE ##########')
+print_header(f'######## GET ALL DOMAINS VALUES AT ONCE ##########')
 #Description:
 #   Gets power/sensor values of the board.
 #Input Arguments:
@@ -156,10 +139,8 @@ print(f'######## GET ALL DOMAINS VALUES AT ONCE ##########')
 #   ret: List of rails for asked domain.
 ret = handle.GetValuesAll()
 print(json.dumps(ret, indent=2))
-print(f'########################################')
 
-
-print(f'######## GET SYSMON TEMPERATURE VALUES ##########')
+print_header(f'######## GET SYSMON TEMPERATURE VALUES ##########')
 #Description:
 #   Gets sysmon temperature values of Versal.
 #Input Arguments:
@@ -168,39 +149,37 @@ print(f'######## GET SYSMON TEMPERATURE VALUES ##########')
 #   ret: Sysmon Temperature values
 ret = handle.GetSysmonTemperatures()
 print(json.dumps(ret, indent=2))
-print(f'########################################')
 
-
-print(f'######## GET PS TEMPERATURE VALUE ##########')
+print_header(f'######## LIST VOLTAGES ##########')
 #Description:
-#   Gets PS temperature value of Versal.
+#   Gets sysmon temperature values of Versal.
 #Input Arguments:
 #   None
 #Return:
-#   ret: PS Temperature values.
-ret = handle.GetPSTemperature()
+#   ret: Sysmon Temperature values
+ret = handle.ListVoltages()
 print(json.dumps(ret, indent=2))
-print(f'########################################')
 
 
-print(f'######## GET SYSTEM STATS ##########')
-ret = handle.GetSystemStats()
+print_header(f'######## GET "VCCINT" VOLTAGES ##########')
+#Description:
+#   Gets sysmon temperature values of Versal.
+#Input Arguments:
+#   None
+#Return:
+#   ret: Sysmon Temperature values
+ret = handle.GetVoltage("VCCINT")
 print(json.dumps(ret, indent=2))
-print(f'########################################')
 
-
-print(f'######## LIST VOLTAGES ##########')
-voltages = handle.ListVoltages()
-print(json.dumps(voltages, indent=2))
-print(f'#################################')
-
-
-print(f'######## GET ALL VOLTAGES ##########')
-for voltage in voltages['voltages']:
-    for k, v in voltage.items():
-        ret = handle.GetVoltage(k)
-        print(json.dumps(ret, indent=2))
-print(f'###################################')
+print_header(f'######## GET "VCC_SOC" REGULATOR ##########')
+#Description:
+#   Gets sysmon temperature values of Versal.
+#Input Arguments:
+#   None
+#Return:
+#   ret: Sysmon Temperature values
+ret = handle.GetRegulator("VCC_SOC")
+print(json.dumps(ret, indent=2))
 
 
 
