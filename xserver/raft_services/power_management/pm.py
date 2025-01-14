@@ -197,6 +197,23 @@ class PM(object):
 
     def handle_request(self, process_function, *args, **kwargs):
         try:
+            caller_name = sys._getframe(1).f_code.co_name.lower()
+            if 'voltage' in caller_name:
+                if 'voltage' not in self.feature_list:
+                    raise Exception(f"Unsupported feature: voltage")
+            if 'regulator' in caller_name:
+                if 'voltage' not in self.feature_list:
+                    raise Exception(f"Unsupported feature: voltage")
+            if 'power' in caller_name:
+                if 'power' not in self.feature_list:
+                    raise Exception(f"Unsupported feature: power")
+            if 'temp' in caller_name:
+                if 'temperature' not in self.feature_list:
+                    raise Exception(f"Unsupported feature: temperature")
+            if 'domain' in caller_name:
+                if 'powerdomain' not in self.feature_list:
+                    raise Exception(f"Unsupported feature: powerdomain")
+
             data = process_function(*args, **kwargs)
             return {
                 "status": "success",
@@ -228,6 +245,11 @@ class PM(object):
     def GetBoardInfo(self):
         self.logger.info(f"GetBoardInfo()")
         return self.handle_request(self._get_board_info)
+
+    def ListFeature(self):
+        self.logger.info(f"GetBoardInfo()")
+        return self.handle_request(self._list_feature)
+
 
     def ListPowerDomains(self):
         self.logger.info(f"ListPowerSensors()")
@@ -404,6 +426,11 @@ class PM(object):
             raise ValueError(f'Board Eeprom undefined')
         else:
             return self.pmic.GetBoardInfo(self.boardeeprom, self.pdi_file)
+
+    def _list_feature(self):
+        if len(self.feature_list) == 0:
+            raise ValueError(f"Feature list is empty")
+        return self.feature_list
 
     def __find_domain(self, domain_name):
         temp_d = None

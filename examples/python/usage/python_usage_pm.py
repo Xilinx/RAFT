@@ -78,6 +78,14 @@ def print_header(section_name):
 ret = handle.GetBoardInfo()
 print(json.dumps(ret, indent=2))
 
+#Description:
+#   Lists feature info.
+#Input Arguments:
+#
+#Return:
+#   ret:Features in list format.
+ret = handle.ListFeature()
+print(json.dumps(ret, indent=2))
 
 print_header("LIST OF DOMAINS")
 #Description:

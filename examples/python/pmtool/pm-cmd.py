@@ -65,7 +65,7 @@ def main():
 
     parser = argparse.ArgumentParser(description="Power Management Client Module CLI")
     parser.add_argument("-c", "--command", required=True, choices=[
-                        "boardinfo", "domains", "powervalue", "allvalue", "rails", "railvalue",
+                        "boardinfo", "listfeature", "domains", "powervalue", "allvalue", "rails", "railvalue",
                         "listpower", "getpower", "getcalpower", "getinaconf", "setinaconf",
                         "listvoltage", "enablevoltage", "disablevoltage", "getvoltage", "setvoltage", "setbootvoltage", "restorevoltage", "getregulator",
                         "loglevel", "sysmon",
@@ -76,6 +76,8 @@ def main():
     match args.command:
         case "boardinfo":
             print_response(client.GetBoardInfo())
+        case "listfeature":
+            print_response(client.ListFeature())
         case "domains":
             print_response(client.ListPowerDomains())
         case "powervalue":
