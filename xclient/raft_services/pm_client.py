@@ -107,87 +107,97 @@ class PM_Client(object):
             self.logger.setLevel(logging.CRITICAL)
         return
 
-    def GetBoardInfo(self):
+    def getboardinfo(self):
         """
         Gets Board's Info
 
         :param : None
         :return: Board Info
         """
-        self.logger.debug("GetBoardInfo()")
+        self.logger.debug("getboardinfo()")
         return self.PM.GetBoardInfo()
 
-    def ListFeature(self):
+    def listfeature(self):
         """
         Gets feature list
 
         :param : None
         :return: Feature List
         """
-        self.logger.debug("ListFeature()")
+        self.logger.debug("listfeature()")
         return self.PM.ListFeature()
 
-    def ListPowerDomains(self):
+    def listpowerdomain(self):
         """
         Gets list of Power Domains.
 
         :param : None
         :return: Domains
         """
-        self.logger.debug("ListPowerDomains()")
+        self.logger.debug("listpowerdomain()")
         return self.PM.ListPowerDomains()
 
-    def ListRailsOfDomain(self, domainname):
+    def listrailsofdomain(self, domainname):
         """
         Gets list of Rails given domain name.
 
         :param domainname: string of a "domainname"
         :return: Rails name list
         """
-        self.logger.debug("ListRailsOfDomain()")
+        self.logger.debug("listrailsofdomain()")
         return self.PM.ListRailsOfDomain(domainname)
 
-    def GetValueOfRail(self, railname):
+    def getvalueofrail(self, railname):
         """
         Gets list of the rail's sensor values given rail name.
 
         :param railname: string of a "railname"
         :return: Sensor values of the Rail
         """
-        self.logger.debug(f"GetValueOfRail({railname})")
+        self.logger.debug(f"getvalueofrail({railname})")
         return self.PM.GetPowerSensor(railname)
 
-    def GetValueOfDomain(self, domainname):
+    def getvalueofdomain(self, domainname):
         """
         Gets the domain's all rail sensor values given domain name.
 
         :param : string of a "domainname"
         :return: The domain's all rails sensor values of the Rail
         """
-        self.logger.debug("GetValueOfDomain({domainname})")
+        self.logger.debug("getvalueofdomain({domainname})")
         return self.PM.GetValueOfDomain(domainname)
 
-    def GetPowersAll(self):
+    def getpowerall(self):
         """
         Gets the boards's all domain's and total power values
 
         :param : None
         :return: The boards's all domain's and total power values
         """
-        self.logger.debug("GetPowersAll()")
+        self.logger.debug("getpowerall()")
         return self.PM.GetPowersAll()
 
-    def GetValuesAll(self):
+    def getvalueall(self):
         """
         Gets the boards's all domain's rails sensor values
 
         :param : None
         :return: The board's all rails sensor values of the Rail
         """
-        self.logger.debug("GetValuesAll()")
+        self.logger.debug("getvalueall()")
         return self.PM.GetValuesAll()
 
-    def GetSysmonTemperatures(self):
+    def listtemperature(self):
+        """
+        Gets the Sysmon temperature values
+
+        :param : None
+        :return: The sysmon temperature values
+        """
+        self.logger.debug("listtemperature()")
+        return self.PM.ListTemperatures()
+
+    def gettemperature(self, name):
         """
         Gets the Sysmon temperature values
 
@@ -195,53 +205,53 @@ class PM_Client(object):
         :return: The sysmon temperature values
         """
         self.logger.debug("GetSysmonTemperatures()")
-        return self.PM.GetSysmonTemperatures()
+        return self.PM.GetTemperature(name)
 
-    def ListPowerSensors(self):
+    def listpower(self):
         self.logger.debug("ListPowerSensors()")
         return self.PM.ListPowerSensors()
 
-    def GetPowerSensor(self, name):
+    def getpower(self, name):
         self.logger.debug("GetPowerSensor()")
         return self.PM.GetPowerSensor(name)
 
-    def GetCalPowerSensor(self, name):
+    def getcalpower(self, name):
         self.logger.debug("GetCalPowerSensor()")
         return self.PM.GetCalPowerSensor(name)
 
-    def GetPowerSensorConf(self, name):
+    def getpowerconf(self, name):
         self.logger.debug("GetPowerSensorConf()")
         return self.PM.GetPowerSensorConf(name)
 
-    def SetPowerSensorConf(self, name, conf):
+    def setpowerconf(self, name, conf):
         self.logger.debug("SetPowerSensorConf()")
         return self.PM.SetPowerSensorConf(name, conf)
 
-    def ListVoltages(self):
+    def listvoltage(self):
         self.logger.debug("ListVoltages()")
         return self.PM.ListVoltages()
 
-    def EnableVoltage(self, name):
+    def enablevoltage(self, name):
         self.logger.debug("EnableVoltage()")
         return self.PM.EnableVoltage(name)
 
-    def DisableVoltage(self, name):
+    def disablevoltage(self, name):
         self.logger.debug("DisableVoltage()")
         return self.PM.DisableVoltage(name)
 
-    def GetRegulator(self, name):
+    def getregulator(self, name):
         self.logger.debug("GetRegulator()")
         return self.PM.GetRegulator(name)
 
-    def GetVoltage(self, name):
+    def getvoltage(self, name):
         self.logger.debug("GetVoltage()")
         return self.PM.GetVoltage(name)
 
-    def SetVoltage(self, name, value):
+    def setvoltage(self, name, value):
         self.logger.debug("SetVoltage()")
         return self.PM.SetVoltage(name, value)
 
-    def SetBootVoltage(self, name, value):
+    def setbootvoltage(self, name, value):
         """
         Set boot voltage for the regulator.
 
@@ -252,7 +262,7 @@ class PM_Client(object):
         self.logger.debug("SetBootVoltage()")
         return self.PM.SetBootVoltage(name, value)
 
-    def RestoreVoltage(self, name):
+    def restorevoltage(self, name):
         """
         Reset to typical voltage.
 
@@ -262,19 +272,19 @@ class PM_Client(object):
         self.logger.debug("RestoreVoltage()")
         return self.PM.RestoreVoltage(name)
 
-    def ListUnits(self):
+    def listunit(self):
         self.logger.debug("ListUnits()")
         return self.PM.ListUnits()
 
-    def GetUnit(self, quantity):
+    def getunit(self, quantity):
         self.logger.debug("GetUnit()")
         return self.PM.GetUnit(quantity)
 
-    def SetScale(self, quantity, scale):
+    def setscale(self, quantity, scale):
         self.logger.debug("SetScale()")
         return self.PM.SetScale(quantity, scale)
 
-    def ListAvailableScales(self, quantity):
+    def listscale(self, quantity):
         self.logger.debug("ListAvailableScales()")
         return self.PM.ListAvailableScales(quantity)
 
