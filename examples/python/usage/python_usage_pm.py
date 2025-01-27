@@ -75,7 +75,7 @@ def print_header(section_name):
 #
 #Return:
 #   ret:BoardInfo in dict format.
-ret = handle.GetBoardInfo()
+ret = handle.getboardinfo()
 print(json.dumps(ret, indent=2))
 
 #Description:
@@ -84,7 +84,7 @@ print(json.dumps(ret, indent=2))
 #
 #Return:
 #   ret:Features in list format.
-ret = handle.ListFeature()
+ret = handle.listfeature()
 print(json.dumps(ret, indent=2))
 
 print_header("LIST OF DOMAINS")
@@ -94,7 +94,7 @@ print_header("LIST OF DOMAINS")
 #   None
 #Return:
 #   ret: Power Domains List.
-ret = handle.ListPowerDomains()
+ret = handle.listpowerdomain()
 print(json.dumps(ret, indent=2))
 
 
@@ -105,7 +105,7 @@ print_header('LIST OF "FPD" RAILS')
 #   domain_name: Domain Name
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.ListRailsOfDomain("FPD")
+ret = handle.listrailsofdomain("FPD")
 print(json.dumps(ret, indent=2))
 
 print_header('VALUES OF "VCCINT_PSFP" RAIL')
@@ -115,7 +115,7 @@ print_header('VALUES OF "VCCINT_PSFP" RAIL')
 #   rail_name: Rail Name
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.GetValueOfRail("VCCINT_PSFP")
+ret = handle.getvalueofrail("VCCINT_PSFP")
 print(json.dumps(ret, indent=2))
 
 print_header(f'######## VALUES OF "PLD" DOMAIN ########')
@@ -125,7 +125,7 @@ print_header(f'######## VALUES OF "PLD" DOMAIN ########')
 #   rail_name: Domain Name
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.GetValueOfDomain("PLD")
+ret = handle.getvalueofdomain("PLD")
 print(json.dumps(ret, indent=2))
 
 print_header(f'######## GET ALL DOMAINS POWER VALUES AT ONCE ##########')
@@ -135,7 +135,7 @@ print_header(f'######## GET ALL DOMAINS POWER VALUES AT ONCE ##########')
 #   None
 #Return:
 #   ret: List of power values of the board.
-ret = handle.GetPowersAll()
+ret = handle.getpowerall()
 print(json.dumps(ret, indent=2))
 
 print_header(f'######## GET ALL DOMAINS VALUES AT ONCE ##########')
@@ -145,17 +145,27 @@ print_header(f'######## GET ALL DOMAINS VALUES AT ONCE ##########')
 #   None
 #Return:
 #   ret: List of rails for asked domain.
-ret = handle.GetValuesAll()
+ret = handle.getvalueall()
 print(json.dumps(ret, indent=2))
 
-print_header(f'######## GET SYSMON TEMPERATURE VALUES ##########')
+print_header(f'######## LIST TEMPERATURES ##########')
+#Description:
+#   List temperature s names.
+#Input Arguments:
+#   None
+#Return:
+#   ret: List Temperature devices
+ret = handle.listtemperature()
+print(json.dumps(ret, indent=2))
+
+print_header(f'######## GET TEMPERATURE of "Versal" ##########')
 #Description:
 #   Gets sysmon temperature values of Versal.
 #Input Arguments:
 #   None
 #Return:
-#   ret: Sysmon Temperature values
-ret = handle.GetSysmonTemperatures()
+#   ret: Versal's Temperature values
+ret = handle.gettemperature('Versal')
 print(json.dumps(ret, indent=2))
 
 print_header(f'######## LIST VOLTAGES ##########')
@@ -165,7 +175,7 @@ print_header(f'######## LIST VOLTAGES ##########')
 #   None
 #Return:
 #   ret: Sysmon Temperature values
-ret = handle.ListVoltages()
+ret = handle.listvoltage()
 print(json.dumps(ret, indent=2))
 
 
@@ -176,7 +186,7 @@ print_header(f'######## GET "VCCINT" VOLTAGES ##########')
 #   None
 #Return:
 #   ret: Sysmon Temperature values
-ret = handle.GetVoltage("VCCINT")
+ret = handle.getvoltage("VCCINT")
 print(json.dumps(ret, indent=2))
 
 print_header(f'######## GET "VCC_SOC" REGULATOR ##########')
@@ -186,7 +196,7 @@ print_header(f'######## GET "VCC_SOC" REGULATOR ##########')
 #   None
 #Return:
 #   ret: Sysmon Temperature values
-ret = handle.GetRegulator("VCC_SOC")
+ret = handle.getregulator("VCC_SOC")
 print(json.dumps(ret, indent=2))
 
 

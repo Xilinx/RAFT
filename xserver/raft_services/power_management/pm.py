@@ -29,7 +29,7 @@ class PM(object):
     voltages = []
     scales = None
     pmic = None
-    sysmon = None
+    temps = []
     status = None
     pdi_file = ""
 
@@ -103,7 +103,12 @@ class PM(object):
             if 'Temperature' in board_data:
                 if "versal-isa" in board_data['Temperature']['Sensor']:
                     try:
-                        self.sysmon = Sysmon(None, None, Sysmon_Device_Type.SYSFS)
+                        temp_s = {
+                            "Name" : board_data['Temperature']['Name'],
+                            "Sensor" : Sysmon(None, None, Sysmon_Device_Type.SYSFS)
+                        }
+                        if temp_s is not None:
+                            self.temps.append(temp_s)
                     except Exception as e:
                         print(e)
                 elif "i2c" in board_data['Temperature']['Sensor']:
@@ -111,7 +116,12 @@ class PM(object):
                     address = tokens[3]
                     device_path = "/dev/i2c-" + tokens[2]
                     try:
-                        self.sysmon = Sysmon(address, device_path, Sysmon_Device_Type.I2C)
+                        temp_s = {
+                            "Name" : board_data['Temperature']['Name'],
+                            "Sensor" : Sysmon(address,device_path, Sysmon_Device_Type.I2C)
+                            }
+                        if temp_s is not None:
+                            self.temps.append(temp_s)
                     except Exception as e:
                         print(e)
 
@@ -208,7 +218,7 @@ class PM(object):
                 if 'power' not in self.feature_list:
                     raise Exception(f"Unsupported feature: power")
             if 'temp' in caller_name:
-                if 'temperature' not in self.feature_list:
+                if 'temp' not in self.feature_list:
                     raise Exception(f"Unsupported feature: temperature")
             if 'domain' in caller_name:
                 if 'powerdomain' not in self.feature_list:
@@ -329,9 +339,13 @@ class PM(object):
         self.logger.info(f"SetVoltage({voltage_name})")
         return self.handle_request(self._restore_voltage, voltage_name)
 
-    def GetSysmonTemperatures(self):
-        self.logger.info(f"GetSysmonTemperatures()")
-        return self.handle_request(self._get_temperatures)
+    def ListTemperatures(self):
+        self.logger.info(f"ListTemperatures()")
+        return self.handle_request(self._list_temperatures)
+
+    def GetTemperature(self, temp_name):
+        self.logger.info(f"GetSysmonTemperature()")
+        return self.handle_request(self._get_temperature, temp_name)
 
     def ListUnits(self):
         self.logger.info(f"ListUnits()")
@@ -721,12 +735,30 @@ class PM(object):
                 db.sync()
                 db.close()
 
-    def _get_temperatures(self):
+    def __find_temperature(self, temp_name):
+        temp = None
+        for v in self.temps:
+            if v['Name'] == temp_name:
+                temp = v
+        return temp
+
+    def _list_temperatures(self):
+        self.logger.info(f"ListTemperatures()")
+        data = []
+        if len(self.temps) == 0:
+            raise ValueError(f"Temperature list is empty")
+        for s in self.temps:
+            data.append(s['Name'])
+        return data
+
+    def _get_temperature(self, temp_name):
+        self.logger.info(f"GetTemperature()")
         data = {}
-        if self.sysmon is None:
-            raise ValueError(f'Sysmon is not available')
+        v = self.__find_temperature(temp_name)
+        if v is None:
+            raise ValueError(f'{temp_name} does not exits')
         else:
-            temp, minimum, max_max, min_min = self.sysmon.ReadSysmonTemperatures()
+            temp, minimum, max_max, min_min = v['Sensor'].ReadSysmonTemperatures()
             data['TEMP'] = self._scale(temp, "temperature")
             data['MIN'] = self._scale(minimum, "temperature")
             data['MAX_MAX'] = self._scale(max_max, "temperature")
