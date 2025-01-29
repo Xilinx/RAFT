@@ -3,7 +3,7 @@
 
 	"VEK385": {
 		"FEATURE": {
-			"List" : ["temp", "power", "powerdomain"]
+			"List" : ["temp", "voltage", "power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"VCC_LPD" : {
@@ -211,308 +211,308 @@
 			"VCC_USB2_504": {
 				"Name": "VCC_USB2_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x12",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCIO_USB2_504": {
 				"Name": "VCCIO_USB2_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 3.67,
 				"Typical_Volt": 3.3,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 2.97,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x15",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCO_50X": {
 				"Name": "VCCO_50X",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.98,
 				"Typical_Volt": 1.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.62,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x1A",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"GTYP_AVCCAUX": {
 				"Name": "GTYP_AVCCAUX",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.65,
 				"Typical_Volt": 1.5,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.35,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x1C",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"GTYP_AVTT": {
 				"Name": "GTYP_AVTT",
 				"Part_Name": "MPQ2285",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.32,
 				"Typical_Volt": 1.2,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.08,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x1D",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCC_SOC_IO": {
 				"Name": "VCC_SOC_IO",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x22",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 0,
 				"Phase" : 2
 			},
 			"VCCO_7XX_LP5": {
 				"Name": "VCCO_7XX_LP5",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.1,
 				"Typical_Volt": 1.0,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.9,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x22",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 1,
 				"Phase" : 1
 			},
 			"VCC_MMD": {
 				"Name": "VCC_MMD",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x22",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 2,
 				"Phase" : 1
 			},
 			"VCCINT": {
 				"Name": "VCCINT",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x23",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 0,
 				"Phase" : 4
 			},
 			"VCC_FPD": {
 				"Name": "VCC_FPD",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.968,
 				"Typical_Volt": 0.88,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.792,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x23",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 1,
 				"Phase" : 1
 			},
 			"VCC_LPD": {
 				"Name": "VCC_LPD",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.968,
 				"Typical_Volt": 0.88,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.792,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x23",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 2,
 				"Phase" : 1
 			},
 			"VCC_AIE": {
 				"Name": "VCC_AIE",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x24",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 0,
 				"Phase" : 4
 			},
 			"GTYP_AVCC": {
 				"Name": "GTYP_AVCC",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1,
 				"Typical_Volt": 0.92,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.83,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x24",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 1,
 				"Phase" : 1
 			},
 			"VCC_RAM": {
 				"Name": "VCC_RAM",
 				"Part_Name": "MPQ72963",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-11",
 				"I2C_Address": "0x24",
-				"PMBus_VOUT_MODE": 1,
+				"PMBus_VOUT_MODE": 0,
 				"Page_Select": 2,
 				"Phase" : 1
 			},
 			"VCCAUX": {
 				"Name": "VCCAUX",
 				"Part_Name": "MPQ2285",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.65,
 				"Typical_Volt": 1.5,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.35,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x01",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VADJ_FMC": {
 				"Name": "VADJ_FMC",
 				"Part_Name": "MPQ2285",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.32,
 				"Typical_Volt": 1.2,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.08,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x02",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"LP5_VDDH_1V05": {
 				"Name": "LP5_VDDH_1V05",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.15,
 				"Typical_Volt": 1.05,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.95,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x03",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"LP5_VDDQ_0V5": {
 				"Name": "LP5_VDDQ_0V5",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.55,
 				"Typical_Volt": 0.5,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.45,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x04",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCC_MIPI_507": {
 				"Name": "VCC_MIPI_507",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x1E",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCIO_MIPI_507": {
 				"Name": "VCCIO_MIPI_507",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.32,
 				"Typical_Volt": 1.2,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.08,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x1F",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCC_PAUX_504": {
 				"Name": "VCC_PAUX_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x13",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCC_USB3_504": {
 				"Name": "VCC_USB3_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 0.72,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x14",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCREG_USB2_504": {
 				"Name": "VCCREG_USB2_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 3.6,
 				"Typical_Volt": 3.3,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 3,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x16",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCIO_PAUX_504": {
 				"Name": "VCCIO_PAUX_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.98,
 				"Typical_Volt": 1.8,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.62,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x17",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCIO_USB3_504": {
 				"Name": "VCCIO_USB3_504",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.32,
 				"Typical_Volt": 1.2,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.08,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x18",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCAUX_LPD": {
 				"Name": "VCCAUX_LPD",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 1.65,
 				"Typical_Volt": 1.5,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 1.35,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x19",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			},
 			"VCCO_40X": {
 				"Name": "VCCO_40X",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": -1,
+				"Maximum_Volt": 3.6,
 				"Typical_Volt": 3.3,
-				"Minimum_Volt": -1,
+				"Minimum_Volt": 3,
 				"I2C_Bus": "/dev/i2c-12",
 				"I2C_Address": "0x1B",
 				"PMBus_VOUT_MODE": 1,
-				"Page_Select": 0
+				"Page_Select": -1
 			}
 		},
 		"Temperature": {

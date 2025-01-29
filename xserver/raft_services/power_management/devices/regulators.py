@@ -20,6 +20,7 @@ class PMBUS(IntEnum):
     VOUT_COMMAND =  0x21
     VOUT_MAX =      0X24
     VOUT_MIN =      0x2B
+    VOUT_SCALE_LOOP = 0x29
     STATUS_BYTE =   0x79
     STATUS_WORD =   0x79
     STATUS_VOUT =   0x7A
@@ -69,6 +70,10 @@ class PMBusRegulator:
             case 'TPS53681':
                 self.vout_scaling = ScalingType.VID
                 self.temp_scaling = ScalingType.LINEAR11
+            case 'MPQ2283' | 'MPQ2285':
+                self.vout_scaling = ScalingType.DIRECT
+                self.iout_scaling = None
+                self.temp_scaling = None
             case _:
                 self.vout_scaling = ScalingType.LINEAR16
 
@@ -120,22 +125,33 @@ class PMBusRegulator:
         self._write_byte(PMBUS.OPERATION, 0x00)
 
     def set_voltage(self, value):
-        self.shutdown_output()
         pm_print(f"set_voltage({value})")
-        if self.page > 0:
-            self._select_page()
-        self._get_vout_mode()
-        raw_value = self._value_2_rawvalue(value, self.vout_scaling)
-        self._write_word(PMBUS.VOUT_COMMAND, raw_value)
-        pm_print("raw_value 0x{0:04x}".format(raw_value))
-        self.enable_output()
+        if self.name in ("MPQ2283", "MPQ2285"):
+            raw_value = self._value_2_rawvalue(value, self.vout_scaling)
+            pm_print("raw_value 0x{0:02x}".format(raw_value))
+            self._write_byte(PMBUS.VOUT_COMMAND, raw_value)
+        else:
+            self.shutdown_output()
+            if self.page > 0:
+                self._select_page()
+            self._get_vout_mode()
+            raw_value = self._value_2_rawvalue(value, self.vout_scaling)
+            self._write_word(PMBUS.VOUT_COMMAND, raw_value)
+            pm_print("raw_value 0x{0:04x}".format(raw_value))
+            self.enable_output()
 
     def read_voltage(self):
         """Read and scale output voltage using READ_VOUT command."""
+        pm_print(f"read_voltage()")
+        if not self.vout_scaling:
+            return None
         if self.page >= 0:
             self._select_page()
         self._get_vout_mode()
-        raw_voltage = self._read_word(PMBUS.READ_VOUT)
+        if self.name in ("MPQ2283", "MPQ2285"):
+            raw_voltage = self._read_byte(PMBUS.VOUT_COMMAND)
+        else:
+            raw_voltage = self._read_word(PMBUS.READ_VOUT)
         if not raw_voltage:
             return None
         else:
@@ -144,6 +160,8 @@ class PMBusRegulator:
 
     def read_current(self):
         """Read and scale output current using READ_IOUT command."""
+        if not self.iout_scaling:
+            return None
         if self.page >= 0:
             self._select_page()
         if self.phase > 0:
@@ -157,7 +175,7 @@ class PMBusRegulator:
 
     def read_temperature(self):
         """Read and scale output temperature using READ_TEMPERATURE_1 command."""
-        if self.temp_scaling is None:
+        if not self.temp_scaling:
             return None
         if self.page >= 0:
             self._select_page()
@@ -222,6 +240,14 @@ class PMBusRegulator:
             value = 0.25 + (raw_value - 1) * 0.005  # XmV, fix this !
         return value
 
+    def _direct_to_float(self, raw_value):
+        if self.name in ("MPQ2283", "MPQ2285"):
+            VOUT_SL = self._read_byte(PMBUS.VOUT_SCALE_LOOP) + 1
+            value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
+        else:
+            value = 0 # implement !
+        return value
+
     def _float_to_vid_mode(self, value):
         vid_mode = self.vout_mode & 0x0F
         value *= 1000
@@ -265,6 +291,15 @@ class PMBusRegulator:
         if exponent >= 0x10:
             exponent -= 0x20
         return round((value / (2 ** exponent)))
+
+    def _float_to_direct(self, value):
+        if self.name in ("MPQ2283", "MPQ2285"):
+            VOUT_SL = self._read_byte(PMBUS.VOUT_SCALE_LOOP) + 1
+            raw_value = ((value / VOUT_SL) - 206.25e-3) / 6.25e-3
+            #value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
+        else:
+            raw_value = 0 # implement !
+        return round(raw_value)
 
     def _value_2_rawvalue(self, value, scaling):
         match scaling:
