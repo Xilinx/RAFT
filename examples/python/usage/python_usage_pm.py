@@ -155,17 +155,17 @@ print_header(f'######## LIST TEMPERATURES ##########')
 #   None
 #Return:
 #   ret: List Temperature devices
-ret = handle.listtemperature()
-print(json.dumps(ret, indent=2))
+list_temp = handle.listtemperature()
+print(json.dumps(list_temp, indent=2))
 
-print_header(f'######## GET TEMPERATURE of "Versal" ##########')
+print_header(f'######## GET TEMPERATURE of {list_temp['data'][0]} ##########')
 #Description:
 #   Gets sysmon temperature values of Versal.
 #Input Arguments:
 #   None
 #Return:
 #   ret: Versal's Temperature values
-ret = handle.gettemperature('Versal')
+ret = handle.gettemperature(list_temp['data'][0])
 print(json.dumps(ret, indent=2))
 
 print_header(f'######## LIST VOLTAGES ##########')
