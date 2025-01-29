@@ -106,7 +106,8 @@ def main():
                 if target_args.target:
                     print(f"Target: {target_args.target}")
         case "sysmon":
-            print_response(client.gettemperature('Versal'))
+            list_temp = client.listtemperature()
+            print_response(client.gettemperature(list_temp['data'][0]))
         case "listpower":
             print_response(client.listpower())
         case "getpower":
