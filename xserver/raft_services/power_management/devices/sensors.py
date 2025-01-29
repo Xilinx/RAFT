@@ -233,6 +233,8 @@ class INA7XX(object):
 
     def getCurrent(self):
         current = self._readRegister(INA7XX.CURRENT)
+        if current & 0x8000:
+            current -= 0x10000
         current *= self.current_lsb
         return current
 

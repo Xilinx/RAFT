@@ -550,7 +550,12 @@ class PM(object):
         if len(self.pmic.power_sensors) == 0:
             raise ValueError(f"Power Sensor list is empty")
         for s in self.pmic.power_sensors:
-            data.append(s.name)
+            temp = {
+                s.name : {
+                    "Device" : s.part_name
+                }
+            }
+            data.append(temp)
         return data
 
     def _get_power_sensor(self, sensor_name):
