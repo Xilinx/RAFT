@@ -497,7 +497,7 @@ class PM(object):
                     }
                     data[domain_name]['Rails'].append(rail_value)
                     total_power += self._scale(rail_value[railname]['Power'], "power")
-            data[domain_name]['Total Power'] = total_power
+            data[domain_name]['Total Power'] = round(total_power, 3)
         return data
 
     def _get_power_value_of_domain(self, domain_name):
@@ -528,7 +528,7 @@ class PM(object):
             temp_p = self._get_power_value_of_domain(domain.name)
             total_power += self._scale(temp_p[domain.name]['Power'], "power")
             data[self.board_name]['Power Domains'].append(temp_p)
-        data[self.board_name]['Total Power'] = total_power
+        data[self.board_name]['Total Power'] = round(total_power, 3)
         return data
 
     def _get_values_all(self):
