@@ -133,7 +133,7 @@ def main():
                 arguments={"sensor_name": {"type": str, "help": "Specify the power sensor name (e.g., VCCINT, VCCSOC)"}})
     add_command("setinaconf", "Set INA configuration", power_action,
                 arguments={"sensor_name": {"type": str, "help": "Specify the power sensor name (e.g., VCCINT, VCCSOC)"},
-                            "value": {"type": lambda arg: list(map(int, arg.split(' '))), "help": "Set INA configuration value in decimal values e.g., '1 2 3 4'"}})
+                            "value": {"type": lambda arg: [int(token) if token.isdigit() else None if token.lower() == 'x' else token for token in arg.split(' ')], "help": "Set INA configuration value in decimal values e.g., '1 2 3 4'"}})
 
     add_command("listvoltage", "List available voltage regulators", voltage_action)
     add_command("enablevoltage", "Enable a specific voltage regulator output", voltage_action,

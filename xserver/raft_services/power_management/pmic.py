@@ -191,17 +191,7 @@ class PMIC(object):
 
     def GetPowerSensorConf(self, s):
         self.logger.debug("GetPowerSensorConf(0x{0:02x}@{1})".format(s.addr, s.i2c.devpath))
-        data = {}
-        registers = s.readRegisterValues()
-        data['Configuration'] = '0x{0:04x}'.format(registers[INA226.CONFIGURATION])
-        data['Shunt_Voltage'] = '0x{0:04x}'.format(registers[INA226.SHUNT_VOLTAGE])
-        data['Bus_Voltage'] =   '0x{0:04x}'.format(registers[INA226.BUS_VOLTAGE])
-        data['Power'] = '0x{0:04x}'.format(registers[INA226.POWER])
-        data['Current'] = '0x{0:04x}'.format(registers[INA226.CURRENT])
-        data['Calibration'] = '0x{0:04x}'.format(registers[INA226.CALIBRATION])
-        data['Mask_Enable'] = '0x{0:04x}'.format(registers[INA226.MASK_ENABLE])
-        data['Alert_Limit'] = '0x{0:04x}'.format(registers[INA226.ALERT_LIMIT])
-        return data
+        return s.readRegisterValues()
 
     def SetPowerSensorConf(self, s, data):
         self.logger.debug("SetPowerSensorConf(0x{0:02x}@{1})".format(s.addr, s.i2c.devpath))
