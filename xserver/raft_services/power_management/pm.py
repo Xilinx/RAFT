@@ -597,7 +597,35 @@ class PM(object):
         else:
             if ps._sensor is None:
                 raise Exception(f'{sensor_name} sensor is not defined')
-        return self.pmic.GetPowerSensorConf(ps._sensor)
+        registers = self.pmic.GetPowerSensorConf(ps._sensor)
+        data = {}
+        match ps.part_name:
+            case "INA226":
+                data['Configuration'] = '0x{0:04x}'.format(registers[0])
+                data['Shunt_Voltage'] = '0x{0:04x}'.format(registers[1])
+                data['Bus_Voltage'] =   '0x{0:04x}'.format(registers[2])
+                data['Power'] = '0x{0:04x}'.format(registers[3])
+                data['Current'] = '0x{0:04x}'.format(registers[4])
+                data['Calibration'] = '0x{0:04x}'.format(registers[5])
+                data['Mask_Enable'] = '0x{0:04x}'.format(registers[6])
+                data['Alert_Limit'] = '0x{0:04x}'.format(registers[7])
+            case "INA700" | "INA745A" | "INA745B":
+                data['Configuration'] = '0x{0:04x}'.format(registers[0])
+                data['ADC_Configuration'] = '0x{0:04x}'.format(registers[1])
+                data['Bus_Voltage'] =   '0x{0:04x}'.format(registers[2])
+                data['Die_Temp'] = '0x{0:04x}'.format(registers[3])
+                data['Current'] = '0x{0:04x}'.format(registers[4])
+                data['Power'] = '0x{0:04x}'.format(registers[5])
+                data['Diag_Alert'] = '0x{0:04x}'.format(registers[6])
+                data['Current_OL'] = '0x{0:04x}'.format(registers[7])
+                data['Current_UL'] = '0x{0:04x}'.format(registers[8])
+                data['Voltage_OL'] = '0x{0:04x}'.format(registers[9])
+                data['Voltage_UL'] = '0x{0:04x}'.format(registers[10])
+                data['Temp_Limit'] = '0x{0:04x}'.format(registers[11])
+                data['Power_Limit'] = '0x{0:04x}'.format(registers[12])
+            case _:
+                raise ValueError(f"{ps.part_name} Unknown part name for power sensor")
+        return data
 
     def _set_power_sensor_conf(self, sensor_name, conf):
         ps = self.__find_power_sensor(sensor_name)
@@ -606,6 +634,15 @@ class PM(object):
         else:
             if ps._sensor is None:
                 raise Exception(f'{sensor_name} sensor is not defined')
+        match ps.part_name:
+            case "INA226":
+                print(conf)
+                if len(conf) < 4:
+                    raise ValueError(f"{conf} register value list is wrong")
+            case "INA700" | "INA745A" | "INA745B":
+                print(conf)
+                if len(conf) < 5:
+                    raise ValueError(f"{conf} register value list is wrong")
         return self.pmic.SetPowerSensorConf(ps._sensor, conf)
 
     def __find_voltage(self, voltage_name):

@@ -126,14 +126,18 @@ class INA226(object):
         return registers
 
     def writeRegisterValues(self, reg_val):
-        pm_print("0x{0:04x}".format(reg_val[0]))
-        pm_print("0x{0:04x}".format(reg_val[1]))
-        pm_print("0x{0:04x}".format(reg_val[2]))
-        pm_print("0x{0:04x}".format(reg_val[3]))
-        self._writeRegister(INA226.CONFIGURATION, reg_val[0])
-        self._writeRegister(INA226.CALIBRATION, reg_val[1])
-        self._writeRegister(INA226.MASK_ENABLE, reg_val[2])
-        self._writeRegister(INA226.ALERT_LIMIT, reg_val[3])
+        if not reg_val[0] == None:
+            pm_print("0x{0:04x}".format(reg_val[0]))
+            self._writeRegister(INA226.CONFIGURATION, reg_val[0])
+        if not reg_val[1] == None:
+            pm_print("0x{0:04x}".format(reg_val[1]))
+            self._writeRegister(INA226.CALIBRATION, reg_val[1])
+        if not reg_val[2] == None:
+            pm_print("0x{0:04x}".format(reg_val[2]))
+            self._writeRegister(INA226.MASK_ENABLE, reg_val[2])
+        if not reg_val[3] == None:
+            pm_print("0x{0:04x}".format(reg_val[3]))
+            self._writeRegister(INA226.ALERT_LIMIT, reg_val[3])
 
     def _readRegister(self, register):
         val = 0
@@ -240,6 +244,35 @@ class INA7XX(object):
 
     def getManufacturerID(self):
         return self._readRegister(INA7XX.MANUFACTURER_ID)
+
+    def readRegisterValues(self):
+        registers = []
+        for reg_adr in range(18):
+            if reg_adr in [2, 3, 4, 9, 10]:
+                continue
+            else:
+                registers.append(self._readRegister(reg_adr))
+        registers.append(self._readRegister(INA7XX.MANUFACTURER_ID))
+        for index, reg_val in enumerate(registers):
+            pm_print("register[0x{0:02x}] = 0x{1:04x}".format(index, reg_val))
+        return registers
+
+    def writeRegisterValues(self, reg_val):
+        if not reg_val[0] == None:
+            pm_print("0x{0:04x}".format(reg_val[0]))
+            self._writeRegister(INA7XX.CONFIG, reg_val[0])
+        if not reg_val[1] == None:
+            pm_print("0x{0:04x}".format(reg_val[1]))
+            self._writeRegister(INA7XX.ADC_CONFIG, reg_val[1])
+        if not reg_val[2] == None:
+            pm_print("0x{0:04x}".format(reg_val[2]))
+            self._writeRegister(INA7XX.DIAG_ALERT, reg_val[2])
+        if not reg_val[3] == None:
+            pm_print("0x{0:04x}".format(reg_val[3]))
+            self._writeRegister(INA7XX.TEMP_LIMIT, reg_val[3])
+        if not reg_val[4] == None:
+            pm_print("0x{0:04x}".format(reg_val[4]))
+            self._writeRegister(INA7XX.PWR_LIMIT, reg_val[4])
 
     def _readRegister40bit(self, register):
         val = 0
