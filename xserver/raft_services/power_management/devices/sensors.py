@@ -1,8 +1,8 @@
-# Copyright (C) 2023-2024 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2023-2025 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2023-2024, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023-2025, Advanced Micro Devices, Inc."
 
 import logging
 from periphery import I2C
