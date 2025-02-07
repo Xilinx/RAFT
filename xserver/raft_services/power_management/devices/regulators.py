@@ -70,7 +70,7 @@ class PMBusRegulator:
             case 'TPS53681':
                 self.vout_scaling = ScalingType.VID
                 self.temp_scaling = ScalingType.LINEAR11
-            case 'MPQ2283' | 'MPQ2285':
+            case 'MPQ2283' | 'MPQ2285' | 'MPQ72963':
                 self.vout_scaling = ScalingType.DIRECT
                 self.iout_scaling = None
                 self.temp_scaling = None
@@ -244,6 +244,8 @@ class PMBusRegulator:
         if self.name in ("MPQ2283", "MPQ2285"):
             VOUT_SL = self._read_byte(PMBUS.VOUT_SCALE_LOOP) + 1
             value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
+        elif self.name == "MPQ72963":
+            value = raw_value * 1.5625e-3
         else:
             value = 0 # implement !
         return value
@@ -297,6 +299,8 @@ class PMBusRegulator:
             VOUT_SL = self._read_byte(PMBUS.VOUT_SCALE_LOOP) + 1
             raw_value = ((value / VOUT_SL) - 206.25e-3) / 6.25e-3
             #value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
+        elif self.name == "MPQ72963":
+            raw_value = value / 5e-3
         else:
             raw_value = 0 # implement !
         return round(raw_value)
