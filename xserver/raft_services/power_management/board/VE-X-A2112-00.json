@@ -3,11 +3,12 @@
 
 	"VE-X-A2112-00" : {
 		"FEATURE" : {
-			"List" : ["voltage", "temp", "power"]
+			"List" : ["voltage", "temp", "power", "powerdomain"]
 		},
-		"INA226" : {
+		"POWER_SENSORS" : {
 			"VR_LPD_0V8" : {
 				"Name" : "VR_LPD_0V8",
+				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x40",
 				"Shunt_Resistor" : 1000,
@@ -16,6 +17,7 @@
 			},
 			"VCC_FPD" : {
 				"Name" : "VCC_FPD",
+				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x41",
 				"Shunt_Resistor" : 1000,
@@ -23,24 +25,35 @@
 				"Phase_Multiplier" : 1
 			}
 		},
+		"POWER DOMAIN" : {
+			"PD_FPD" : {
+				"Name" : "FPD",
+				"Rails" : ["VCC_FPD"]
+			},
+			"PD_LPD" : {
+				"Name" : "LPD",
+				"Rails" : ["VR_LPD_0V8"]
+			}
+		},
 		"VOLTAGE" : {
 			"VCCINT" : {
 				"Name" : "VCCINT",
 				"Part_Name" : "TPS53681",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x60",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : 0
+				"Page_Select" : 0.0,
+				"Phase" : 4
 			},
 			"VCC_FPD" : {
 				"Name" : "VCC_FPD",
 				"Part_Name" : "TPS53681",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x60",
 				"PMBus_VOUT_MODE" : 1,
@@ -49,9 +62,9 @@
 			"VCC_AIE" : {
 				"Name" : "VCC_AIE",
 				"Part_Name" : "TPS53681",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x61",
 				"PMBus_VOUT_MODE" : 1,
@@ -60,9 +73,9 @@
 			"VCC_IO_SOC" : {
 				"Name" : "VCC_IO_SOC",
 				"Part_Name" : "TPS53681",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x61",
 				"PMBus_VOUT_MODE" : 1,
@@ -71,9 +84,9 @@
 			"VR_RAM_0V8" : {
 				"Name" : "VR_RAM_0V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x19",
 				"PMBus_VOUT_MODE" : 1,
@@ -82,9 +95,9 @@
 			"VR_MIO_1V8" : {
 				"Name" : "VR_MIO_1V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.98,
 				"Typical_Volt" : 1.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.62,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x1D",
 				"PMBus_VOUT_MODE" : 1,
@@ -93,9 +106,9 @@
 			"VR_LPD_0V8": {
 				"Name" : "VR_LPD_0V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x10",
 				"PMBus_VOUT_MODE" : 1,
@@ -104,9 +117,9 @@
 			"VR_AUX_LPD_1V5" : {
 				"Name" : "VR_AUX_LPD_1V5",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.65,
 				"Typical_Volt" : 1.5,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.35,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x13",
 				"PMBus_VOUT_MODE" : 1,
@@ -115,9 +128,9 @@
 			"VR_MIPI_1V2" : {
 				"Name" : "VR_MIPI_1V2",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.32,
 				"Typical_Volt" : 1.2,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.08,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x1F",
 				"PMBus_VOUT_MODE" : 1,
@@ -126,9 +139,9 @@
 			"VR_VCC_USB2_0V8" : {
 				"Name" : "VR_VCC_USB2_0V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x24",
 				"PMBus_VOUT_MODE" : 1,
@@ -137,9 +150,9 @@
 			"VR_VCC_PAUX_USB3_0V8" : {
 				"Name" : "VR_VCC_PAUX_USB3_0V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x25",
 				"PMBus_VOUT_MODE" : 1,
@@ -148,9 +161,9 @@
 			"VR_VCCIO_REG_USB2_3V3" : {
 				"Name" : "VR_VCCIO_REG_USB2_3V3",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 3.6,
 				"Typical_Volt" : 3.3,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 3,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x26",
 				"PMBus_VOUT_MODE" : 1,
@@ -159,9 +172,9 @@
 			"VR_VCCIO_PAUX_1V8" : {
 				"Name" : "VR_VCCIO_PAUX_1V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.98,
 				"Typical_Volt" : 1.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.62,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x27",
 				"PMBus_VOUT_MODE" : 1,
@@ -170,9 +183,9 @@
 			"VR_UTIL_1V8" : {
 				"Name" : "VR_UTIL_1V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.98,
 				"Typical_Volt" : 1.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.62,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x11",
 				"PMBus_VOUT_MODE" : 1,
@@ -181,9 +194,9 @@
 			"VR_UTIL_3V3" : {
 				"Name" : "VR_UTIL_3V3",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 3.6,
 				"Typical_Volt" : 3.3,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 3,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x17",
 				"PMBus_VOUT_MODE" : 1,
@@ -192,9 +205,9 @@
 			"VR_VCCIO_USB3_1V2" : {
 				"Name" : "VR_VCCIO_USB3_1V2",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.32,
 				"Typical_Volt" : 1.2,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x14",
 				"PMBus_VOUT_MODE" : 1,
@@ -203,9 +216,9 @@
 			"VR_AUX_1V5" : {
 				"Name" : "VR_AUX_1V5",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.65,
 				"Typical_Volt" : 1.5,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.35,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x15",
 				"PMBus_VOUT_MODE" : 1,
@@ -214,9 +227,9 @@
 			"VR_MMD_0V8" : {
 				"Name" : "VR_MMD_0V8",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.72,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x18",
 				"PMBus_VOUT_MODE" : 1,
@@ -225,9 +238,9 @@
 			"VR_LP5_1V0" : {
 				"Name" : "VR_LP5_1V0",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.1,
 				"Typical_Volt" : 1.0,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.9,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x20",
 				"PMBus_VOUT_MODE" : 1,
@@ -236,9 +249,9 @@
 			"VR_LP5_VDD2_1V05" : {
 				"Name" : "VR_LP5_VDD2_1V05",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.1,
 				"Typical_Volt" : 1.05,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.9,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x21",
 				"PMBus_VOUT_MODE" : 1,
@@ -247,9 +260,9 @@
 			"VR_LP5_VDDQ_0V5" : {
 				"Name" : "VR_LP5_VDDQ_0V5",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 0.55,
 				"Typical_Volt" : 0.5,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.45,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x22",
 				"PMBus_VOUT_MODE" : 1,
@@ -258,9 +271,9 @@
 			"VR_HDIO_3V3" : {
 				"Name" : "VR_HDIO_3V3",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 3.6,
 				"Typical_Volt" : 3.3,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 3,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x23",
 				"PMBus_VOUT_MODE" : 1,
@@ -269,9 +282,9 @@
 			"VR_GTYP_MMI_AVCC_0V92" : {
 				"Name" : "VR_GTYP_MMI_AVCC_0V92",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1,
 				"Typical_Volt" : 0.92,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 0.8,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x29",
 				"PMBus_VOUT_MODE" : 1,
@@ -280,9 +293,9 @@
 			"VR_GTYP_MMI_AVTT_1V2" : {
 				"Name" : "VR_GTYP_MMI_AVTT_1V2",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.32,
 				"Typical_Volt" : 1.2,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.08,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x2A",
 				"PMBus_VOUT_MODE" : 1,
@@ -291,9 +304,9 @@
 			"VR_GTYP_MMI_AVCCAUX_1V5" : {
 				"Name" : "VR_GTYP_MMI_AVCCAUX_1V5",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 1.65,
 				"Typical_Volt" : 1.5,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 1.35,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x2B",
 				"PMBus_VOUT_MODE" : 1,
@@ -302,9 +315,9 @@
 			"VR_UTIL_5V0" : {
 				"Name" : "VR_UTIL_5V0",
 				"Part_Name" : "TPS546B24A",
-				"Maximum_Volt" : -1,
+				"Maximum_Volt" : 5.5,
 				"Typical_Volt" : 5.0,
-				"Minimum_Volt" : -1,
+				"Minimum_Volt" : 4.5,
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x16",
 				"PMBus_VOUT_MODE" : 1,
