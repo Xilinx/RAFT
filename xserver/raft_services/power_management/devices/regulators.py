@@ -36,10 +36,10 @@ class PMBUS(IntEnum):
     IC_DEVICE_REV = 0xAE
 
 class ScalingType(IntEnum):
-    VID = 0
-    LINEAR16 = 1
-    LINEAR11 = 2
-    DIRECT = 3
+    VID = 1
+    LINEAR16 = 2
+    LINEAR11 = 3
+    DIRECT = 4
 
 def pm_print(printstr):
     if(PM_LOWLEVEL_DEBUG):
