@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # Copyright (C) 2023-2025 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
@@ -85,8 +86,10 @@ def print_response(response):
             print(json.dumps(response['status'], indent=2))
         else:
             print(json.dumps(response['data'], indent=2))
+        sys.exit(os.EX_OK)
     else:
         print(json.dumps(response['message'], indent=2))
+        sys.exit(os.EX_SOFTWARE)
 
 def main():
     # Define command groups
@@ -325,8 +328,10 @@ def pm_csv_dump(csv_data, columns_order, filepath, filename):
             for row in csv_data:
                     csv_writer.writerow(row)
             print(f"The requested data is written to file - {csv_file}")
+            sys.exit(os.EX_OK)
     except IOError:
         print(f"I/O error while opening {csv_file} to write")
+        sys.exit(os.EX_SOFTWARE)
 
 if __name__ == "__main__":
     # call main
