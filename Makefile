@@ -1,9 +1,11 @@
-# Copyright (C) 2022-2023 Advanced Micro Devices, Inc. All Rights Reserved.
+# Copyright (C) 2022-2025 Advanced Micro Devices, Inc. All Rights Reserved.
 # SPDX-License-Identifier: MIT
 SUBDIRS := c_lib/i2c-driver c_lib/libaximemmap c_lib/libxhelper c_lib/sysmon-driver
 
 INSTALL_DIR_RAFT := $(DESTDIR)/usr/share/raft
 INSTALL_DIR_NOTEBOOKS := ${DESTDIR}/usr/share/notebooks
+PM_CMD_PY := ${DESTDIR}/usr/share/raft/examples/python/pmtool/pm-cmd.py
+LINK_NAME := $(BINDIR)/raft-pm-cmd
 
 .PHONY: all clean install $(SUBDIRS)
 
@@ -16,6 +18,7 @@ clean:
 	for dir in $(SUBDIRS); do \
         	$(MAKE) -C $$dir clean; \
 	done
+	rm -f $(LINK_NAME)
 
 install:
 	for dir in $(SUBDIRS); do \
@@ -36,6 +39,9 @@ ifeq ($(NOTEBOOKS),enabled)
 	install -m 0755 examples/python/rftool/mixer.ipynb ${INSTALL_DIR_NOTEBOOKS}
 endif
 ifeq ($(STARTUPSC),enabled)
+	echo "Installing symbolic link for pm-cmd CLI App: $(LINK_NAME) -> $(PM_CMD_PY)"
+	install -d ${BINDIR}
+	ln --relative --symbolic $(PM_CMD_PY) $(LINK_NAME)
 ifneq ($(SYSCONF_DIR),)
 	echo "Installing RAFT system controller startup sysconfdir at ${SYSCONF_DIR}"
 	install -d ${SYSCONF_DIR}
