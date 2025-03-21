@@ -9,7 +9,7 @@
 			"DAC_AVCCAUX" : {
 				"Name" : "DAC_AVCCAUX",
 				"Part_Name" : "INA745A",
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x42",
 				"Shunt_Resistor" : 1000,
 				"Maximum_Current" : 1600,
@@ -18,7 +18,7 @@
 			"DAC_AVTT" : {
 				"Name" : "DAC_AVTT",
 				"Part_Name" : "INA745A",
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x41",
 				"Shunt_Resistor" : 1000,
 				"Maximum_Current" : 1000,
@@ -27,7 +27,7 @@
 			"ADC_AVCC" : {
 				"Name" : "ADC_AVCC",
 				"Part_Name" : "INA745A",
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x43",
 				"Shunt_Resistor" : 1000,
 				"Maximum_Current" : 7500,
@@ -36,7 +36,7 @@
 			"ADC_AVCCAUX" : {
 				"Name" : "ADC_AVCCAUX",
 				"Part_Name" : "INA745A",
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x44",
 				"Shunt_Resistor" : 1000,
 				"Maximum_Current" : 3500,
@@ -45,7 +45,7 @@
 			"DAC_AVCC" : {
 				"Name" : "DAC_AVCC",
 				"Part_Name" : "INA745A",
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x40",
 				"Shunt_Resistor" : 1000,
 				"Maximum_Current" : 8000,
@@ -69,7 +69,7 @@
 				"Maximum_Volt" : 0.975,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x60",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : 0.0,
@@ -81,7 +81,7 @@
 				"Maximum_Volt" : 0.97,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x60",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : 1,
@@ -93,7 +93,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1B",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -104,7 +104,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1D",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -115,7 +115,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x10",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -126,7 +126,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x19",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -137,7 +137,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1A",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -148,7 +148,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x29",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -159,7 +159,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x13",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -170,7 +170,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.8,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x14",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -181,7 +181,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x16",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -192,7 +192,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.5,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x23",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -203,7 +203,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.5,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x12",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -214,7 +214,7 @@
 				"Maximum_Volt" : 3.3,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x17",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -225,7 +225,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.2,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x18",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -236,7 +236,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.2,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x26",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -247,18 +247,18 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x0E",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
 			},
-			"LP5_VDD2_1V05" : {
-				"Name" : "LP5_VDD2_1V05",
+			"LP5_VDD2H_1V05" : {
+				"Name" : "LP5_VDD2H_1V05",
 				"Part_Name" : "TPS544B25",
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 1.05,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x0F",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -269,7 +269,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.0,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x15",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -280,7 +280,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.5,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x22",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -291,7 +291,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.92,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x27",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -302,18 +302,18 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.2,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x25",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
 			},
-			"GTYP_AVCCAUX" : {
-				"Name" : "GTYP_AVCCAUX",
+			"GTYP_VCCAUX" : {
+				"Name" : "GTYP_VCCAUX",
 				"Part_Name" : "TPS546B24A",
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.5,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x20",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -324,7 +324,7 @@
 				"Maximum_Volt" : 1.5,
 				"Typical_Volt" : 0.92,
 				"Minimum_Volt" : 0.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x24",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -335,7 +335,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.2,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1C",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -346,7 +346,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 1.5,
 				"Minimum_Volt" : 1,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x21",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
@@ -357,7 +357,7 @@
 				"Maximum_Volt" : 1,
 				"Typical_Volt" : 0.9,
 				"Minimum_Volt" : 0.8,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x61",
 				"Page_Select" : -1,
 				"FB_Ratio" : 0.6667
@@ -368,7 +368,7 @@
 				"Maximum_Volt" : 1,
 				"Typical_Volt" : 0.9,
 				"Minimum_Volt" : 0.8,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x62",
 				"Page_Select" : -1,
 				"FB_Ratio" : 0.6667
@@ -379,7 +379,7 @@
 				"Maximum_Volt" : 2,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x63",
 				"Page_Select" : -1,
 				"FB_Ratio" : 1.5
@@ -390,7 +390,7 @@
 				"Maximum_Volt" : 2,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x64",
 				"Page_Select" : 0.0,
 				"FB_Ratio" : 1.5
@@ -401,7 +401,7 @@
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 2.85,
 				"Minimum_Volt" : 2.5,
-				"I2C_Bus" : "/dev/i2c-1",
+				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x64",
 				"Page_Select" : 1,
 				"FB_Ratio" : 0.2126
