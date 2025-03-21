@@ -104,7 +104,7 @@ class PMBusRegulator:
 
     def enable_output(self):
         """Enable output via OPERATION command."""
-        if self.page > 0:
+        if self.page >= 0:
             self._select_page()
         config = self._read_byte(PMBUS.ON_OFF_CONFIG)
         if config:
@@ -115,7 +115,7 @@ class PMBusRegulator:
 
     def shutdown_output(self):
         """Disable output via OPERATION command."""
-        if self.page > 0:
+        if self.page >= 0:
             self._select_page()
         config = self._read_byte(PMBUS.ON_OFF_CONFIG)
         if config:
@@ -131,14 +131,14 @@ class PMBusRegulator:
             pm_print("raw_value 0x{0:02x}".format(raw_value))
             self._write_byte(PMBUS.VOUT_COMMAND, raw_value)
         else:
-            self.shutdown_output()
-            if self.page > 0:
+            #self.shutdown_output()
+            if self.page >= 0:
                 self._select_page()
             self._get_vout_mode()
             raw_value = self._value_2_rawvalue(value, self.vout_scaling)
             self._write_word(PMBUS.VOUT_COMMAND, raw_value)
             pm_print("raw_value 0x{0:04x}".format(raw_value))
-            self.enable_output()
+            #self.enable_output()
 
     def read_voltage(self):
         """Read and scale output voltage using READ_VOUT command."""
