@@ -59,41 +59,82 @@ def parse_json_file(json_file):
         #print(json.dumps(json_data, indent=2))
     return json_data
 
+def find_i2c_device_by_name(target_name):
+    sys_i2c_path = "/sys/bus/i2c/devices/"
+
+    for device in os.listdir(sys_i2c_path):
+        name_path = os.path.join(sys_i2c_path, device, "name")
+
+        if os.path.isfile(name_path):
+            try:
+                with open(name_path, "r") as f:
+                    device_name = f.read().strip()
+
+                if device_name == target_name:
+                    bus_number, address = device.split("-")
+                    bus_number = bus_number.replace("i2c", "")
+                    dev_path = f"/dev/i2c-{bus_number}"
+                    logging.debug(f"Found {target_name} at {dev_path}, address 0x{address}")
+                    return dev_path, int(address, 16)
+            except IOError:
+                continue
+
+    logging.debug(f"Device {target_name} not found")
+    return None, None
+
 def get_eeprom_data():
     result = False
     i2c = None
     onboard.Name = "Common"
     onboard.I2C_Bus = "/dev/i2c-1"
     onboard.I2C_Addr = 0x54
-    i2c = I2C(onboard.I2C_Bus)
-    if i2c is not None:
-        data  = bytearray(256)
-        try:
-            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
-            i2c.transfer(onboard.I2C_Addr, msgs)
-            eeprom_data = msgs[1].data
-            result = True
-        except IOError:
-            logging.info(f"Onboard {onboard.Name} Eeprom read failed!")
+    data  = bytearray(256)
+    try:
+        i2c = I2C(onboard.I2C_Bus)
+        msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
+        i2c.transfer(onboard.I2C_Addr, msgs)
+        eeprom_data = msgs[1].data
+        result = True
         i2c.close()
+    except:
+        logging.debug(f"Onboard {onboard.Name} Eeprom read failed!")
+
     if result is False:
         onboard.Name = "Legacy"
         onboard.I2C_Bus = "/dev/i2c-11"
         onboard.I2C_Addr = 0x54
-        i2c = I2C(onboard.I2C_Bus)
-        if i2c is not None:
+        data  = bytearray(256)
+        try:
+            i2c = I2C(onboard.I2C_Bus)
+            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
+            i2c.transfer(onboard.I2C_Addr, msgs)
+            eeprom_data = msgs[1].data
+            result = True
+            i2c.close()
+        except:
+            logging.debug(f"Onboard {onboard.Name} Eeprom read failed!")
+
+    if result is False:
+        device_path, device_address = find_i2c_device_by_name("24c128")
+        if device_path is not None:
+            onboard.Name = "Custom"
+            onboard.I2C_Bus = device_path
+            onboard.I2C_Addr = device_address
             data  = bytearray(256)
             try:
+                i2c = I2C(onboard.I2C_Bus)
                 msgs = [I2C.Message([0x0, 0x0]), I2C.Message(data, read=True)]
                 i2c.transfer(onboard.I2C_Addr, msgs)
                 eeprom_data = msgs[1].data
                 result = True
-            except IOError:
-                logging.info(f"Onboard {onboard.Name} Eeprom read failed!")
-            i2c.close()
-        if result is False:
-            logging.error("Board Eeprom Identification Failed.")
-            exit_program()
+                i2c.close()
+            except:
+                logging.debug(f"Onboard {onboard.Name} Eeprom read failed!")
+
+    if result is False:
+        logging.error("Board Eeprom Identification Failed.")
+        exit_program()
+
     return eeprom_data
 
 def get_product_name():
@@ -103,9 +144,7 @@ def get_product_name():
     name = eeprom_data[offset+1:(offset+1 + length)].decode("utf-8").strip('\x00')
     return name
 
-
-product_name = get_product_name()
-json_file = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/board', '.'.join((product_name, 'json')))
+json_file = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/board', '.'.join((get_product_name(), 'json')))
 
 if is_valid_json_file(json_file):
     json_data = parse_json_file(json_file)
