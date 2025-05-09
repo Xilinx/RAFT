@@ -14,7 +14,7 @@ from utils import ffi, open_packed_c_library, cdata_to_py, cptr_to_pylist
 from utils import cdata_to_py, get_python_log_levels
 from utils import getkey_from_listbeginvalue, xhelper_handle
 
-rfdc_handle = open_packed_c_library(RAFT_DIR + "xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h", "/usr/lib/librfdc.so.12")
+rfdc_handle = open_packed_c_library(RAFT_DIR + "xserver/xcffi/drv_header/rfdc/xrfdc_h_python.h", "/usr/lib/librfdc.so.13")
 
 
 class RFDC(object):

@@ -13,7 +13,7 @@ import json
 from utils import ffi, open_c_library, cdata_to_py, xhelper_handle
 from utils import get_python_log_levels
 
-rfclk_handle = open_c_library(RAFT_DIR + "xserver/xcffi/drv_header/rfdc/xrfclk_h_python.h", "/usr/lib/librfclk.so.1")
+rfclk_handle = open_c_library(RAFT_DIR + "xserver/xcffi/drv_header/rfdc/xrfclk_h_python.h", "/usr/lib/librfclk.so.2")
 
 
 class RFCLK(object):
