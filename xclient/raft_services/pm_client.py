@@ -243,6 +243,14 @@ class PM_Client(object):
         self.logger.debug("GetRegulator()")
         return self.PM.GetRegulator(name)
 
+    def onregulator(self, name):
+        self.logger.debug("onregulator()")
+        return self.PM.ONRegulator(name)
+
+    def offregulator(self, name):
+        self.logger.debug("offregulator()")
+        return self.PM.OFFRegulator(name)
+
     def getvoltage(self, name):
         self.logger.debug("GetVoltage()")
         return self.PM.GetVoltage(name)
@@ -271,6 +279,18 @@ class PM_Client(object):
         """
         self.logger.debug("RestoreVoltage()")
         return self.PM.RestoreVoltage(name)
+
+    def listgpio(self):
+        self.logger.debug("ListGPIO()")
+        return self.PM.ListGPIO()
+
+    def setgpio(self, name, value):
+        self.logger.debug("SetGPIO()")
+        return self.PM.SetGPIO(name, value)
+
+    def getgpio(self, name):
+        self.logger.debug("GetGPIO()")
+        return self.PM.GetGPIO(name)
 
     def listunit(self):
         self.logger.debug("ListUnits()")

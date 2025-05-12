@@ -3,7 +3,7 @@
 
 	"VR-R-A2488-01" : {
 		"FEATURE" : {
-			"List" : ["voltage", "power", "powerdomain"]
+			"List" : ["gpio", "voltage", "power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"DAC_AVCCAUX" : {
@@ -73,7 +73,8 @@
 				"I2C_Address" : "0x60",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : 0.0,
-				"Phase" : 4
+				"Phase" : 4,
+				"GPIO_Cnt" : "VCCINT_EN"
 			},
 			"VCC_AIE" : {
 				"Name" : "VCC_AIE",
@@ -85,7 +86,8 @@
 				"I2C_Address" : "0x60",
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : 1,
-				"Phase" : 2
+				"Phase" : 2,
+				"GPIO_Cnt" : "VCC_AIE_EN"
 			},
 			"VCC_IO" : {
 				"Name" : "VCC_IO",
@@ -96,7 +98,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1B",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCC_IO_EN"
 			},
 			"VCC_SOC" : {
 				"Name" : "VCC_SOC",
@@ -107,7 +110,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1D",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCC_SOC_EN"
 			},
 			"VCCINT_GT" : {
 				"Name" : "VCCINT_GT",
@@ -118,7 +122,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x10",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCINT_GT_EN"
 			},
 			"VCC_RAM" : {
 				"Name" : "VCC_RAM",
@@ -129,7 +134,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x19",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCC_RAM_EN"
 			},
 			"UTIL_1V8" : {
 				"Name" : "UTIL_1V8",
@@ -140,7 +146,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1A",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "UTIL_1V8_EN"
 			},
 			"VCC_PMC" : {
 				"Name" : "VCC_PMC",
@@ -151,7 +158,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x29",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCC_PMC_EN"
 			},
 			"VCC_PSFP" : {
 				"Name" : "VCC_PSFP",
@@ -162,7 +170,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x13",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCC_PSFP_EN"
 			},
 			"VCC_PSLP" : {
 				"Name" : "VCC_PSLP",
@@ -173,7 +182,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x14",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCC_PSLP_EN"
 			},
 			"VCCO_MIO" : {
 				"Name" : "VCCO_MIO",
@@ -184,7 +194,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x16",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCO_MIO_EN"
 			},
 			"VCCAUX" : {
 				"Name" : "VCCAUX",
@@ -195,7 +206,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x23",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCAUX_EN"
 			},
 			"VCCAUX_PMC" : {
 				"Name" : "VCCAUX_PMC",
@@ -206,7 +218,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x12",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCAUX_PMC_EN"
 			},
 			"VCCO_503" : {
 				"Name" : "VCCO_503",
@@ -217,7 +230,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x17",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCO_503_EN"
 			},
 			"VCCO_X5IO" : {
 				"Name" : "VCCO_X5IO",
@@ -228,7 +242,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x18",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCO_X5IO_EN"
 			},
 			"VCCO_713" : {
 				"Name" : "VCCO_713",
@@ -239,7 +254,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x26",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "VCCO_713_EN"
 			},
 			"LP5_VDD1_1V8" : {
 				"Name" : "LP5_VDD1_1V8",
@@ -250,7 +266,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x0E",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "LP5_VDD1_1V8_EN"
 			},
 			"LP5_VDD2H_1V05" : {
 				"Name" : "LP5_VDD2H_1V05",
@@ -261,7 +278,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x0F",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "LP5_VDD2H_1V05_EN"
 			},
 			"LP5_VCCO_1V0" : {
 				"Name" : "LP5_VCCO_1V0",
@@ -272,7 +290,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x15",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "LP5_VCCO_1V0_EN"
 			},
 			"LP5_VDDQ_0V5" : {
 				"Name" : "LP5_VDDQ_0V5",
@@ -283,7 +302,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x22",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "LP5_VDDQ_0V5_EN"
 			},
 			"GTYP_AVCC" : {
 				"Name" : "GTYP_AVCC",
@@ -294,7 +314,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x27",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "GTYP_AVCC_EN"
 			},
 			"GTYP_AVTT" : {
 				"Name" : "GTYP_AVTT",
@@ -305,7 +326,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x25",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "GTYP_AVTT_EN"
 			},
 			"GTYP_VCCAUX" : {
 				"Name" : "GTYP_VCCAUX",
@@ -316,7 +338,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x20",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "GTYP_VCCAUX_EN"
 			},
 			"GTM_AVCC" : {
 				"Name" : "GTM_AVCC",
@@ -327,7 +350,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x24",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "GTM_AVCC_EN"
 			},
 			"GTM_AVTT" : {
 				"Name" : "GTM_AVTT",
@@ -338,7 +362,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x1C",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "GTM_AVTT_EN"
 			},
 			"GTM_AVCCAUX" : {
 				"Name" : "GTM_AVCCAUX",
@@ -349,7 +374,8 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x21",
 				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : -1
+				"Page_Select" : -1,
+				"GPIO_Cnt" : "GTM_AVCCAUX_EN"
 			},
 			"ADC_AVCC" : {
 				"Name" : "ADC_AVCC",
@@ -406,6 +432,13 @@
 				"Page_Select" : 1,
 				"FB_Ratio" : 0.2126
 			}
+		},
+		"GPIO" : {
+			"FPGA_PWR_EN_B": "FPGA_PWR_EN_B",
+			"UCD90320_POR_B": "UCD90320_POR_B",
+			"UCD90320_CTLR_B": "UCD90320_CTLR_B",
+			"DC_12V_PWRDN_B_SW_ON": "DC_12V_PWRDN_B_SW_ON",
+			"UCD90320_POR_B_SW": "UCD90320_POR_B_SW"
 		}
 	}
 }

@@ -212,6 +212,28 @@ if 'voltage' in list_features['data']:
         ret = handle.getregulator(voltage)
         print(json.dumps(ret, indent=2))
 
+if 'gpio' in list_features['data']:
+    print_header(f'######## LIST GPIOS ##########')
+    #Description:
+    #   List of gpio names.
+    #Input Arguments:
+    #   None
+    #Return:
+    #   ret: List GPIO devices
+    list_gpio = handle.listgpio()
+    print(json.dumps(list_gpio, indent=2))
+
+    if list_gpio['data']:
+        print_header(f'######## GET GPIO of {list_gpio['data'][0]} ##########')
+        #Description:
+        #   Gets sysmon temperature values of Versal.
+        #Input Arguments:
+        #   None
+        #Return:
+        #   ret: Versal's Temperature values
+        ret = handle.getgpio(list_gpio['data'][0])
+        print(json.dumps(ret, indent=2))
+
 if 'temp' in list_features['data']:
     print_header(f'######## LIST TEMPERATURES ##########')
     #Description:

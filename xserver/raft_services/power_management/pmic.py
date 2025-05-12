@@ -19,13 +19,15 @@ sys.path.append(RAFT_DIR + 'xserver/raft_services/power_management/devices')
 from pm_types import *
 from devices.sensors import *
 from devices.regulators import *
+from devices.gpio import *
 class PMIC(object):
     logger = None
     domains = []
     voltages = []
     power_sensors = []
+    gpios = []
 
-    def __init__(self, pm_domains, pm_powersensor, pm_voltages):
+    def __init__(self, pm_domains, pm_powersensor, pm_voltages, pm_gpios):
         self.logger = self.GetLogger()
         self.domains = pm_domains
 
@@ -75,7 +77,15 @@ class PMIC(object):
                     voltage_name = key.decode('utf-8')
                     if voltage_name == v.name:
                         self.SetVoltage(v._output, float(value))
+            if v.gpio_name:
+                gpio = find_gpio_by_name(v.gpio_name)
+                v._gpiocnt = GPIOController(v.gpio_name, gpio[0], gpio[1])
         db.close()
+        
+        for v in pm_gpios:
+            v['Controller'] = GPIOController(v['Name'], v['Chip'][0], v['Chip'][1])
+            self.gpios.append(v)
+        
         self.logger.info("Inside PMIC Constructor")
 
     @staticmethod
@@ -181,6 +191,14 @@ class PMIC(object):
         self.logger.debug(f"GetRegulator({o.addr}@{o.i2c.devpath})")
         return o.read_telemetry_all()
 
+    def ONRegulator(self, cnt):
+        self.logger.debug(f"ONRegulator({cnt.gpio_name}@{cnt.gpio_chip}:{cnt.gpio_number})")
+        cnt.set_high()
+    
+    def OFFRegulator(self, cnt):
+        self.logger.debug(f"OFFRegulator({cnt.gpio_name}@{cnt.gpio_chip}:{cnt.gpio_number})")
+        cnt.set_low()
+
     def GetVoltage(self, o):
         self.logger.debug("GetVoltage(0x{0:02x}@{1})".format(o.addr, o.i2c.devpath))
         return o.read_voltage()
@@ -203,6 +221,17 @@ class PMIC(object):
         current = round(s.getCurrent(), 4)
         power = round(s.getPower(), 4)
         return vbus, current, power
+
+    def SetGPIO(self, cnt, value):
+        self.logger.debug(f"SetGPIO({cnt.gpio_name}@{cnt.gpio_chip}:{cnt.gpio_number})")
+        if value:
+            cnt.set_high()
+        else:
+            cnt.set_low()
+
+    def GetGPIO(self, cnt):
+        self.logger.debug(f"GetGPIO({cnt.gpio_name}@{cnt.gpio_chip}:{cnt.gpio_number})")
+        return cnt.get()
 
     def __del__(self):
         self.logger.info("Inside PMIC Destructor")

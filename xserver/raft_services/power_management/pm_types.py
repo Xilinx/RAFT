@@ -16,7 +16,8 @@ class Rails:
     def __init__(self, Name, Part_Name, I2C_Bus, I2C_Address,
                  Shunt_Resistor=None, Maximum_Current=None, Phase_Multiplier=None,
                  Maximum_Volt=None, Typical_Volt=None, Minimum_Volt=None,
-                 PMBus_VOUT_MODE=-1, Page_Select=-1, Phase=-1, FB_Ratio=1.0, Voltage_Multiplier=-1):
+                 PMBus_VOUT_MODE=-1, Page_Select=-1, Phase=-1, FB_Ratio=1.0, Voltage_Multiplier=-1,
+                 GPIO_Cnt=None):
         self.name = Name
         self.part_name = Part_Name
         self.i2c_bus = I2C_Bus
@@ -32,9 +33,11 @@ class Rails:
         self.phase = int(Phase)
         self.fb_ratio = float(FB_Ratio)
         self.voltage_multiplier = int(Voltage_Multiplier)
+        self.gpio_name = GPIO_Cnt
 
         self._sensor = None
         self._output = None
+        self._gpiocnt = None
 
     def __str__(self):
         str_info = {

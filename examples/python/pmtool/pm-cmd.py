@@ -96,8 +96,9 @@ def main():
     command_groups = {
         "System Information": ["boardinfo", "listfeature"],
         "Power Sensor Measurement and Control": ["listpower", "getpower", "getcalpower", "getinaconf", "setinaconf"],
-        "Reagultor Voltage Measurement and Control": ["listvoltage", "enablevoltage", "disablevoltage", "getvoltage", "setvoltage", "setbootvoltage", "restorevoltage", "getregulator"],
+        "Reagultor Voltage Measurement and Control": ["listvoltage", "enablevoltage", "disablevoltage", "getvoltage", "setvoltage", "setbootvoltage", "restorevoltage", "getregulator", "onregulator", "offregulator"],
         "Power Domains and Rails Info": ["listdomain", "listrail", "powervalue", "allvalue"],
+        "GPIO Control": ["listgpio", "setgpio", "getgpio"],
         "Temperature Measurement": ["listtemperature", "gettemperature"],
         "Measurement Units": ["listunit", "getunit", "availablescale", "setscale"],
         "Miscellaneous": ["loglevel", "output-csv"]
@@ -155,6 +156,10 @@ def main():
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to set"}})
     add_command("getregulator", "Get ragulators all available telemetry data", voltage_action,
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to get"}})
+    add_command("onregulator", "Turn On/Enable regulator by gpio controller", voltage_action,
+                arguments={"voltage_name": {"type": str, "help": "Voltage rail to turn on"}})
+    add_command("offregulator", "Turn Off/Disable regulator by gpio controller", voltage_action,
+                arguments={"voltage_name": {"type": str, "help": "Voltage rail to turn off"}})
 
     add_command("listdomain", "List all power domains", domain_action)
     add_command("listrail", "List all power rails for specific domain", domain_action,
@@ -165,6 +170,13 @@ def main():
     add_command("listtemperature", "List all tmeperature sensors", temp_action)
     add_command("gettemperature", "Get temperature values for given sensor", temp_action,
                 arguments={"temp_name": {"type": str, "help": "temp_name"}})
+
+    add_command("listgpio", "List all gpios", gpio_action)
+    add_command("setgpio", "Set gpio value", gpio_action,
+                arguments={"gpio_name": {"type": str, "help": "gpio_name"},
+                    "value": {"type": str, "choices": ["high", "low",], "help": "New gpio value"}})
+    add_command("getgpio", "Get gpio value", gpio_action,
+                arguments={"gpio_name": {"type": str, "help": "gpio_name"}})
 
     add_command("listunit", "List available measurement units", unit_action)
     add_command("getunit", "Get unit details",  unit_action,
@@ -228,6 +240,10 @@ def voltage_action(args):
             print_response(client.restorevoltage(args.voltage_name))
         case "getregulator":
             print_response(client.getregulator(args.voltage_name))
+        case "onregulator":
+            print_response(client.onregulator(args.voltage_name))
+        case "offregulator":
+            print_response(client.offregulator(args.voltage_name))
 
 def domain_action(args):
     match args.command:
@@ -246,6 +262,15 @@ def temp_action(args):
             print_response(client.listtemperature())
         case 'gettemperature':
             print_response(client.gettemperature(args.temp_name))
+
+def gpio_action(args):
+    match args.command:
+        case 'listgpio':
+            print_response(client.listgpio())
+        case 'setgpio':
+            print_response(client.setgpio(args.gpio_name, args.value))
+        case 'getgpio':
+            print_response(client.getgpio(args.gpio_name))
 
 def unit_action(args):
     match args.command:

@@ -16,6 +16,7 @@ sys.path.append(RAFT_DIR + 'xserver/raft_services/power_management/devices')
 from pmic import PMIC
 from devices.stats import Stats
 from devices.sysmon import Sysmon
+from devices.gpio import *
 from utils import get_python_log_levels
 from pm_types import *
 
@@ -27,6 +28,7 @@ class PM(object):
     domains = []
     sensors = []
     voltages = []
+    gpios = []
     scales = None
     pmic = None
     temps = []
@@ -125,6 +127,16 @@ class PM(object):
                     except Exception as e:
                         print(e)
 
+        if 'gpio' in self.feature_list:
+            if 'GPIO' in board_data:
+                for k, v in board_data['GPIO'].items():
+                    temp_g = {
+                        'Name': k,
+                        'Chip': find_gpio_by_name(v),
+                        'Controller': None
+                    }
+                    self.gpios.append(temp_g)
+
         if 'Boot Config' in board_data:
             self.pdi_file = board_data['Boot Config']['PDI']
 
@@ -137,7 +149,7 @@ class PM(object):
             self.exit_program()
 
         try:
-            self.pmic = PMIC(self.domains, self.sensors, self.voltages)
+            self.pmic = PMIC(self.domains, self.sensors, self.voltages, self.gpios)
         except Exception as e:
             self.logger.error(f"InitPmic failed. ({e})")
             self.exit_program()
@@ -223,6 +235,9 @@ class PM(object):
             if 'domain' in caller_name:
                 if 'powerdomain' not in self.feature_list:
                     raise Exception(f"Unsupported feature: powerdomain")
+            if 'gpio' in caller_name:
+                if 'gpio' not in self.feature_list:
+                    raise Exception(f"Unsupported feature: gpio")
 
             data = process_function(*args, **kwargs)
             return {
@@ -323,6 +338,14 @@ class PM(object):
         self.logger.info(f"GetRegulator({voltage_name})")
         return self.handle_request(self._get_regulator, voltage_name)
 
+    def ONRegulator(self, voltage_name):
+        self.logger.info(f"ONRegulator({voltage_name})")
+        return self.handle_request(self._on_regulator, voltage_name)
+
+    def OFFRegulator(self, voltage_name):
+        self.logger.info(f"OFFRegulator({voltage_name})")
+        return self.handle_request(self._off_regulator, voltage_name)
+
     def GetVoltage(self, voltage_name):
         self.logger.info(f"GetVoltage({voltage_name})")
         return self.handle_request(self._get_voltage, voltage_name)
@@ -339,6 +362,9 @@ class PM(object):
         self.logger.info(f"SetVoltage({voltage_name})")
         return self.handle_request(self._restore_voltage, voltage_name)
 
+    """
+    Temperature APIs
+    """
     def ListTemperatures(self):
         self.logger.info(f"ListTemperatures()")
         return self.handle_request(self._list_temperatures)
@@ -347,6 +373,24 @@ class PM(object):
         self.logger.info(f"GetSysmonTemperature()")
         return self.handle_request(self._get_temperature, temp_name)
 
+    """
+    GPIO APIs
+    """
+    def ListGPIO(self):
+        self.logger.info(f"ListGPIO()")
+        return self.handle_request(self._list_gpios)
+
+    def SetGPIO(self, gpio_name, new_value):
+        self.logger.info(f"SetGPIO({gpio_name}, {new_value})")
+        return self.handle_request(self._set_gpio, gpio_name, new_value)
+
+    def GetGPIO(self, gpio_name):
+        self.logger.info(f"GetPIO({gpio_name})")
+        return self.handle_request(self._get_gpio, gpio_name)
+
+    """
+    Misc APIs
+    """
     def ListUnits(self):
         self.logger.info(f"ListUnits()")
         return self.handle_request(self._list_units)
@@ -363,6 +407,10 @@ class PM(object):
         self.logger.info(f"SetUnit()")
         return self.handle_request(self._set_scale, quantity, unit)
 
+
+    """
+    Lower Level Functions
+    """
     def _list_units(self):
         if self.scales is None:
             raise Exception(f'Unsupported feature: Enable "Units" in config')
@@ -665,7 +713,6 @@ class PM(object):
         return data
 
     def _enable_voltage(self, voltage_name):
-        self.logger.info(f"EnableVoltage({voltage_name})")
         v = self.__find_voltage(voltage_name)
         if v is None:
             raise ValueError(f'{voltage_name} does not exits')
@@ -705,6 +752,32 @@ class PM(object):
                 }
         return data
 
+    def _on_regulator(self, voltage_name):
+        v = self.__find_voltage(voltage_name)
+        if v is None:
+            raise ValueError(f'{voltage_name} does not exits')
+        else:
+            if v._output is None:
+                raise Exception(f'{voltage_name} regulator is not defined')
+            else:
+                if v._gpiocnt is None:
+                    raise Exception(f'{voltage_name} gpio controller is not defined')
+                else:
+                    self.pmic.ONRegulator(v._gpiocnt)
+
+    def _off_regulator(self, voltage_name):
+        v = self.__find_voltage(voltage_name)
+        if v is None:
+            raise ValueError(f'{voltage_name} does not exits')
+        else:
+            if v._output is None:
+                raise Exception(f'{voltage_name} regulator is not defined')
+            else:
+                if v._gpiocnt is None:
+                    raise Exception(f'{voltage_name} gpio controller is not defined')
+                else:
+                    self.pmic.OFFRegulator(v._gpiocnt)
+
     def _get_voltage(self, voltage_name):
         v = self.__find_voltage(voltage_name)
         if v is None:
@@ -732,7 +805,6 @@ class PM(object):
                     self.pmic.SetVoltage(v._output, self._unscale(new_value, "voltage"))
 
     def _set_boot_voltage(self, voltage_name, boot_value):
-        self.logger.info(f"SetBootVoltage({voltage_name}, {boot_value})")
         v = self.__find_voltage(voltage_name)
         if v is None:
             raise ValueError(f'{voltage_name} does not exits')
@@ -760,7 +832,6 @@ class PM(object):
             db.close()
 
     def _restore_voltage(self, voltage_name):
-        self.logger.info(f"RestoreVoltage({voltage_name})")
         v = self.__find_voltage(voltage_name)
         if v is None:
             raise ValueError(f'{voltage_name} does not exits')
@@ -785,7 +856,6 @@ class PM(object):
         return temp
 
     def _list_temperatures(self):
-        self.logger.info(f"ListTemperatures()")
         data = []
         if len(self.temps) == 0:
             raise ValueError(f"Temperature list is empty")
@@ -794,7 +864,6 @@ class PM(object):
         return data
 
     def _get_temperature(self, temp_name):
-        self.logger.info(f"GetTemperature()")
         data = {}
         v = self.__find_temperature(temp_name)
         if v is None:
@@ -805,6 +874,44 @@ class PM(object):
             data['MIN'] = self._scale(minimum, "temperature")
             data['MAX_MAX'] = self._scale(max_max, "temperature")
             data['MIN_MIN'] = self._scale(min_min, "temperature")
+        return data
+
+    def __find_gpio(self, gpio_name):
+        temp = None
+        for v in self.pmic.gpios:
+            if v['Name'] == gpio_name:
+                temp = v
+        return temp
+
+    def _list_gpios(self):
+        data =[]
+        if len(self.gpios) == 0:
+            raise ValueError(f"GPIO list is empty")
+        for g in self.gpios:
+            data.append(g['Name'])
+        return data
+
+    def _set_gpio(self, gpio_name, new_value):
+        gpio = self.__find_gpio(gpio_name)
+        if gpio is None:
+            raise ValueError(f'{gpio_name} does not exits')
+        else:
+            if new_value.lower() == "high":
+                self.pmic.SetGPIO(gpio['Controller'], 1)
+            else:
+                self.pmic.SetGPIO(gpio['Controller'], 0)
+
+    def _get_gpio(self, gpio_name):
+        data = None
+        gpio = self.__find_gpio(gpio_name)
+        if gpio is None:
+            raise ValueError(f'{gpio_name} does not exits')
+        else:
+            ret = self.pmic.GetGPIO(gpio['Controller'])
+            if ret == 1:
+                data = "high"
+            else:
+                data = "low"
         return data
 
     def __del__(self):
