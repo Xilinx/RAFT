@@ -1,0 +1,565 @@
+{
+	"License" : "Copyright (c) 2025 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+
+	"VRK160" : {
+		"FEATURE" : {
+			"List" : ["voltage", "power", "powerdomain"]
+		},
+		"POWER_SENSORS" : {
+			"VCCINT_1" : {
+				"Name" : "VCCINT_1",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x48",
+				"Maximum_Current" : 24000
+			},
+			"VCCINT_2" : {
+				"Name" : "VCCINT_2",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x49",
+				"Maximum_Current" : 24000
+			},
+			"VCCINT_3" : {
+				"Name" : "VCCINT_3",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x4A",
+				"Maximum_Current" : 24000
+			},
+			"VCCINT_4" : {
+				"Name" : "VCCINT_4",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x4B",
+				"Maximum_Current" : 24000
+			},
+			"VCCINT_5" : {
+				"Name" : "VCCINT_5",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x4C",
+				"Maximum_Current" : 24000
+			},
+			"VCCINT_GT" : {
+				"Name" : "VCCINT_GT",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x40",
+				"Maximum_Current" : 4000
+			},
+			"LP5_VCCO_1V0" : {
+				"Name" : "LP5_VCCO_1V0",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 8000
+			},
+			"VCC_AIE_1" : {
+				"Name" : "VCC_AIE_1",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x48",
+				"Maximum_Current" : 20000
+			},
+			"VCC_AIE_2" : {
+				"Name" : "VCC_AIE_2",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x49",
+				"Maximum_Current" : 20000
+			},
+			"GTM_AVTT" : {
+				"Name" : "GTM_AVTT",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-10",
+				"I2C_Address" : "0x45",
+				"Maximum_Current" : 4000
+			},
+			"GTM_AVCC" : {
+				"Name" : "GTM_AVCC",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-10",
+				"I2C_Address" : "0x46",
+				"Maximum_Current" : 4000
+			},
+			"VCC_SOC" : {
+				"Name" : "VCC_SOC",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x41",
+				"Maximum_Current" : 30000
+			},
+			"VCC_PSFP" : {
+				"Name" : "VCC_PSFP",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-10",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 1000
+			},
+			"VCC_PSLP" : {
+				"Name" : "VCC_PSLP",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-9",
+				"I2C_Address" : "0x47",
+				"Maximum_Current" : 4000
+			},
+			"GTYP_AVTT" : {
+				"Name" : "GTYP_AVTT",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-9",
+				"I2C_Address" : "0x46",
+				"Maximum_Current" : 4000
+			},
+			"VCCAUX_PMC" : {
+				"Name" : "VCCAUX_PMC",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x45",
+				"Maximum_Current" : 2000
+			},
+			"VCC_RAM" : {
+				"Name" : "VCC_RAM",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x45",
+				"Maximum_Current" : 2000
+			},
+			"VCCO_50X" : {
+				"Name" : "VCCO_50X",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x46",
+				"Maximum_Current" : 3000
+			},
+			"VCC_PMC" : {
+				"Name" : "VCC_PMC",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 500
+			},
+			"VCCAUX" : {
+				"Name" : "VCCAUX",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x46",
+				"Maximum_Current" : 5000
+			},
+			"VCCO_302" : {
+				"Name" : "VCCO_302",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-9",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 5000
+			},
+			"GTYP1_AVCCAUX" : {
+				"Name" : "GTYP1_AVCCAUX",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-9",
+				"I2C_Address" : "0x45",
+				"Maximum_Current" : 5000
+			},
+			"ADC_AVCC" : {
+				"Name" : "ADC_AVCC",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x43",
+				"Maximum_Current" : 25000
+			},
+			"DAC_AVCC" : {
+				"Name" : "DAC_AVCC",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x40",
+				"Maximum_Current" : 25000
+			},
+			"ADC_AVCCAUX" : {
+				"Name" : "ADC_AVCCAUX",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x4A",
+				"Maximum_Current" : 25000
+			},
+			"DAC_AVCCAUX" : {
+				"Name" : "DAC_AVCCAUX",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x42",
+				"Maximum_Current" : 25000
+			},
+			"DAC_AVTT" : {
+				"Name" : "DAC_AVTT",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-6",
+				"I2C_Address" : "0x41",
+				"Maximum_Current" : 5000
+			},
+			"GTM_AVCCAUX" : {
+				"Name" : "GTM_AVCCAUX",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-10",
+				"I2C_Address" : "0x47",
+				"Maximum_Current" : 5000
+			},
+			"GTYP_AVCC" : {
+				"Name" : "GTYP_AVCC",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-10",
+				"I2C_Address" : "0x42",
+				"Maximum_Current" : 5000
+			},
+			"VCCO_X5IO" : {
+				"Name" : "VCCO_X5IO",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-5",
+				"I2C_Address" : "0x47",
+				"Maximum_Current" : 5000
+			}
+		},
+		"POWER DOMAIN" : {
+			"PSFP" : {
+				"Name" : "PSFP",
+				"Rails" : ["VCC_PSFP"]
+			},
+			"PSLP" : {
+				"Name" : "PSLP",
+				"Rails" : ["VCC_PSLP"]
+			},
+			"SOC" : {
+				"Name" : "SOC",
+				"Rails" : ["VCC_SOC"]
+			}
+		},
+		"VOLTAGE" : {
+			"VCCINT": {
+				"Name": "VCCINT",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x23",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 0,
+				"Phase" : 5
+			},
+			"VCCINT_GT": {
+				"Name": "VCCINT_GT",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x23",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 1,
+				"Phase" : 1
+			},
+			"LP5_VCCO_1V0": {
+				"Name": "LP5_VCCO_1V0",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 1.1,
+				"Typical_Volt": 1.0,
+				"Minimum_Volt": 0.9,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x23",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 2,
+				"Phase" : 1
+			},
+			"VCCAIE": {
+				"Name": "VCCAIE",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x24",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 0,
+				"Phase" : 2
+			},
+			"GTM_AVTT": {
+				"Name": "GTM_AVTT",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 1.32,
+				"Typical_Volt": 1.2,
+				"Minimum_Volt": 1.08,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x24",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 1,
+				"Phase" : 1
+			},
+			"GTM_AVCC": {
+				"Name": "GTM_AVCC",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 1,
+				"Typical_Volt": 0.92,
+				"Minimum_Volt": 0.8,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x24",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 2,
+				"Phase" : 1
+			},
+			"VCC_SOC": {
+				"Name": "VCC_SOC",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x22",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 0,
+				"Phase" : 2
+			},
+			"VCC_PSFP": {
+				"Name": "VCC_PSFP",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x22",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 1,
+				"Phase" : 1
+			},
+			"VCC_PSLP": {
+				"Name": "GTM_AVCC",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x22",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 2,
+				"Phase" : 1
+			},
+			"VCC_PMC": {
+				"Name": "VCC_PMC",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x13",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"GTM_AVCCAUX": {
+				"Name": "GTM_AVCCAUX",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.65,
+				"Typical_Volt": 1.5,
+				"Minimum_Volt": 1.35,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x1C",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCC_RAM": {
+				"Name": "VCC_RAM",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 0.88,
+				"Typical_Volt": 0.8,
+				"Minimum_Volt": 0.72,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x14",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"GTYP_AVCC": {
+				"Name": "GTYP_AVCC",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.01,
+				"Typical_Volt": 0.92,
+				"Minimum_Volt": 0.83,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x2C",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"LP5_VDD1_1V8": {
+				"Name": "LP5_VDD1_1V8",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.98,
+				"Typical_Volt": 1.8,
+				"Minimum_Volt": 1.62,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x2D",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCCO_502": {
+				"Name": "VCCO_502",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.98,
+				"Typical_Volt": 1.8,
+				"Minimum_Volt": 1.62,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x17",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCCO_X5IO": {
+				"Name": "VCCO_X5IO",
+				"Part_Name": "MPQ2285",
+				"Maximum_Volt": 1.32,
+				"Typical_Volt": 1.2,
+				"Minimum_Volt": 1.08,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x1D",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCCAUX": {
+				"Name": "VCCAUX",
+				"Part_Name": "MPQ2285",
+				"Maximum_Volt": 1.65,
+				"Typical_Volt": 1.5,
+				"Minimum_Volt": 1.35,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x01",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"GTYP_AVTT": {
+				"Name": "GTYP_AVTT",
+				"Part_Name": "MPQ2285",
+				"Maximum_Volt": 1.32,
+				"Typical_Volt": 1.2,
+				"Minimum_Volt": 1.08,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x1F",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCCAUX_PMC": {
+				"Name": "VCCAUX_PMC",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.65,
+				"Typical_Volt": 1.5,
+				"Minimum_Volt": 1.35,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x2A",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCCO_50X": {
+				"Name": "VCCO_50X",
+				"Part_Name": "MPQ2285",
+				"Maximum_Volt": 1.98,
+				"Typical_Volt": 1.8,
+				"Minimum_Volt": 1.62,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x20",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"VCCO_302": {
+				"Name": "VCCO_302",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.98,
+				"Typical_Volt": 1.8,
+				"Minimum_Volt": 1.62,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x1A",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"GTYP1_AVCCAUX": {
+				"Name": "GTYP1_AVCCAUX",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.65,
+				"Typical_Volt": 1.5,
+				"Minimum_Volt": 1.35,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x19",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"LP5_VDDH_1V05": {
+				"Name": "LP5_VDDH_1V05",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 1.15,
+				"Typical_Volt": 1.05,
+				"Minimum_Volt": 0.95,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x2E",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"LP5_VDDQ_0V5": {
+				"Name": "GTYP1_AVCCAUX",
+				"Part_Name": "MPQ2283",
+				"Maximum_Volt": 0.55,
+				"Typical_Volt": 0.5,
+				"Minimum_Volt": 0.45,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x04",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
+			},
+			"ADC_AVCC" : {
+				"Name" : "ADC_AVCC",
+				"Part_Name" : "MPM54522",
+				"Maximum_Volt" : 1,
+				"Typical_Volt" : 0.9,
+				"Minimum_Volt" : 0.8,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x61",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.6667
+			},
+			"DAC_AVCC" : {
+				"Name" : "DAC_AVCC",
+				"Part_Name" : "MPM54522",
+				"Maximum_Volt" : 1,
+				"Typical_Volt" : 0.9,
+				"Minimum_Volt" : 0.8,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x62",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.6667
+			},
+			"ADC_AVCCAUX" : {
+				"Name" : "ADC_AVCCAUX",
+				"Part_Name" : "MPM54322",
+				"Maximum_Volt" : 2,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1.5,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x63",
+				"Page_Select" : -1,
+				"FB_Ratio" : 1.5
+			},
+			"DAC_AVCCAUX" : {
+				"Name" : "DAC_AVCCAUX",
+				"Part_Name" : "MPM54322",
+				"Maximum_Volt" : 2,
+				"Typical_Volt" : 1.8,
+				"Minimum_Volt" : 1.5,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x64",
+				"Page_Select" : 0.0,
+				"FB_Ratio" : 1.5
+			},
+			"DAC_AVTT" : {
+				"Name" : "DAC_AVTT",
+				"Part_Name" : "MPM54322",
+				"Maximum_Volt" : 3,
+				"Typical_Volt" : 2.85,
+				"Minimum_Volt" : 2.5,
+				"I2C_Bus" : "/dev/i2c-3",
+				"I2C_Address" : "0x64",
+				"Page_Select" : 1,
+				"FB_Ratio" : 0.2126
+			}
+		}
+	}
+}
