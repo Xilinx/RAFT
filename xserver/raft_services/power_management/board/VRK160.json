@@ -468,7 +468,7 @@
 				"Typical_Volt": 1.8,
 				"Minimum_Volt": 1.62,
 				"I2C_Bus": "/dev/i2c-4",
-				"I2C_Address": "0x1A",
+				"I2C_Address": "0x15",
 				"PMBus_VOUT_MODE": 1,
 				"Page_Select": -1
 			},
@@ -559,6 +559,17 @@
 				"I2C_Address" : "0x64",
 				"Page_Select" : 1,
 				"FB_Ratio" : 0.2126
+			},
+			"VADJ_FMC": {
+				"Name": "VADJ_FMC",
+				"Part_Name": "MPQ2285",
+				"Maximum_Volt": 1.32,
+				"Typical_Volt": 1.2,
+				"Minimum_Volt": 1.08,
+				"I2C_Bus": "/dev/i2c-4",
+				"I2C_Address": "0x02",
+				"PMBus_VOUT_MODE": 1,
+				"Page_Select": -1
 			}
 		}
 	}
