@@ -8,6 +8,7 @@ import os
 import sys
 import logging
 import dbm.dumb
+import Pyro4
 
 RAFT_DIR = '/usr/share/raft/'
 sys.path.append(RAFT_DIR + 'xserver/utils')
@@ -22,7 +23,7 @@ from pm_types import *
 
 class HardwareError(Exception):
     pass
-
+@Pyro4.expose
 class PM(object):
     logger = None
     domains = []

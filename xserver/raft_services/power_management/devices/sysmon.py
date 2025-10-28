@@ -19,7 +19,7 @@ logging.basicConfig(level=logging.ERROR)
 
 class Sysmon(object):
     def __init__(self, address, devicepath, devicetype):
-        logging.info("Inside SysmonI2C Constructor")
+        logging.debug("Inside SysmonI2C Constructor")
         self._address = None
         self._bus = None
         self._min = 0
@@ -191,4 +191,4 @@ class Sysmon(object):
         return self._temp, self._min, self._max_max, self._min_min
 
     def __del__(self):
-        logging.info("Inside Sysmon Destructor")
+        logging.debug("Inside Sysmon Destructor")

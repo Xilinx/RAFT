@@ -31,7 +31,7 @@ class INA226(object):
     DIE_ID_VAL =    0x2260
 
     def __init__(self, address, devicepath):
-        logging.info("Inside INA226 Constructor")
+        logging.debug("Inside INA226 Constructor")
         self.die_id = 0
         self.manu_id = 0
         self.addr = int(address, 0)
@@ -164,7 +164,7 @@ class INA226(object):
             logging.error("INA226 _writeRegister failed.")
 
     def __del__(self):
-        logging.info("Inside INA226 Destructor")
+        logging.debug("Inside INA226 Destructor")
 
 class INA7XX(object):
     CONFIG      = 0x00
@@ -212,7 +212,7 @@ class INA7XX(object):
     charge_lsb = 0
 
     def __init__(self, address, devicepath):
-        logging.info("Inside INA7XX Constructor")
+        logging.debug("Inside INA7XX Constructor")
         self.addr = int(address, 0)
         self.i2c = I2C(devicepath)
 
@@ -323,7 +323,7 @@ class INA7XX(object):
             logging.error("INA7XX _writeRegister failed.")
 
     def __del__(self):
-        logging.info("Inside INA7XX Destructor")
+        logging.debug("Inside INA7XX Destructor")
 
 class INA700(INA7XX):
     def __init__(self, address, devicepath):

@@ -1,14 +1,16 @@
 [Unit]
-Description=raft-startup
+Description=RAFT Power Management Pyro Server
 After=systemd-networkd.service
 Requires=systemd-networkd.service
 StartLimitBurst=3
 StartLimitIntervalSec=infinity
 
 [Service]
-ExecStartPre=/bin/sleep 3
+Type=simple
+ExecStartPre=/bin/sleep 1
 ExecStart=/usr/bin/raft-startup
 StandardOutput=journal+console
+StandardError=journal+console
 Restart=always
 RestartSec=3
 
