@@ -61,7 +61,7 @@ class PMIC(object):
             v._output = None
             match v.part_name:
                 case 'IR35215'| 'IRPS5401' | 'IR38164' | 'IR38064' | 'IR38060'\
-                    | 'TPS53681' | 'TPS546B24A' | 'TPS546D24A' | 'TPS544B25'\
+                    | 'TPS53681' | 'TPS546A24A' | 'TPS546B24A' | 'TPS546D24A' | 'TPS544B25'\
                     | 'MPQ2283' | 'MPQ2285' | 'MPQ72963':
                     v._output = PMBusRegulator(device_name=v.part_name, device_path=v.i2c_bus, device_address=v.i2c_address, page=v.page_select, pmbus_vout_mode=v.pmbus_vout_mode, phase=v.phase)
                 case 'MPM54322' | 'MPM54522':

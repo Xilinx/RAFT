@@ -1,0 +1,32 @@
+{
+	"License" : "Copyright (c) 2025 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+
+	"SCU200" : {
+		"FEATURE" : {
+			"List" : ["power"]
+		},
+		"POWER_SENSORS" : {
+			"EXT_5V0" : {
+				"Name" : "EXT_5V0",
+				"Part_Name" : "INA745A",
+				"I2C_Bus" : "/dev/i2c-2",
+				"I2C_Address" : "0x40",
+				"Maximum_Current" : 20000
+			},
+			"VOUT_20V" : {
+				"Name" : "VR_VOUT_20V",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-2",
+				"I2C_Address" : "0x44",
+				"Maximum_Current" : 20000
+			},
+			"VCCINT" : {
+				"Name" : "VCCINT",
+				"Part_Name" : "INA700",
+				"I2C_Bus" : "/dev/i2c-2",
+				"I2C_Address" : "0x45",
+				"Maximum_Current" : 17000
+			}
+		}
+	}
+}
