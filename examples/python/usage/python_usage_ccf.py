@@ -832,7 +832,14 @@ SwVersion_out, HwVersion_out = handle.XDfeCcf_GetVersions(device_id)
 #Return:
 #   None
 
+
+ret = handle.XDfeCcf_GetIsCcfOperational(device_id)
+print(ret)
+
 handle.XDfeCcf_Deactivate(device_id)
+
+ret = handle.XDfeCcf_GetIsCcfOperational(device_id)
+print(ret)
 
 #Description:
 #   Sets the delay, which will be added to TUSER and TLAST (delay matched

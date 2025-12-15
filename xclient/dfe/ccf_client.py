@@ -982,6 +982,17 @@ class CCF_Client(object):
         self.CCF.XDfeCcf_SetRegBank(device_id, RegBank)
         return
 
+    def XDfeCcf_GetIsCcfOperational(self, device_id):
+        """
+        Retrieves the current operational state of CCF.
+
+        :param device_id: id of the opened device.
+        :return: ret: XST_SUCCESS - CCF is operational, XST_FAILURE - CCF is NOT operational.
+        """
+        self.logger.debug(f"XDfeCcf_GetIsCcfOperational({device_id})")
+        operational = self.CCF.XDfeCcf_GetIsCcfOperational(device_id)
+        return operational
+
     def XDfeCcf_GetVersions(self, device_id):
         """
         This API is used to get the driver version.
