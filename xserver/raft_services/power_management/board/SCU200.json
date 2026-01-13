@@ -3,7 +3,7 @@
 
 	"SCU200" : {
 		"FEATURE" : {
-			"List" : ["power"]
+			"List" : ["power", "powerdomain"]
 		},
 		"POWER_SENSORS" : {
 			"EXT_5V0" : {
@@ -26,6 +26,12 @@
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x45",
 				"Maximum_Current" : 17000
+			}
+		},
+		"POWER DOMAIN" : {
+			"PD_FPD" : {
+				"Name" : "FPD",
+				"Rails" : ["VCCINT"]
 			}
 		}
 	}

@@ -13,6 +13,7 @@ import csv
 import time
 import datetime
 import operator
+from pathlib import Path
 sys.path.append('/usr/share/raft/xclient/raft_services')
 from pm_client import PM_Client
 
@@ -193,7 +194,7 @@ def main():
     add_command("output-csv", "Time-series allvalue output results in CSV format", outputcsv_action,
                 arguments={"duration": {"type": int, "min": 1, "action": CheckRange, "help": "Duration time value"},
                            "sampling_rate": {"type": int, "min": 1, "max": 12, "action": CheckRange, "help": "Sampling rate value"}},
-                optional_arguments={"--path": {"type": str, "default": "/home/petalinux", "help": "Path to save the output file"}})
+                optional_arguments={"--path": {"type": str, "default": Path.home(), "help": "Path to save the output file"}})
     # Parse arguments
     args = parser.parse_args()
     # Execute the corresponding function
