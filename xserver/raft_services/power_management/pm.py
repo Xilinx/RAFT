@@ -685,13 +685,15 @@ class PM(object):
                 raise Exception(f'{sensor_name} sensor is not defined')
         match ps.part_name:
             case "INA226":
-                print(conf)
+                if all(x is None for x in conf):
+                    raise  ValueError(f"All registers values are None, give at least one")
                 if len(conf) < 4:
-                    raise ValueError(f"{conf} register value list is wrong")
+                    raise ValueError(f"Register value list is wrong")
             case "INA700" | "INA745A" | "INA745B":
-                print(conf)
+                if all(x is None for x in conf):
+                    raise  ValueError(f"All registers values are None, give at least one")
                 if len(conf) < 5:
-                    raise ValueError(f"{conf} register value list is wrong")
+                    raise ValueError(f"Register value list is wrong")
         return self.pmic.SetPowerSensorConf(ps._sensor, conf)
 
     def __find_voltage(self, voltage_name):

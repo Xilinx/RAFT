@@ -185,22 +185,20 @@
 		"POWER DOMAIN" :  {
 			"PD_LPD" : {
 				"Name" : "LPD",
-				"Rails" : ["VCC_LPD", "VCCAUX_LPD", "VCCO_50X",
-					"VCC_MIPI_507", "VCCIO_MIPI_507"]
+				"Rails" : ["VCC_LPD"]
 			},
 			"PD_FPD" : {
 				"Name" : "FPD",
-				"Rails" : ["VCC_FPD", "UTIL_5V0_504"]
+				"Rails" : ["VCC_FPD"]
 			},
 			"PD_SYSTEM" : {
 				"Name" : "System",
-				"Rails" : ["VCC_SOC_IO", "VCCAUX", "VADJ_FMC", "VCCO_7XX_LP5",
-					"VCC_MMD"]
+				"Rails" : ["VCC_SOC_IO", "VCCO_7XX_LP5", "VCC_MMD"]
 			},
 			"PD_PLD" : {
 				"Name": "PLD",
-				"Rails" : ["VCCO_40X", "VCCINT_1", "VCCINT_2", "VCCINT_3", "VCCINT_4",
-					"VCC_RAM", "GTYP_AVCC", "GTYP_AVCCAUX", "GTYP_AVTT"]
+				"Rails" : ["VCCINT_1", "VCCINT_2", "VCCINT_3", "VCCINT_4",
+					"VCC_RAM", "GTYP_AVCC"]
 			},
 			"PD_AIE" : {
 				"Name" : "AIE",
