@@ -102,7 +102,7 @@ def main():
         "GPIO Control": ["listgpio", "setgpio", "getgpio"],
         "Temperature Measurement": ["listtemperature", "gettemperature"],
         "Measurement Units": ["listunit", "getunit", "availablescale", "setscale"],
-        "Miscellaneous": ["loglevel", "output-csv"]
+        "Miscellaneous": ["loglevel", "output-csv", "powerlog"]
     }
     # Create main parser
     parser = argparse.ArgumentParser(
@@ -195,6 +195,22 @@ def main():
                 arguments={"duration": {"type": int, "min": 1, "action": CheckRange, "help": "Duration time value"},
                            "sampling_rate": {"type": int, "min": 1, "max": 12, "action": CheckRange, "help": "Sampling rate value"}},
                 optional_arguments={"--path": {"type": str, "default": Path.home(), "help": "Path to save the output file"}})
+    add_command(
+    "powerlog",
+    "Dump all power sensors to stdout (optional: log to file). Includes typical voltage mismatch check.",
+    cmd_dump_power_log,
+    optional_arguments={
+        "--threshold": {
+            "type": float,
+            "default": 10.0,
+            "help": "Voltage mismatch threshold percentage (default: 10.0)"
+        },
+        "--outfile": {
+            "type": str,
+            "default": None,
+            "help": "Optional output filename (if not set, no file is written)"
+        }
+    })
     # Parse arguments
     args = parser.parse_args()
     # Execute the corresponding function
@@ -358,6 +374,294 @@ def pm_csv_dump(csv_data, columns_order, filepath, filename):
     except IOError:
         print(f"I/O error while opening {csv_file} to write")
         sys.exit(os.EX_SOFTWARE)
+
+def cmd_dump_power_log(args):
+    import sys
+    import os
+    import datetime
+    import re
+
+    # ----------------------------
+    # Helpers
+    # ----------------------------
+    def is_error_string(x):
+        return isinstance(x, str) and x.strip().lower().startswith("error")
+
+    def unwrap(resp):
+        """
+        PM API returns:
+          {"status":"success|fail","data":...,"message":"..."}
+        But in error cases we may get:
+          "Error: ...."
+        Returns: (ok, data, message)
+        """
+        if is_error_string(resp):
+            return (False, None, resp.strip())
+
+        if not isinstance(resp, dict):
+            return (False, None, f"Unexpected response type: {type(resp)}")
+
+        status = resp.get("status", None)
+        data = resp.get("data", None)
+        msg = resp.get("message", "")
+
+        if status != "success":
+            if is_error_string(msg):
+                return (False, data, msg.strip())
+            return (False, data, msg or "Operation failed")
+
+        return (True, data, msg or "OK")
+
+    def fatal(msg, exit_code):
+        print(f"FATAL: {msg}", file=sys.stderr)
+        sys.exit(exit_code)
+
+    def vrm_rail_name(sensor_rail):
+        """
+        Multiphase rails are enumerated with a SINGLE digit suffix:
+          VCCINT_1, VCCINT_2, ... -> VRM rail is VCCINT
+        Rails like VCC_MIPI_507 are NOT multiphase.
+        """
+        m = re.match(r"^(.*)_([0-9])$", sensor_rail)
+        if m:
+            return m.group(1)
+        return sensor_rail
+
+    def parse_listvoltage_payload(payload):
+        """
+        payload example:
+        [
+          {"VCCINT": {"typical_volt": 0.8}},
+          {"VCC_LPD": {"typical_volt": 0.88}}
+        ]
+        Returns dict: rail -> typical_volt(float)
+        """
+        typical = {}
+        if not isinstance(payload, list):
+            return typical
+
+        for item in payload:
+            if not isinstance(item, dict):
+                continue
+            for rail, info in item.items():
+                if not isinstance(info, dict):
+                    continue
+                tv = info.get("typical_volt", None)
+                if tv is None:
+                    continue
+                try:
+                    typical[rail] = float(tv)
+                except Exception:
+                    pass
+        return typical
+
+    # ----------------------------
+    # Args
+    # ----------------------------
+    try:
+        threshold_pct = float(getattr(args, "threshold", 10.0))
+    except Exception:
+        fatal("Invalid --threshold value", os.EX_USAGE)
+
+    outfile = getattr(args, "outfile", None)
+    log = None
+
+    # ----------------------------
+    # Output function (stdout always, file optional)
+    # ----------------------------
+    def out(line):
+        print(line)
+        if log is not None:
+            log.write(line + "\n")
+
+    # ----------------------------
+    # listfeature check
+    # ----------------------------
+    try:
+        ok, features, msg = unwrap(client.listfeature())
+    except Exception as e:
+        fatal(f"listfeature exception: {e}", os.EX_UNAVAILABLE)
+
+    if not ok:
+        fatal(f"listfeature failed: {msg}", os.EX_UNAVAILABLE)
+
+    if not isinstance(features, list):
+        fatal("listfeature returned unexpected format", os.EX_SOFTWARE)
+
+    if "power" not in features:
+        fatal("Power feature not supported (missing 'power' in listfeature)", os.EX_UNAVAILABLE)
+
+    # ----------------------------
+    # listpower
+    # ----------------------------
+    try:
+        ok, rails_info, msg = unwrap(client.listpower())
+    except Exception as e:
+        fatal(f"listpower exception: {e}", os.EX_UNAVAILABLE)
+
+    if not ok:
+        fatal(f"listpower failed: {msg}", os.EX_UNAVAILABLE)
+
+    if not isinstance(rails_info, list):
+        fatal("listpower returned unexpected format (expected list)", os.EX_SOFTWARE)
+
+    rails = []
+    try:
+        for item in rails_info:
+            if isinstance(item, dict):
+                rails.extend(item.keys())
+    except Exception:
+        fatal("listpower returned malformed list", os.EX_SOFTWARE)
+
+    if not rails:
+        fatal("listpower returned empty list (no sensors found)", os.EX_UNAVAILABLE)
+
+    # ----------------------------
+    # listvoltage (typical map) - not fatal if missing
+    # ----------------------------
+    typical_map = {}
+    try:
+        vok, vpayload, vmsg = unwrap(client.listvoltage())
+        if vok:
+            typical_map = parse_listvoltage_payload(vpayload)
+    except Exception:
+        typical_map = {}
+
+    # ----------------------------
+    # Open log file only if requested
+    # ----------------------------
+    if outfile:
+        try:
+            log = open(outfile, "w")
+        except OSError as e:
+            fatal(f"Failed to write log file '{outfile}': {e}", os.EX_CANTCREAT)
+
+    # ----------------------------
+    # Print header
+    # ----------------------------
+    partial_error = False
+    out(f"Power log generated at: {datetime.datetime.now()}")
+    out(f"Voltage mismatch threshold: {threshold_pct:.1f}%")
+    out("")
+
+    header = (
+        f"{'RAIL':20} "
+        f"{'SENS_V(V)':10} "
+        f"{'DEF_V(V)':10} "
+        f"{'CURR(A)':10} "
+        f"{'POWER(W)':10} "
+        f"{'STATUS':14} "
+        f"COMMENT"
+    )
+    sep = (
+        f"{'-'*20} "
+        f"{'-'*10} "
+        f"{'-'*10} "
+        f"{'-'*10} "
+        f"{'-'*10} "
+        f"{'-'*14} "
+        f"{'-'*40}"
+    )
+
+    out(header)
+    out(sep)
+
+    # ----------------------------
+    # Per-rail dump
+    # ----------------------------
+    for rail in rails:
+        status = "OK"
+        comment = ""
+
+        # getpower
+        try:
+            pok, pdata, pmsg = unwrap(client.getpower(rail))
+        except Exception as e:
+            pok, pdata, pmsg = (False, None, f"Error: exception: {e}")
+
+        if not pok:
+            out(
+                f"{rail:20} "
+                f"{'N/A':10} "
+                f"{'N/A':10} "
+                f"{'N/A':10} "
+                f"{'N/A':10} "
+                f"{'ERROR':14} "
+                f"{pmsg}"
+            )
+            partial_error = True
+            continue
+
+        if not isinstance(pdata, dict):
+            out(
+                f"{rail:20} "
+                f"{'N/A':10} "
+                f"{'N/A':10} "
+                f"{'N/A':10} "
+                f"{'N/A':10} "
+                f"{'ERROR':14} "
+                f"Error: malformed getpower data"
+            )
+            partial_error = True
+            continue
+
+        sens_v = pdata.get("Voltage", None)
+        curr = pdata.get("Current", None)
+        pw = pdata.get("Power", None)
+
+        # typical voltage lookup (via listvoltage)
+        vrm_name = vrm_rail_name(rail)
+        if vrm_name != rail:
+            comment = f"VRM={vrm_name}"
+
+        typ_v = typical_map.get(vrm_name, None)
+        if typ_v is None:
+            comment = (comment + " | " if comment else "") + "VRM_NOT_FOUND"
+
+        # compare sensor voltage vs typical
+        try:
+            if sens_v is not None and typ_v is not None:
+                sens_v_f = float(sens_v)
+                typ_v_f = float(typ_v)
+
+                if typ_v_f != 0.0:
+                    diff_pct = abs(sens_v_f - typ_v_f) / abs(typ_v_f) * 100.0
+                    if diff_pct > threshold_pct:
+                        status = "WARN"
+                        comment = (comment + " | " if comment else "") + f"Vdiff={diff_pct:.1f}%"
+                else:
+                    status = "TYP_ZERO"
+        except Exception:
+            status = "BAD_VOLT_FMT"
+
+        # output row
+        sens_v_out = "N/A" if sens_v is None else str(sens_v)
+        typ_v_out = "N/A" if typ_v is None else str(typ_v)
+        curr_out = "N/A" if curr is None else str(curr)
+        pw_out = "N/A" if pw is None else str(pw)
+
+        out(
+            f"{rail:20} "
+            f"{sens_v_out:10} "
+            f"{typ_v_out:10} "
+            f"{curr_out:10} "
+            f"{pw_out:10} "
+            f"{status:14} "
+            f"{comment}"
+        )
+
+    # ----------------------------
+    # Cleanup
+    # ----------------------------
+    if log is not None:
+        log.close()
+        print(f"\nLog written to: {outfile}")
+
+    if partial_error:
+        sys.exit(os.EX_SOFTWARE)
+
+    sys.exit(os.EX_OK)
+
 
 if __name__ == "__main__":
     # call main
