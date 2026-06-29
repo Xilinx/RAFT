@@ -430,7 +430,7 @@
 			},
 			"GTYP_AVTT": {
 				"Name": "GTYP_AVTT",
-				"Part_Name": "MPQ2285",
+				"Part_Name": "MPQ2283",
 				"Maximum_Volt": 1.32,
 				"Typical_Volt": 1.2,
 				"Minimum_Volt": 1.08,
@@ -485,7 +485,7 @@
 			},
 			"LP5_VDDH_1V05": {
 				"Name": "LP5_VDDH_1V05",
-				"Part_Name": "MPQ2283",
+				"Part_Name": "MPQ2287",
 				"Maximum_Volt": 1.15,
 				"Typical_Volt": 1.05,
 				"Minimum_Volt": 0.95,

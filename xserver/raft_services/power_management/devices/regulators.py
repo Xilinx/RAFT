@@ -1,8 +1,8 @@
-# Copyright (C) 2024-2025 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2024-2026 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2024-2025, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2024-2026, Advanced Micro Devices, Inc."
 
 from enum import IntEnum
 from periphery import I2C, GPIO
@@ -70,7 +70,7 @@ class PMBusRegulator:
             case 'TPS53681':
                 self.vout_scaling = ScalingType.VID
                 self.temp_scaling = ScalingType.LINEAR11
-            case 'MPQ2283' | 'MPQ2285' | 'MPQ72963':
+            case 'MPQ2283' | 'MPQ2285' | 'MPQ2287' | 'MPQ72963':
                 self.vout_scaling = ScalingType.DIRECT
                 self.iout_scaling = None
                 self.temp_scaling = None
@@ -126,7 +126,7 @@ class PMBusRegulator:
 
     def set_voltage(self, value):
         pm_print(f"set_voltage({value})")
-        if self.name in ("MPQ2283", "MPQ2285"):
+        if self.name in ("MPQ2283", "MPQ2285", "MPQ2287"):
             raw_value = self._value_2_rawvalue(value, self.vout_scaling)
             pm_print("raw_value 0x{0:02x}".format(raw_value))
             self._write_byte(PMBUS.VOUT_COMMAND, raw_value)
@@ -148,7 +148,7 @@ class PMBusRegulator:
         if self.page >= 0:
             self._select_page()
         self._get_vout_mode()
-        if self.name in ("MPQ2283", "MPQ2285"):
+        if self.name in ("MPQ2283", "MPQ2285", "MPQ2287"):
             raw_voltage = self._read_byte(PMBUS.VOUT_COMMAND)
         else:
             raw_voltage = self._read_word(PMBUS.READ_VOUT)
@@ -241,7 +241,7 @@ class PMBusRegulator:
         return value
 
     def _direct_to_float(self, raw_value):
-        if self.name in ("MPQ2283", "MPQ2285"):
+        if self.name in ("MPQ2283", "MPQ2285", "MPQ2287"):
             VOUT_SL = self._read_byte(PMBUS.VOUT_SCALE_LOOP) + 1
             value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
         elif self.name == "MPQ72963":
@@ -295,7 +295,7 @@ class PMBusRegulator:
         return round((value / (2 ** exponent)))
 
     def _float_to_direct(self, value):
-        if self.name in ("MPQ2283", "MPQ2285"):
+        if self.name in ("MPQ2283", "MPQ2285", "MPQ2287"):
             VOUT_SL = self._read_byte(PMBUS.VOUT_SCALE_LOOP) + 1
             raw_value = ((value / VOUT_SL) - 206.25e-3) / 6.25e-3
             #value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
