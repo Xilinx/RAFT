@@ -276,7 +276,7 @@
 		"VOLTAGE": {
 			"GTM2_CPM6_AVCC": {
 				"Name": "GTM2_CPM6_AVCC",
-				"Part_Name": "MPQ2283",
+				"Part_Name": "MPQ2285",
 				"Maximum_Volt": 1.012,
 				"Typical_Volt": 0.92,
 				"Minimum_Volt": 0.828,
@@ -298,7 +298,7 @@
 			},
 			"GTM2_AVCCAUX": {
 				"Name": "GTM2_AVCCAUX",
-				"Part_Name": "MPQ2283",
+				"Part_Name": "MPQ2285",
 				"Maximum_Volt": 1.65,
 				"Typical_Volt": 1.5,
 				"Minimum_Volt": 1.35,
@@ -331,7 +331,7 @@
 			},
 			"VCCO_1V0": {
 				"Name": "VCCO_1V0",
-				"Part_Name": "MPQ2283",
+				"Part_Name": "MPQ2285",
 				"Maximum_Volt": 1.1,
 				"Typical_Volt": 1.0,
 				"Minimum_Volt": 0.9,
@@ -375,7 +375,7 @@
 			},
 			"VCC_RAM": {
 				"Name": "VCC_RAM",
-				"Part_Name": "MPQ2283",
+				"Part_Name": "MPQ2285",
 				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
 				"Minimum_Volt": 0.72,
@@ -419,7 +419,7 @@
 			},
 			"VDD_LP5": {
 				"Name": "VDD_LP5",
-				"Part_Name": "MPQ2283",
+				"Part_Name": "MPQ2287",
 				"Maximum_Volt": 1.155,
 				"Typical_Volt": 1.05,
 				"Minimum_Volt": 0.945,

@@ -1,8 +1,8 @@
-# Copyright (C) 2023-2025 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2023-2026 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2023-2025, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023-2026, Advanced Micro Devices, Inc."
 
 import os
 import sys
@@ -62,7 +62,7 @@ class PMIC(object):
             match v.part_name:
                 case 'IR35215'| 'IRPS5401' | 'IR38164' | 'IR38064' | 'IR38060'\
                     | 'TPS53681' | 'TPS546A24A' | 'TPS546B24A' | 'TPS546D24A' | 'TPS544B25'\
-                    | 'MPQ2283' | 'MPQ2285' | 'MPQ72963':
+                    | 'MPQ2283' | 'MPQ2285' | 'MPQ2287' | 'MPQ72963':
                     v._output = PMBusRegulator(device_name=v.part_name, device_path=v.i2c_bus, device_address=v.i2c_address, page=v.page_select, pmbus_vout_mode=v.pmbus_vout_mode, phase=v.phase)
                 case 'MPM54322' | 'MPM54522':
                     v._output = MPSRegulator(device_path=v.i2c_bus, device_address=v.i2c_address, page=v.page_select, phase=v.phase, fb_ratio=v.fb_ratio)
