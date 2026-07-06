@@ -329,7 +329,7 @@
 				"Phase" : 1
 			},
 			"VCC_PSLP": {
-				"Name": "GTM_AVCC",
+				"Name": "VCC_PSLP",
 				"Part_Name": "MPQ72963",
 				"Maximum_Volt": 0.88,
 				"Typical_Volt": 0.8,
@@ -464,9 +464,9 @@
 			"VCCO_302": {
 				"Name": "VCCO_302",
 				"Part_Name": "MPQ2283",
-				"Maximum_Volt": 1.98,
-				"Typical_Volt": 1.8,
-				"Minimum_Volt": 1.62,
+				"Maximum_Volt": 3.63,
+				"Typical_Volt": 3.3,
+				"Minimum_Volt": 2.97,
 				"I2C_Bus": "/dev/i2c-4",
 				"I2C_Address": "0x15",
 				"PMBus_VOUT_MODE": 1,
@@ -495,7 +495,7 @@
 				"Page_Select": -1
 			},
 			"LP5_VDDQ_0V5": {
-				"Name": "GTYP1_AVCCAUX",
+				"Name": "LP5_VDDQ_0V5",
 				"Part_Name": "MPQ2283",
 				"Maximum_Volt": 0.55,
 				"Typical_Volt": 0.5,
@@ -536,7 +536,7 @@
 				"I2C_Bus" : "/dev/i2c-3",
 				"I2C_Address" : "0x63",
 				"Page_Select" : -1,
-				"FB_Ratio" : 1.5
+				"FB_Ratio" : 0.3334
 			},
 			"DAC_AVCCAUX" : {
 				"Name" : "DAC_AVCCAUX",
@@ -547,7 +547,7 @@
 				"I2C_Bus" : "/dev/i2c-3",
 				"I2C_Address" : "0x64",
 				"Page_Select" : 0.0,
-				"FB_Ratio" : 1.5
+				"FB_Ratio" : 0.3334
 			},
 			"DAC_AVTT" : {
 				"Name" : "DAC_AVTT",
