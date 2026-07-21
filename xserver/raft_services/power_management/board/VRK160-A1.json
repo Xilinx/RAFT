@@ -507,58 +507,58 @@
 			},
 			"ADC_AVCC" : {
 				"Name" : "ADC_AVCC",
-				"Part_Name" : "LT7182S",
+				"Part_Name" : "MPM54522",
 				"Maximum_Volt" : 1,
 				"Typical_Volt" : 0.9,
 				"Minimum_Volt" : 0.8,
 				"I2C_Bus" : "/dev/i2c-3",
-				"I2C_Address" : "0x41",
-				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : 0
+				"I2C_Address" : "0x61",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.6667
 			},
 			"DAC_AVCC" : {
 				"Name" : "DAC_AVCC",
-				"Part_Name" : "LT7182S",
+				"Part_Name" : "MPM54522",
 				"Maximum_Volt" : 1,
 				"Typical_Volt" : 0.9,
 				"Minimum_Volt" : 0.8,
 				"I2C_Bus" : "/dev/i2c-3",
-				"I2C_Address" : "0x42",
-				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : 0
+				"I2C_Address" : "0x62",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.6667
 			},
 			"ADC_AVCCAUX" : {
 				"Name" : "ADC_AVCCAUX",
-				"Part_Name" : "LT7182S",
+				"Part_Name" : "MPM54322",
 				"Maximum_Volt" : 2,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1.5,
 				"I2C_Bus" : "/dev/i2c-3",
-				"I2C_Address" : "0x43",
-				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : 0
+				"I2C_Address" : "0x63",
+				"Page_Select" : -1,
+				"FB_Ratio" : 0.3334
 			},
 			"DAC_AVCCAUX" : {
 				"Name" : "DAC_AVCCAUX",
-				"Part_Name" : "LT7182S",
+				"Part_Name" : "MPM54322",
 				"Maximum_Volt" : 2,
 				"Typical_Volt" : 1.8,
 				"Minimum_Volt" : 1.5,
 				"I2C_Bus" : "/dev/i2c-3",
-				"I2C_Address" : "0x44",
-				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : 0
+				"I2C_Address" : "0x64",
+				"Page_Select" : 0.0,
+				"FB_Ratio" : 0.3334
 			},
 			"DAC_AVTT" : {
 				"Name" : "DAC_AVTT",
-				"Part_Name" : "LT7182S",
+				"Part_Name" : "MPM54322",
 				"Maximum_Volt" : 3,
 				"Typical_Volt" : 2.85,
 				"Minimum_Volt" : 2.5,
 				"I2C_Bus" : "/dev/i2c-3",
-				"I2C_Address" : "0x44",
-				"PMBus_VOUT_MODE" : 1,
-				"Page_Select" : 1
+				"I2C_Address" : "0x64",
+				"Page_Select" : 1,
+				"FB_Ratio" : 0.2126
 			},
 			"VADJ_FMC": {
 				"Name": "VADJ_FMC",

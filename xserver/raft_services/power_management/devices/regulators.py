@@ -74,10 +74,15 @@ class PMBusRegulator:
                 self.vout_scaling = ScalingType.DIRECT
                 self.iout_scaling = None
                 self.temp_scaling = None
+            case 'LT7182S':
+                self.vout_scaling = ScalingType.LINEAR16
             case _:
                 self.vout_scaling = ScalingType.LINEAR16
 
-        if self.pmbus_vout_mode <= 0:
+        if self.name == 'LT7182S':
+            # NOTE: validate VOUT_MODE on hardware (LT7182S also supports IEEE754 0x60).
+            self.vout_mode = 0x14
+        elif self.pmbus_vout_mode <= 0:
             self.vout_mode = 0x18 # 0x18 - 0x20 = -8
 
         # Initialize ALERT pin if provided
@@ -361,7 +366,13 @@ class PMBusRegulator:
         """Retrieve VOUT_MODE scaling exponent."""
         if self.pmbus_vout_mode <= 0:
             return
-        self.vout_mode = self._read_byte(PMBUS.VOUT_MODE)
+        mode = self._read_byte(PMBUS.VOUT_MODE)
+        if mode is None:
+            return
+        if self.name == 'LT7182S' and mode == 0x60:
+            pm_print("LT7182S VOUT_MODE 0x60 (IEEE754) not supported by PMBusRegulator; using Linear16 interim default")
+            return
+        self.vout_mode = mode
         pm_print("raw_vout_mode 0x{0:02x}".format(self.vout_mode))
 
     def _write_word(self, command, value):

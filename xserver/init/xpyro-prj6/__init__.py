@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-# Copyright (C) 2023-2025 Advanced Micro Devices, Inc.
+# Copyright (C) 2023-2026 Advanced Micro Devices, Inc.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2023-2025, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023-2026, Advanced Micro Devices, Inc."
 
 import os
 import sys
 import json
 import logging
+import subprocess
 import Pyro4
 from periphery import I2C
+
+SC_BOARD_ID = '/bin/sc-board-id'
 
 # Ensure immediate flush for stdout
 sys.stdout.reconfigure(line_buffering=True)
@@ -26,6 +29,7 @@ from pm import PM
 from utils import get_ip_and_port
 
 RAFT_DIR = '/usr/share/raft/'
+BOARD_PATH = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/board')
 
 # -------------------------
 # Robust Logging Setup
@@ -133,13 +137,98 @@ def get_eeprom_data():
     exit_program("Board EEPROM Identification Failed.")
     return None
 
-def get_product_name():
+# Field index within board area in EEPROM that are represented as strings
+# (from EEPROM_BOARD_FIELDS_START):
+# 0: Manufacturer, 1: Product Name, 2: Serial Number, 3: Part Number,
+# 4: FRU ID, 5: Revision
+EEPROM_END_OF_FIELDS = 0xC1
+EEPROM_BOARD_AREA = 0x08
+EEPROM_BOARD_FIELDS_START = 0x0E
+EEPROM_BOARD_NAME_INDEX = 1
+EEPROM_BOARD_REVISION_INDEX = 5
+
+# Read string field `index` by walking type/length fields from `start`.
+def eeprom_read_field(eeprom_data, start, index, area_end):
+    offset = start
+    field_num = 0
+    while offset < area_end and offset < len(eeprom_data):
+        type_length = eeprom_data[offset]
+        if type_length == EEPROM_END_OF_FIELDS:
+            return ""
+
+        # Unused/padding bytes; skip without advancing the field index.
+        if type_length in (0x00, 0xFF):
+            offset += 1
+            continue
+
+        field_type = type_length & 0xC0
+        length = type_length & 0x3F
+        if field_type == 0x80:
+            logging.error("EEPROM field parsing: length in ASCII is not supported")
+            return ""
+
+        if field_num == index:
+            # Board area strings are text strings (type 0xC0); length is in bytes.
+            if field_type != 0xC0:
+                return ""
+            raw = bytes(eeprom_data[offset + 1:offset + 1 + length])
+            return raw.decode("ascii", errors="ignore").replace("\x00", "").strip()
+
+        # Advance past this field (1 type/length byte + Length data bytes) to the next field.
+        offset += 1 + length
+        field_num += 1
+    return ""
+
+# Run /bin/sc-board-id with a single option; return stripped stdout or None.
+def run_sc_board_id(option):
+    try:
+        result = subprocess.run(
+            [SC_BOARD_ID, option], capture_output=True, text=True, check=True, timeout=5
+        )
+    except (OSError, subprocess.SubprocessError) as err:
+        logging.warning(f"{SC_BOARD_ID} {option} failed: {err}")
+        return None
+
+    value = result.stdout.strip()
+    return value or None
+
+def get_board_identity():
+    if os.path.isfile(SC_BOARD_ID):
+        product_name = run_sc_board_id('--name')
+        product_revision = run_sc_board_id('--func-rev')
+        if product_name and product_revision:
+            product_name = product_name.upper()
+            product_revision = product_revision.upper()
+            logging.info(f"Board identity from {SC_BOARD_ID}")
+            logging.info(f"Product name: {product_name}")
+            logging.info(f"Product revision: {product_revision}")
+            return product_name, product_revision
+
+        logging.info(f"{SC_BOARD_ID} failed; using EEPROM")
+    else:
+        logging.info(f"{SC_BOARD_ID} not available; using EEPROM")
+
     eeprom_data = get_eeprom_data()
-    offset = 0x15
-    length = int.from_bytes(eeprom_data[offset:offset+1], "big") & 0x3f
-    name = eeprom_data[offset+1:(offset+1 + length)].decode("utf-8").strip('\x00')
-    logging.debug(f"Product name determined: {name}")
-    return name
+    board_area_end = EEPROM_BOARD_AREA + eeprom_data[EEPROM_BOARD_AREA + 1] * 8
+    product_name = eeprom_read_field(
+        eeprom_data, EEPROM_BOARD_FIELDS_START, EEPROM_BOARD_NAME_INDEX, board_area_end
+    )
+    product_revision = eeprom_read_field(
+        eeprom_data, EEPROM_BOARD_FIELDS_START, EEPROM_BOARD_REVISION_INDEX, board_area_end
+    )
+
+    if not product_name:
+        exit_program("Board EEPROM product name is missing or invalid.")
+    if not product_revision:
+        logging.warning(
+            "Board EEPROM product revision is missing or invalid; "
+            "falling back to base board JSON."
+        )
+
+    logging.info("Board identity from EEPROM")
+    logging.info(f"Product name: {product_name}")
+    logging.info(f"Product revision: {product_revision or '(none)'}")
+    return product_name, product_revision
 
 # -------------------------
 # Pyro4 Daemon
@@ -150,20 +239,35 @@ def start_pyro_daemon():
     if not IPADDR:
         exit_program("No network interface found. Cannot start Pyro4 daemon.")
 
-    json_file = os.path.join(
-        RAFT_DIR, 'xserver/raft_services/power_management/board',
-        f"{get_product_name()}.json"
-    )
-    logging.debug(f"Using board JSON file: {json_file}")
-    if not is_valid_json_file(json_file):
+    product_name, product_revision = get_board_identity()
+
+    json_file = None
+    if product_revision:
+        rev_file = os.path.join(
+            BOARD_PATH, f"{product_name}-{product_revision}.json"
+        )
+        if os.path.isfile(rev_file):
+            json_file = rev_file
+            logging.info(f"Board file (revision): {json_file}")
+        else:
+            logging.info(f"Board file (revision) not found: {rev_file}")
+
+    if json_file is None:
+        base_file = os.path.join(BOARD_PATH, f"{product_name}.json")
+        if os.path.isfile(base_file):
+            json_file = base_file
+            logging.info(f"Board file: {json_file}")
+        else:
+            logging.info(f"Board file not found: {base_file}")
+
+    if json_file is None or not is_valid_json_file(json_file):
         exit_program("Invalid or missing board configuration JSON.")
 
     with open(json_file, 'r') as f:
         json_data = json.load(f)
-    board_name = os.path.splitext(os.path.basename(json_file))[0]
 
     try:
-        pm_obj = PM(json_data, board_name, onboard)
+        pm_obj = PM(json_data, product_name, onboard)
         daemon = Pyro4.Daemon(host=IPADDR, port=PORT)
         uri = daemon.register(pm_obj, objectId="PM")
 
