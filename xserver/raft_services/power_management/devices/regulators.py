@@ -41,6 +41,74 @@ class ScalingType(IntEnum):
     LINEAR11 = 3
     DIRECT = 4
 
+PMBUS_IEEE754_VOUT_MODE = 0x60
+PMBUS_IEEE754_EXP_OFFSET = 25
+PMBUS_IEEE754_MIN_MANTISSA = 0x400
+PMBUS_IEEE754_MAX_MANTISSA = 0x7FF
+PMBUS_IEEE754_VOUT_SCALE = 1000
+
+# Decode PMBus VOUT IEEE754 half-precision register data to volts.
+def _pmbus_ieee754_reg_to_volts(reg):
+    # 16-bit word: [15]=sign, [14:10]=exponent, [9:0]=mantissa.
+    sign = (reg >> 15) & 1
+    exponent = (reg >> 10) & 0x1F
+    val = reg & 0x3FF
+    scale = PMBUS_IEEE754_VOUT_SCALE
+
+    if exponent == 0:
+        # Subnormal: effective exponent is -24.
+        exponent = -(14 + 10)
+    elif exponent == 0x1F:
+        # Saturated value.
+        exponent = 0
+        val = 65504
+    else:
+        # Normal: remove IEEE754 bias (15+10) and restore implicit mantissa bit.
+        exponent -= PMBUS_IEEE754_EXP_OFFSET
+        val |= PMBUS_IEEE754_MIN_MANTISSA
+
+    # Scale to millivolts, apply exponent, then convert back to volts.
+    val *= scale
+    if exponent >= 0:
+        val <<= exponent
+    else:
+        val >>= -exponent
+
+    if sign:
+        val = -val
+
+    return val / scale
+
+# Encode volts as PMBus VOUT IEEE754 half-precision register data.
+def _pmbus_volts_to_ieee754_reg(value):
+    scale = PMBUS_IEEE754_VOUT_SCALE
+    if value == 0:
+        return 0
+
+    sign = 0
+    # Work in millivolts to keep the mantissa in integer form.
+    data = round(value * scale)
+    if data < 0:
+        sign = 1
+        data = -data
+
+    # Start at the IEEE754 half-precision bias and normalize mantissa into range.
+    exponent = PMBUS_IEEE754_EXP_OFFSET
+    while data > PMBUS_IEEE754_MAX_MANTISSA * scale and exponent < 30:
+        exponent += 1
+        data >>= 1
+    while data < PMBUS_IEEE754_MIN_MANTISSA * scale and exponent > 1:
+        exponent -= 1
+        data <<= 1
+
+    mantissa = round(data / scale)
+
+    # Clamp mantissa to the 10-bit IEEE754 half-precision range.
+    mantissa = max(PMBUS_IEEE754_MIN_MANTISSA, min(mantissa, PMBUS_IEEE754_MAX_MANTISSA))
+
+    # Pack sign, biased exponent, and 10-bit mantissa into one 16-bit register.
+    return (sign << 15) | ((exponent & 0x1F) << 10) | (mantissa & 0x3FF)
+
 def pm_print(printstr):
     if(PM_LOWLEVEL_DEBUG):
         print(printstr)
@@ -79,10 +147,7 @@ class PMBusRegulator:
             case _:
                 self.vout_scaling = ScalingType.LINEAR16
 
-        if self.name == 'LT7182S':
-            # NOTE: validate VOUT_MODE on hardware (LT7182S also supports IEEE754 0x60).
-            self.vout_mode = 0x14
-        elif self.pmbus_vout_mode <= 0:
+        if self.pmbus_vout_mode <= 0:
             self.vout_mode = 0x18 # 0x18 - 0x20 = -8
 
         # Initialize ALERT pin if provided
@@ -310,7 +375,12 @@ class PMBusRegulator:
             raw_value = 0 # implement !
         return round(raw_value)
 
+    def _uses_ieee754_vout(self):
+        return (self.vout_mode & 0x60) == PMBUS_IEEE754_VOUT_MODE
+
     def _value_2_rawvalue(self, value, scaling):
+        if self._uses_ieee754_vout() and scaling == ScalingType.LINEAR16:
+            return int(_pmbus_volts_to_ieee754_reg(value))
         match scaling:
             case ScalingType.VID:
                 return int(self._float_to_vid_mode(value))
@@ -325,6 +395,8 @@ class PMBusRegulator:
 
     def _rawvalue_2_value(self, raw_value, scaling):
         """Apply scaling to raw PMBus data based on scaling type."""
+        if self._uses_ieee754_vout() and scaling == ScalingType.LINEAR16:
+            return _pmbus_ieee754_reg_to_volts(raw_value)
         match scaling:
             case ScalingType.VID:
                 return self._vid_mode_to_float(raw_value)
@@ -368,9 +440,6 @@ class PMBusRegulator:
             return
         mode = self._read_byte(PMBUS.VOUT_MODE)
         if mode is None:
-            return
-        if self.name == 'LT7182S' and mode == 0x60:
-            pm_print("LT7182S VOUT_MODE 0x60 (IEEE754) not supported by PMBusRegulator; using Linear16 interim default")
             return
         self.vout_mode = mode
         pm_print("raw_vout_mode 0x{0:02x}".format(self.vout_mode))

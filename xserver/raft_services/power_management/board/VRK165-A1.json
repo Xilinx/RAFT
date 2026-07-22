@@ -280,24 +280,24 @@
 				"Page_Select": 0,
 				"Phase" : 2
 			},
-			"GTM_AVTT": {
-				"Name": "GTM_AVTT",
-				"Part_Name": "MPQ72963",
-				"Maximum_Volt": 1.32,
-				"Typical_Volt": 1.2,
-				"Minimum_Volt": 1.08,
-				"I2C_Bus": "/dev/i2c-3",
-				"I2C_Address": "0x24",
-				"PMBus_VOUT_MODE": 0,
-				"Page_Select": 1,
-				"Phase" : 1
-			},
 			"GTM_AVCC": {
 				"Name": "GTM_AVCC",
 				"Part_Name": "MPQ72963",
 				"Maximum_Volt": 1,
 				"Typical_Volt": 0.92,
 				"Minimum_Volt": 0.8,
+				"I2C_Bus": "/dev/i2c-3",
+				"I2C_Address": "0x24",
+				"PMBus_VOUT_MODE": 0,
+				"Page_Select": 1,
+				"Phase" : 1
+			},
+			"GTM_AVTT": {
+				"Name": "GTM_AVTT",
+				"Part_Name": "MPQ72963",
+				"Maximum_Volt": 1.32,
+				"Typical_Volt": 1.2,
+				"Minimum_Volt": 1.08,
 				"I2C_Bus": "/dev/i2c-3",
 				"I2C_Address": "0x24",
 				"PMBus_VOUT_MODE": 0,
