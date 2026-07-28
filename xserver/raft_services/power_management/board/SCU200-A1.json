@@ -18,14 +18,14 @@
 				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x44",
-				"Maximum_Current" : 4000
+				"Maximum_Current" : 20000
 			},
 			"VCCINT" : {
 				"Name" : "VCCINT",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-2",
 				"I2C_Address" : "0x45",
-				"Maximum_Current" : 20000
+				"Maximum_Current" : 17000
 			}
 		},
 		"POWER DOMAIN" : {
@@ -36,3 +36,4 @@
 		}
 	}
 }
+
