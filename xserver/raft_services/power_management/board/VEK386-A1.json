@@ -92,14 +92,14 @@
 			},
 			"VCC_MIPI_507" : {
 				"Name" : "VCC_MIPI_507",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-5",
 				"I2C_Address" : "0x47",
 				"Maximum_Current" : 500
 			},
 			"VCCIO_MIPI_507" : {
 				"Name" : "VCCIO_MIPI_507",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-6",
 				"I2C_Address" : "0x44",
 				"Maximum_Current" : 500
@@ -120,21 +120,21 @@
 			},
 			"VADJ_FMC" : {
 				"Name" : "VADJ_FMC",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-6",
 				"I2C_Address" : "0x47",
 				"Maximum_Current" : 6000
 			},
 			"VCCO_7XX_LP5" : {
 				"Name" : "VCCO_7XX_LP5",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-9",
 				"I2C_Address" : "0x47",
 				"Maximum_Current" : 10000
 			},
 			"GTYP_AVTT" : {
 				"Name" : "GTYP_AVTT",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-9",
 				"I2C_Address" : "0x46",
 				"Maximum_Current" : 4000
@@ -155,21 +155,21 @@
 			},
 			"VCC_MMD" : {
 				"Name" : "VCC_MMD",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-10",
 				"I2C_Address" : "0x44",
 				"Maximum_Current" : 6000
 			},
 			"GTYP_AVCC" : {
 				"Name" : "GTYP_AVCC",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-10",
 				"I2C_Address" : "0x46",
 				"Maximum_Current" : 4000
 			},
 			"VCC_RAM" : {
 				"Name" : "VCC_RAM",
-				"Part_Name" : "INA745A",
+				"Part_Name" : "INA700",
 				"I2C_Bus" : "/dev/i2c-10",
 				"I2C_Address" : "0x45",
 				"Maximum_Current" : 2000

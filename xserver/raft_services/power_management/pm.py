@@ -79,20 +79,22 @@ class PM(object):
         }
         self.scales = {param: "base" for param in self.unit_config}
 
+        power_sensors = board_data.get('POWER SENSORS') or board_data.get('POWER_SENSORS', {})
+
         if 'powerdomain' in self.feature_list:
             if 'POWER DOMAIN' in board_data:
                 for key, val in board_data['POWER DOMAIN'].items():
                     temp_d = Domain(**val)
                     for index, railname in enumerate(temp_d.railnames):
-                        for k, v in board_data['POWER_SENSORS'].items():
+                        for k, v in power_sensors.items():
                             if k == railname:
                                 if temp_d.railnames[index] != v['Name']:
                                     temp_d.railnames[index] = v['Name']
                     self.domains.append(temp_d)
 
         if 'power' in self.feature_list:
-            if 'POWER_SENSORS' in board_data:
-                for k, v in board_data['POWER_SENSORS'].items():
+            if power_sensors:
+                for k, v in power_sensors.items():
                     temp_r = Rails(**v)
                     self.sensors.append(temp_r)
 
