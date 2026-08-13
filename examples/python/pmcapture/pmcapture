@@ -1,0 +1,506 @@
+#!/usr/bin/env python3
+# Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+
+# pmcapture command-line tool (start, stop, arm, disarm, status, ping).
+# Sends commands to capture_daemon on /run/pmcapture/control.sock.
+#
+# Usage:
+#     pmcapture daemon
+#     pmcapture start [--capture-config PATH] [--output file|tcp] ...
+#     pmcapture arm [--gpio NAME] [--capture-config PATH] ...
+#     pmcapture disarm
+#     pmcapture stop
+#     pmcapture status
+#     pmcapture ping
+
+from __future__ import annotations
+
+import os
+import sys
+
+_SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+if _SCRIPT_DIR not in sys.path:
+    sys.path.insert(0, _SCRIPT_DIR)
+
+import argparse
+import json
+import socket
+
+from capture_daemon import CONTROL_SOCK, read_status_file
+
+_ERROR_PREFIX = "ERROR: "
+
+
+# Return a single-line CLI error string with a standard ERROR: prefix.
+def _format_cli_error(message) -> str:
+    if message is None:
+        text = "command failed"
+    elif isinstance(message, dict):
+        text = str(message.get("error") or "command failed")
+    else:
+        text = str(message).strip() or "command failed"
+    for prefix in (_ERROR_PREFIX, "ERROR:", "error:"):
+        if text.startswith(prefix):
+            text = text[len(prefix) :].lstrip()
+            break
+    return _ERROR_PREFIX + text
+
+
+# Print formatted CLI error to stderr.
+def _print_error(message) -> None:
+    print(_format_cli_error(message), file=sys.stderr)
+
+# Send one JSON request to daemon control socket.
+def _send_command(payload: dict, sock_path: str = CONTROL_SOCK, timeout: float = 10.0) -> dict:
+    if not os.path.exists(sock_path):
+        st = read_status_file()
+        return {
+            "ok": False,
+            "error": f"daemon not running (no control socket at {sock_path})",
+            "status_file": st,
+        }
+    sock = socket.socket(socket.AF_UNIX, socket.SOCK_STREAM)
+    try:
+        sock.settimeout(timeout)
+        sock.connect(sock_path)
+        sock.sendall((json.dumps(payload) + "\n").encode())
+        chunks: list[bytes] = []
+        while True:
+            part = sock.recv(65536)
+            if not part:
+                break
+            chunks.append(part)
+            if b"\n" in part:
+                break
+        raw = b"".join(chunks).decode("utf-8", errors="replace").strip()
+        if not raw:
+            return {"ok": False, "error": "empty response from daemon"}
+        try:
+            return json.loads(raw.split("\n", 1)[0])
+        except json.JSONDecodeError:
+            return {"ok": False, "error": "invalid response from daemon"}
+    except socket.timeout:
+        return {"ok": False, "error": "daemon request timed out"}
+    except OSError as e:
+        return {"ok": False, "error": f"daemon communication failed: {e}"}
+    finally:
+        try:
+            sock.close()
+        except OSError:
+            pass
+
+
+# Expand ~ and resolve relative paths against the CLI working directory.
+def _resolve_user_path(path: str | None) -> str | None:
+    if not path:
+        return None
+    return os.path.abspath(os.path.expanduser(path))
+
+
+# Resolve *path* to absolute; return None if the file does not exist.
+def _resolve_capture_config(path: str | None) -> str | None:
+    if not path:
+        return None
+    resolved = _resolve_user_path(path)
+    if os.path.isfile(resolved):
+        return resolved
+    if resolved != path:
+        _print_error(f"capture config not found: {path} (resolved: {resolved})")
+    else:
+        _print_error(f"capture config not found: {path}")
+    return None
+
+# Handle pmcapture start subcommand.
+def _cmd_start(args) -> int:
+    from capture_config import load_capture_config, merge_start_options
+
+    req = {
+        "cmd": "start",
+        "rails": args.rails,
+        "capture_config": args.capture_config,
+        "output": args.output,
+        "rate": args.rate,
+        "duration": args.duration,
+        "output_file": args.output_file,
+        "file_format": args.file_format,
+        "host": args.host,
+        "port": args.port,
+        "client": args.client,
+    }
+    capture_config = _resolve_capture_config(args.capture_config)
+    if args.capture_config and capture_config is None:
+        return 1
+    req["capture_config"] = capture_config
+    if capture_config:
+        try:
+            cap_cfg = load_capture_config(capture_config)
+            merged = merge_start_options(req, cap_cfg)
+            req.update({k: v for k, v in merged.items() if v is not None})
+        except (OSError, ValueError) as e:
+            _print_error(e)
+            return 1
+
+    resp = _send_command(req)
+    if resp.get("ok"):
+        sess = resp.get("session") or {}
+        print(
+            f"capture started: session={sess.get('session_id')} "
+            f"output={sess.get('output')} rails={','.join(sess.get('rails') or [])}"
+        )
+        if sess.get("output_file"):
+            print(f"  file: {sess['output_file']}")
+        if sess.get("output") == "tcp":
+            print(f"  tcp: {args.host}:{sess.get('port', args.port)}")
+    else:
+        _print_error(resp.get("error") or "start failed")
+    return 0 if resp.get("ok") else 1
+
+# Handle pmcapture stop subcommand.
+def _cmd_stop(args) -> int:
+    resp = _send_command({"cmd": "stop"})
+    if resp.get("ok"):
+        print(resp.get("message") or "capture stopped")
+    else:
+        _print_error(resp.get("error") or "stop failed")
+    return 0 if resp.get("ok") else 1
+
+# Delegate client label formatting to capture_status.
+def _format_client_label(client) -> str:
+    from capture_status import format_client_label
+
+    return format_client_label(client)
+
+# Delegate trigger condition label to capture_status.
+def _format_trigger_condition(level) -> str:
+    from capture_status import format_trigger_condition
+
+    if level is not None and not isinstance(level, dict):
+        trigger = {"level": level, "active": "high"}
+        return format_trigger_condition(trigger)
+    return format_trigger_condition(level if isinstance(level, dict) else None)
+
+# Print human-readable or JSON status from daemon response.
+def _print_status(resp: dict, *, as_json: bool = False) -> None:
+    if as_json:
+        print(json.dumps(resp, indent=2))
+        return
+
+    state = resp.get("state", "unknown")
+    capture = resp.get("capture") or {}
+    print(f"state: {state}")
+    if capture.get("summary"):
+        print(f"capture: {capture['summary']}")
+    elif resp.get("sampling_active") is not None:
+        sampling = "yes" if resp.get("sampling_active") else "no"
+        print(f"  sampling_active: {sampling}")
+
+    trigger = resp.get("trigger")
+    if trigger:
+        print(f"  trigger: {trigger.get('gpio')} (active={trigger.get('active')})")
+        if trigger.get("level") is not None:
+            print(f"  trigger condition: {_format_trigger_condition(trigger)}")
+        if trigger.get("windows_completed") is not None:
+            print(f"  windows completed: {trigger.get('windows_completed')}")
+        if trigger.get("gpio_gated"):
+            print("  gpio_gated: true")
+
+    if resp.get("error"):
+        print(f"  {_format_cli_error(resp['error'])}")
+
+    sess = resp.get("session")
+    if sess:
+        print(f"  session: {sess.get('session_id')}")
+        print(f"  output: {sess.get('output')}")
+        print(f"  client: {_format_client_label(sess.get('client'))}")
+        print(f"  rails: {', '.join(sess.get('rails') or [])}")
+        print(f"  elapsed: {sess.get('elapsed_s')}s")
+        requested = sess.get("requested_rate_hz", sess.get("rate_hz"))
+        actual = sess.get("actual_rate_hz")
+        if requested is not None or actual is not None:
+            parts = []
+            if requested is not None:
+                parts.append(f"requested_rate_hz: {requested}")
+            if actual is not None:
+                parts.append(f"actual_rate_hz: {actual}")
+            print(f"  {'  '.join(parts)}")
+        if sess.get("output_file"):
+            print(f"  file: {sess['output_file']}")
+        if sess.get("sample_count") is not None:
+            print(f"  samples: {sess.get('sample_count')}")
+
+# Handle pmcapture status subcommand.
+def _cmd_status(args) -> int:
+    from capture_status import build_capture_visibility
+
+    resp = _send_command({"cmd": "status"})
+    if not resp.get("ok"):
+        st = read_status_file()
+        resp = dict(st)
+        resp["ok"] = True
+        if "capture" not in resp:
+            resp["capture"] = build_capture_visibility(
+                state=resp.get("state", "unknown"),
+                session=resp.get("session"),
+                trigger=resp.get("trigger"),
+                error=resp.get("error"),
+            )
+            resp["sampling_active"] = resp["capture"]["sampling_active"]
+            resp["armed"] = resp["capture"]["armed"]
+    _print_status(resp, as_json=getattr(args, "json", False))
+    return 0
+
+# Handle pmcapture ping subcommand.
+def _cmd_ping(args) -> int:
+    resp = _send_command({"cmd": "ping"}, timeout=2.0)
+    if resp.get("ok"):
+        print("daemon ok")
+    else:
+        _print_error(resp.get("error") or "daemon unreachable")
+    return 0 if resp.get("ok") else 1
+
+# Handle pmcapture arm subcommand.
+def _cmd_arm(args) -> int:
+    if not args.capture_config and not args.gpio:
+        _print_error("arm requires --gpio or --capture-config with trigger block")
+        return 1
+    capture_config = None
+    if args.capture_config:
+        capture_config = _resolve_capture_config(args.capture_config)
+        if capture_config is None:
+            return 1
+
+    req = {
+        "cmd": "arm",
+        "capture_config": capture_config,
+        "rails": args.rails,
+        "rate": args.rate,
+        "file_format": args.file_format,
+        "output": "file",
+        "duration": 0.0,
+        "output_file": args.output_file,
+        "gpio": args.gpio,
+        "trigger_active": args.trigger_active,
+        "debounce_ms": args.debounce_ms,
+    }
+    resp = _send_command(req)
+    if resp.get("ok"):
+        trig = resp.get("trigger") or {}
+        print(f"armed: trigger={trig.get('gpio')} on {trig.get('chip')} line {trig.get('line')}")
+    else:
+        _print_error(resp.get("error") or "arm failed")
+    return 0 if resp.get("ok") else 1
+
+# Handle pmcapture disarm subcommand.
+def _cmd_disarm(args) -> int:
+    resp = _send_command({"cmd": "disarm"})
+    if resp.get("ok"):
+        print(resp.get("message") or "disarmed")
+    else:
+        _print_error(resp.get("error") or "disarm failed")
+    return 0 if resp.get("ok") else 1
+
+# Build argparse parser for pmcapture subcommands.
+def build_parser() -> argparse.ArgumentParser:
+    class HelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
+        _SUPPRESS_DEFAULT = frozenset({
+            "output_file",
+            "gpio",
+            "trigger_active",
+            "debounce_ms",
+            "capture_config",
+        })
+
+        # Hide default= in help for selected optional flags.
+        def _get_help_string(self, action):
+            if action.dest in self._SUPPRESS_DEFAULT:
+                return action.help
+            help = action.help or ""
+            if "(default:" in help:
+                return help
+            return super()._get_help_string(action)
+
+    fmt = HelpFormatter
+
+    class PMCaptureArgumentParser(argparse.ArgumentParser):
+        # Print ERROR-prefixed messages for argparse validation failures.
+        def error(self, message):
+            self.print_usage(sys.stderr)
+            self.exit(2, _format_cli_error(message) + "\n")
+
+    ap = PMCaptureArgumentParser(
+        description="SC data capture daemon and CLI",
+        formatter_class=fmt,
+    )
+    sub = ap.add_subparsers(dest="command")
+
+    p_daemon = sub.add_parser(
+        "daemon",
+        help="Run idle supervisor (systemd)",
+        formatter_class=fmt,
+    )
+    p_daemon.add_argument("-d", "--debug", action="store_true", help="debug logging")
+
+    p_start = sub.add_parser(
+        "start",
+        help="Start a capture session",
+        formatter_class=fmt,
+    )
+    p_start.add_argument(
+        "-r",
+        "--rails",
+        default="all",
+        metavar="SELECTOR",
+        help=(
+            "Rails to sample: all POWER SENSORS; comma-separated POWER DOMAIN "
+            "name (e.g. LPD,AIE); or comma-separated POWER SENSOR name "
+            "(e.g. VCCINT_1,VCC_AIE_1)"
+        ),
+    )
+    p_start.add_argument(
+        "-c", "--capture-config", default=None, metavar="PATH", help="user capture JSON"
+    )
+    p_start.add_argument(
+        "-o", "--output", choices=("tcp", "file"), default="file", help="file or tcp"
+    )
+    p_start.add_argument("-t", "--rate", type=float, default=20.0, help="sample rate Hz")
+    p_start.add_argument(
+        "-d", "--duration", type=float, default=0.0, help="capture seconds (0=until stop)"
+    )
+    p_start.add_argument(
+        "-f", "--output-file", default=None, metavar="PATH",
+        help="output file path; if omitted, auto-generated under /data/pmcapture/",
+    )
+    p_start.add_argument(
+        "-F",
+        "--file-format",
+        choices=("jsonl", "csv"),
+        default="jsonl",
+        help="file format",
+    )
+    p_start.add_argument(
+        "-H", "--host", default="0.0.0.0", metavar="ADDR", help="TCP bind address"
+    )
+    p_start.add_argument("-p", "--port", type=int, default=18094, help="TCP port")
+    p_start.add_argument(
+        "-u", "--client", default="cli", metavar="NAME", help="session owner label"
+    )
+
+    p_arm = sub.add_parser(
+        "arm",
+        help="Arm GPIO-triggered file capture",
+        formatter_class=fmt,
+    )
+    p_arm.add_argument(
+        "-g",
+        "--gpio",
+        default=None,
+        metavar="NAME",
+        help="logical GPIO name (required unless capture config has trigger block)",
+    )
+    p_arm.add_argument(
+        "-a",
+        "--trigger-active",
+        default=None,
+        choices=("high", "low"),
+        metavar="LEVEL",
+        help=(
+            "active level that opens a capture window; default high, or "
+            "capture-config trigger.active when omitted"
+        ),
+    )
+    p_arm.add_argument(
+        "-b",
+        "--debounce-ms",
+        type=float,
+        default=None,
+        metavar="MS",
+        help=(
+            "debounce interval in ms before accepting GPIO edges; default 0, or "
+            "capture-config trigger.debounce_ms when omitted"
+        ),
+    )
+    p_arm.add_argument(
+        "-c",
+        "--capture-config",
+        default=None,
+        metavar="PATH",
+        help="optional user capture JSON with trigger block",
+    )
+    p_arm.add_argument(
+        "-r",
+        "--rails",
+        default="all",
+        metavar="SELECTOR",
+        help=(
+            "Rails to sample: all POWER SENSORS; comma-separated POWER DOMAIN "
+            "name (e.g. LPD,AIE); or comma-separated POWER SENSOR name "
+            "(e.g. VCCINT_1,VCC_AIE_1)"
+        ),
+    )
+    p_arm.add_argument(
+        "-t", "--rate", type=float, default=20.0, help="sample rate Hz (default: 20.0)"
+    )
+    p_arm.add_argument(
+        "-F",
+        "--file-format",
+        choices=("jsonl", "csv"),
+        default="jsonl",
+        help="file format for triggered windows (default: jsonl)",
+    )
+    p_arm.add_argument(
+        "-f",
+        "--output-file",
+        default=None,
+        metavar="PATH",
+        help="optional fixed output path; if omitted, auto-generated under /data/pmcapture/",
+    )
+
+    sub.add_parser("disarm", help="Disarm GPIO trigger and return to idle", formatter_class=fmt)
+    sub.add_parser("stop", help="Stop active capture session", formatter_class=fmt)
+    p_status = sub.add_parser("status", help="Show daemon/capture status", formatter_class=fmt)
+    p_status.add_argument(
+        "-j",
+        "--json",
+        action="store_true",
+        help="emit full status as JSON (includes capture phase and sampling_active)",
+    )
+    sub.add_parser("ping", help="Check daemon is reachable", formatter_class=fmt)
+    return ap
+
+
+# CLI entry: parse args and dispatch subcommand handler.
+def main(argv: list[str] | None = None) -> int:
+    ap = build_parser()
+    args = ap.parse_args(argv)
+
+    if args.command is None:
+        ap.print_help()
+        return 2
+
+    if args.command == "daemon":
+        from capture_daemon import run_daemon
+
+        run_daemon(debug=args.debug)
+        return 0
+    if args.command == "start":
+        return _cmd_start(args)
+    if args.command == "arm":
+        return _cmd_arm(args)
+    if args.command == "disarm":
+        return _cmd_disarm(args)
+    if args.command == "stop":
+        return _cmd_stop(args)
+    if args.command == "status":
+        return _cmd_status(args)
+    if args.command == "ping":
+        return _cmd_ping(args)
+    ap.error(f"unknown command: {args.command}")
+    return 2
+
+
+if __name__ == "__main__":
+    try:
+        raise SystemExit(main())
+    except KeyboardInterrupt:
+        raise SystemExit(130)

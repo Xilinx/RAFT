@@ -1,0 +1,382 @@
+.\" Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+.\" SPDX-License-Identifier: MIT
+.TH PMCAPTURE 1 "June 2026" "RAFT System Controller" "User Commands"
+.SH NAME
+pmcapture \- RAFT INA power data capture daemon and control CLI
+.SH SYNOPSIS
+.B pmcapture
+.I COMMAND
+[\fIOPTIONS\fR]
+.PP
+.B pmcapture
+.B daemon
+[\fB\-\-debug\fR|\fB-d\fR]
+.PP
+.B pmcapture
+.B start
+[\fIOPTIONS\fR]
+.PP
+.B pmcapture
+.B arm
+[\fIOPTIONS\fR]
+.PP
+.B pmcapture
+.B disarm
+[\fIOPTIONS\fR]
+.PP
+.B pmcapture
+.B stop
+[\fIOPTIONS\fR]
+.PP
+.B pmcapture
+.B status
+[\fIOPTIONS\fR]
+.PP
+.B pmcapture
+.B ping
+[\fIOPTIONS\fR]
+.SH DESCRIPTION
+.B pmcapture
+controls the System Controller (SC) INA power sampling service built on
+RAFT board JSON and sensor drivers. A long-lived supervisor
+(\fBpmcapture.service\fR) runs in the idle state after boot and does
+not touch I2C until a capture session is started.
+.PP
+Use \fBstart\fR to poll configured INA rails and write samples to a local
+file (offline SSH analysis) or stream JSON lines over TCP (BEAM PM
+Dashboard). Use \fBstop\fR to end a session early. Only one session may run
+at a time.
+.PP
+Use \fBarm\fR to enter GPIO-triggered file capture: the daemon watches a
+board trigger line (libgpiod v2 edge events) and starts a capture session
+on assert and stops it on deassert. While armed, manual \fBstart\fR is
+rejected. Use \fBdisarm\fR to release the trigger line and return to idle.
+No I2C traffic occurs until a GPIO-gated capture window is active.
+.PP
+Board sensor layout is read from RAFT
+.I xserver/raft_services/power_management/board/<BOARD>.json
+(selected from \fB/bin/sc-board-id\fR when available, otherwise FRU EEPROM product
+name — same logic as raft-startup, including revision-specific JSON such as
+\fIVEK386-A1.json\fR).
+.SH COMMANDS
+.TP
+.B daemon
+Run the idle supervisor in the foreground. Intended for
+\fBpmcapture.service\fR; listens on the Unix control socket and
+maintains \fIstatus.json\fR.
+.TP
+.B start
+Begin a capture session. Exits after sending the request; sampling runs
+inside the daemon. When \fB\-\-duration\fR is non-zero, the session stops
+automatically after that many seconds. Not allowed while the daemon is
+\fBarmed\fR for GPIO capture.
+.TP
+.B arm
+Load a capture profile and/or GPIO trigger options, resolve the GPIO line
+name to a chip/offset, and start edge monitoring. Requires \fB\-\-gpio\fR
+or a capture config with a \fBtrigger\fR block. Daemon state becomes
+\fBarmed\fR. Each GPIO assert→deassert window writes a separate file under
+\fI/data/pmcapture/\fR with an auto-generated \fIgpioN\fR suffix. Requires
+\fIpython3-gpiod\fR (libgpiod v2) on the System Controller image.
+.TP
+.B disarm
+Stop the trigger monitor. If a GPIO-gated session is running, stop it
+first. Returns the daemon to \fBidle\fR.
+.TP
+.B stop
+Stop the active capture session. When \fBarmed\fR, returns to \fBarmed\fR
+(not idle) so further GPIO windows may run until \fBdisarm\fR.
+.TP
+.B status
+Report daemon state (\fBidle\fR, \fBarmed\fR, \fBrunning\fR, or \fBerror\fR), a
+\fBcapture:\fR summary line distinguishing armed monitoring from active I2C
+sampling, optional trigger metadata (\fIgpio\fR, \fItrigger condition\fR,
+\fIwindows_completed\fR), and active session metadata (rails, output path,
+elapsed time, sample count, \fIrequested_rate_hz\fR and \fIactual_rate_hz\fR
+on one line while sampling). Use \fB-j\fR, \fB--json\fR for machine-readable output
+(includes \fIsampling_active\fR, \fIarmed\fR, and \fIcapture.phase\fR).
+.TP
+.B ping
+Verify the daemon responds on the control socket.
+.SH START OPTIONS
+.TP
+.BR \-\-rails " " \fISELECTOR\fR, \fB-r " " \fISELECTOR\fR
+Which rails to sample from board JSON \fBPOWER SENSORS\fR before optional
+capture-config trim. Default \fIall\fR: every power sensor on the board.
+Alternatively pass a \fBPOWER DOMAIN\fR \fIName\fR (same as
+\fBraft-pm-cmd listdomain\fR, e.g. \fBLPD\fR, \fBAIE\fR), or a
+comma-separated list of rail names (e.g.
+\fBVCCINT_1,VCC_AIE_1\fR). Legacy values \fIpower_sensors\fR and
+\fIpower_domains\fR are treated as \fIall\fR.
+.TP
+.BR \-\-capture-config " " \fIPATH\fR, \fB-c " " \fIPATH\fR
+Optional user JSON file that may set \fIrails\fR (selector string or ordered
+array of rail names), \fIrate_hz\fR, \fIduration_s\fR, \fIoutput\fR,
+\fIoutput_file\fR, and \fIfile_format\fR. \fIPATH\fR may be relative to the
+shell working directory or use \fB~\fR. CLI flags override unset config fields.
+.TP
+.BR \-\-output " " \fIMODE\fR, \fB-o " " \fIMODE\fR
+\fIfile\fR (default): write capture log on the SC filesystem.
+\fItcp\fR: stream newline-delimited JSON on \fB\-\-port\fR.
+.TP
+.BR \-\-rate " " \fIHZ\fR, \fB-t " " \fIHZ\fR
+Target sample rate in Hz (0.1–50, default 20).
+.TP
+.BR \-\-duration " " \fISECONDS\fR, \fB-d " " \fISECONDS\fR
+Capture length in seconds. \fI0\fR (default): run until \fBstop\fR or
+daemon shutdown.
+.TP
+.BR \-\-output-file " " \fIPATH\fR, \fB-f " " \fIPATH\fR
+Output path for file mode. When omitted, a name is generated under
+\fI/data/pmcapture/\fR as
+.IR capture_<board>_<timestamp>.<ext>
+(or
+.IR capture_<board>_<timestamp>_gpioN.<ext>
+for GPIO windows).
+The directory is created on first file capture when \fI/data\fR is available.
+.TP
+.BR \-\-file-format " " \fIFMT\fR, \fB-F " " \fIFMT\fR
+\fIjsonl\fR (default) or \fIcsv\fR (columnar, one row per sample).
+.TP
+.BR \-\-host " " \fIADDR\fR, \fB-H " " \fIADDR\fR
+TCP bind address for \fB\-\-output tcp\fR (default \fI0.0.0.0\fR).
+.TP
+.BR \-\-port " " \fINUM\fR, \fB-p " " \fINUM\fR
+TCP port for \fB\-\-output tcp\fR (default 18094).
+.TP
+.BR \-\-client " " \fINAME\fR, \fB-u " " \fINAME\fR
+Session owner label recorded in status (default stored value \fIcli\fR;
+\fBpmcapture status\fR displays \fBCLI\fR, \fBBEAM\fR, or \fBGPIO\fR for known
+clients). BEAM TCP sessions use \fIbeam\fR; GPIO windows use \fIgpio\fR.
+.SH ARM OPTIONS
+.TP
+.BR \-\-gpio " " \fINAME\fR, \fB-g " " \fINAME\fR
+Logical GPIO name. Required unless the capture config includes a
+\fBtrigger\fR block. Overrides \fBtrigger.gpio\fR when both are given.
+.TP
+.BR \-\-trigger-active " " \fIhigh\fR|\fIlow\fR, \fB-a " " \fIhigh\fR|\fIlow\fR
+Active level that opens a capture window (default \fIhigh\fR). Overrides
+the JSON \fBtrigger.active\fR field when both are given.
+.TP
+.BR \-\-debounce-ms " " \fIMS\fR, \fB-b " " \fIMS\fR
+Debounce interval in milliseconds before accepting GPIO edges (default
+.IR 0 ).
+Overrides the JSON \fBtrigger.debounce_ms\fR field when both are given.
+.TP
+.BR \-\-capture-config " " \fIPATH\fR, \fB-c " " \fIPATH\fR
+Optional user JSON file containing sampling options and/or a \fBtrigger\fR
+object (see \fBTRIGGER CONFIG JSON\fR). \fIPATH\fR may be relative to the
+shell working directory or use \fB~\fR.
+.TP
+.BR \-\-rails " " \fISELECTOR\fR, \fB-r " " \fISELECTOR\fR
+Rail selector (same semantics as \fBstart\fR; default
+.IR all ).
+.TP
+.BR \-\-rate " " \fIHZ\fR, \fB-t " " \fIHZ\fR
+Target sample rate in Hz for triggered windows (0.1–50, default 20).
+.TP
+.BR \-\-file-format " " \fIFMT\fR, \fB-F " " \fIFMT\fR
+Output format for triggered file capture (default \fIjsonl\fR). GPIO
+triggered capture supports \fIfile\fR mode only.
+.TP
+.BR \-\-output-file " " \fIPATH\fR, \fB-f " " \fIPATH\fR
+Optional fixed output path. When omitted, each GPIO window gets a
+separate auto-generated name under \fI/data/pmcapture/\fR.
+.SH FILES
+.TP
+.I /usr/bin/pmcapture
+CLI entry (symlink into RAFT install tree).
+.TP
+.I /usr/share/raft/examples/python/pmcapture/
+Program modules.
+.TP
+.I /run/pmcapture/control.sock
+Daemon control socket (JSON request/response, one line per message).
+.TP
+.I /run/pmcapture/status.json
+Daemon and session state (\fIidle\fR, \fIarmed\fR, \fIrunning\fR, or
+\fIerror\fR; optional \fItrigger\fR and session metadata).
+.TP
+.I /data/pmcapture/
+Default directory for auto-generated capture logs (created on first file
+capture; requires \fI/data\fR to be mounted).
+.TP
+.I /etc/systemd/system/pmcapture.service
+systemd unit (\fBExecStart=.../pmcapture daemon\fR).
+.SH OUTPUT FORMATS
+.SS jsonl
+First line is a catalog object (\fBtype\fR=\fIcatalog\fR) describing
+rails and domains. Each following line is one sample object with
+\fBts\fR, \fBrails\fR (name → \fBV\fR/\fBI\fR/\fBW\fR), \fBboard\fR, and
+\fBrate\fR. Inspect capture files with standard tools such as \fBless\fR or
+\fBjq\fR after copy off the SC.
+.SS csv
+Header row:
+\fBts,rate_hz\fR plus \fI<RAIL>_V\fR, \fI<RAIL>_I\fR, \fI<RAIL>_W\fR for each
+active rail; one data row per sample. No catalog line.
+.SH EXAMPLES
+.SS CAPTURE CONFIG JSON
+A JSON file for \fB\-\-capture-config\fR (\fB\-c\fR) may set \fIrails\fR,
+\fIrate_hz\fR, \fIduration_s\fR, \fIoutput\fR, \fIoutput_file\fR, and
+\fIfile_format\fR. \fIrails\fR is either a selector string (same as
+\fB\-\-rails\fR) or an ordered array of rail names. Deprecated
+\fIrails_pool\fR / \fIrails_selection\fR are accepted as selector aliases.
+CLI flags override any unset field.
+.PP
+\fBRail subset (CSV, 60 s)\fR
+.RS
+.nf
+{
+  "rails": [
+    "VCCINT_1",
+    "VCCINT_2",
+    "VCC_AIE_1",
+    "VCC_AIE_2"
+  ],
+  "rate_hz": 20,
+  "duration_s": 60,
+  "output": "file",
+  "file_format": "csv"
+}
+.fi
+.RE
+.PP
+\fBAll sensors (JSONL, until stop)\fR
+.RS
+.nf
+{
+  "rails": "all",
+  "rate_hz": 20,
+  "duration_s": 0,
+  "output": "file",
+  "file_format": "jsonl"
+}
+.fi
+.RE
+.SS TRIGGER CONFIG JSON
+For \fBarm\fR, supply \fB\-\-gpio\fR on the command line or include a
+\fBtrigger\fR object in the capture config JSON. CLI trigger flags override
+the JSON \fBtrigger\fR block when both are given.
+GPIO names are resolved via libgpiod utilities (\fBgpioinfo\fR) or
+\fBline_offset_from_id\fR on .IR /dev/gpiochip* .
+.PP
+\fBGPIO-gated file capture (standard DUT→SC trigger line, CSV)\fR
+.RS
+.nf
+{
+  "rails": ["VCCINT", "VCCAIE"],
+  "rate_hz": 20,
+  "output": "file",
+  "file_format": "csv",
+  "trigger": {
+    "gpio": "SYSCTRL_GPI4",
+    "active": "high",
+    "debounce_ms": 0
+  }
+}
+.fi
+.RE
+.PP
+Board-specific device-tree labels (for example legacy readback names) also
+resolve when present in \fBgpioinfo\fR or via libgpiod on \fI/dev/gpiochip*\fR.
+.PP
+Optional \fBtrigger.chip\fR and \fBtrigger.line\fR override automatic name
+resolution. \fBtrigger.active\fR is \fIhigh\fR (default) or \fIlow\fR.
+.SS Example commands
+Timed file capture to a specific path (120 s, LPD domain rails, CSV):
+.PP
+.RS
+.nf
+sudo pmcapture start \\
+  \-\-duration 120 \\
+  \-\-output-file /data/pmcapture.out \\
+  \-\-file-format csv \\
+  \-\-rails LPD
+.fi
+.RE
+.PP
+Capture VCCINT and VCC_AIE rails only (comma-separated names):
+.PP
+.RS
+.nf
+sudo pmcapture start \\
+  \-\-rails VCCINT_1,VCCINT_2,VCCINT_3,VCCINT_4,VCC_AIE_1,VCC_AIE_2,VCC_AIE_3,VCC_AIE_4 \\
+  \-\-duration 60 \\
+  \-\-file-format csv
+.fi
+.RE
+.PP
+File capture with user rail subset from a JSON file (see
+\fBCAPTURE CONFIG JSON\fR above; auto-named capture file under
+\fI/data/pmcapture/\fR when no \fB\-\-output-file\fR is set):
+.PP
+.RS
+.nf
+sudo pmcapture start \\
+  \-\-duration 60 \\
+  \-\-capture-config /data/pmcapture/subset.json
+.fi
+.RE
+.PP
+Arm GPIO-triggered capture from CLI flags:
+.PP
+.RS
+.nf
+sudo pmcapture arm \\
+  \-\-gpio SYSCTRL_GPI4 \\
+  \-\-rails all \\
+  \-\-file-format csv
+pmcapture status
+sudo pmcapture disarm
+.fi
+.RE
+.PP
+Arm from a JSON profile and inspect status:
+.PP
+.RS
+.nf
+sudo pmcapture arm \\
+  \-\-capture-config /etc/pmcapture/trigger_capture.json
+pmcapture status
+sudo pmcapture disarm
+.fi
+.RE
+.PP
+Check daemon and session status:
+.PP
+.RS
+.nf
+pmcapture ping
+pmcapture status
+pmcapture status --json
+.fi
+.RE
+.PP
+Stop an open-ended capture:
+.PP
+.RS
+.nf
+sudo pmcapture stop
+.fi
+.RE
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+Command failed (daemon unreachable, capture already running, invalid
+config, sensor init failure, etc.). Failure messages are printed on
+stderr with an \fBERROR:\fR prefix.
+.TP
+.B 2
+Invalid usage (stderr message uses an \fBERROR:\fR prefix).
+.TP
+.B 130
+Interrupted (\fBdaemon\fR foreground mode).
+.SH SEE ALSO
+.BR pmcapture.service (5),
+RAFT board JSON under
+.IR /usr/share/raft/xserver/raft_services/power_management/board/ .
+.SH AUTHORS
+Advanced Micro Devices, Inc.

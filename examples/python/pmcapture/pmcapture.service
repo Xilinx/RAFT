@@ -1,0 +1,19 @@
+# Copyright (C) 2026 Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: MIT
+
+[Unit]
+Description=SC data capture supervisor (idle until pmcapture start)
+Documentation=man:pmcapture(1)
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/share/raft/examples/python/pmcapture/pmcapture daemon
+Restart=on-failure
+RestartSec=3
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

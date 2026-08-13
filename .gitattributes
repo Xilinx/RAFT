@@ -1,0 +1,2 @@
+# Keep Linux-facing scripts on LF even when edited on Windows.
+examples/python/pmcapture/** text eol=lf

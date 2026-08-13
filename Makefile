@@ -41,7 +41,7 @@ endif
 ifeq ($(STARTUPSC),enabled)
 	echo "Installing symbolic link for pm-cmd CLI App: $(LINK_NAME) -> $(PM_CMD_PY)"
 	install -d ${BINDIR}
-	ln --relative --symbolic $(PM_CMD_PY) $(LINK_NAME)
+	ln --relative --symbolic -f $(PM_CMD_PY) $(LINK_NAME)
 ifneq ($(SYSCONF_DIR),)
 	echo "Installing RAFT system controller startup sysconfdir at ${SYSCONF_DIR}"
 	install -d ${SYSCONF_DIR}
@@ -53,6 +53,22 @@ endif
 	echo "Installing RAFT system controller startup to system unit dir at${SYSTEM_UNIT_DIR}"
 	install -d ${SYSTEM_UNIT_DIR}
 	install -m 0644 xserver/init/startup/system-controller/raft-startup.service ${SYSTEM_UNIT_DIR}
+	install -m 0644 examples/python/pmcapture/pmcapture.service ${SYSTEM_UNIT_DIR}
+	install -d ${INSTALL_DIR_RAFT}/examples/python/pmcapture
+	install -m 0755 examples/python/pmcapture/pmcapture ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/board_config.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/capture_config.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/capture_daemon.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/capture_output.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/capture_session.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/sampler_engine.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/gpio_resolve.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0755 examples/python/pmcapture/trigger_monitor.py ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0644 examples/python/pmcapture/pmcapture.service ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -m 0644 examples/python/pmcapture/pmcapture.1 ${INSTALL_DIR_RAFT}/examples/python/pmcapture/
+	install -d ${DESTDIR}/usr/share/man/man1
+	install -m 0644 examples/python/pmcapture/pmcapture.1 ${DESTDIR}/usr/share/man/man1/
+	ln --relative --symbolic -f ${INSTALL_DIR_RAFT}/examples/python/pmcapture/pmcapture $(BINDIR)/pmcapture
 endif
 ifeq ($(STARTUP), enabled)
 ifneq ($(SYSCONF_DIR),)
