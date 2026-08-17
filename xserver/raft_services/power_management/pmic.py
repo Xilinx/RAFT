@@ -9,7 +9,6 @@ import sys
 import datetime
 import logging
 import dbm.dumb
-from periphery import I2C
 from utils import get_python_log_levels
 
 RAFT_DIR = '/usr/share/raft/'
@@ -20,6 +19,8 @@ from pm_types import *
 from devices.sensors import *
 from devices.regulators import *
 from devices.gpio import *
+from board_identity import BoardIdentityError, get_eeprom_data
+
 class PMIC(object):
     logger = None
     domains = []
@@ -123,60 +124,56 @@ class PMIC(object):
 
     def GetBoardInfo(self, eeprom, has_pdi):
         boardinfo = {}
-        i2c = I2C(eeprom.I2C_Bus)
-        bytes = bytearray(256)
         try:
-            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(bytes, read=True)]
-            i2c.transfer(eeprom.I2C_Addr, msgs)
-            eeprom_data = msgs[1].data
-            #print(''.join('{:02x} '.format(x) for x in eeprom_data))
-            offset = 0xA
-            boardinfo["Language"] = eeprom_data[offset]
+            eeprom_data = get_eeprom_data(eeprom)
+        except BoardIdentityError:
+            self.logger.error("Onboard FRU EEPROM read failed!")
+            return boardinfo
 
-            if has_pdi is not None:
-                boardinfo["Silicon Revision"] = "PROD"
-            else:
-                boardinfo["Silicon Revision"] = ""
+        #print(''.join('{:02x} '.format(x) for x in eeprom_data))
+        offset = 0xA
+        boardinfo["Language"] = eeprom_data[offset]
 
-            build_date = datetime.datetime(1996, 1, 1)
-            minutes  = (eeprom_data[0xd] << 16 | eeprom_data[0xc] << 8 | eeprom_data[0xb])
-            time_delta = datetime.timedelta(minutes=minutes)
-            build_date += time_delta
-            time_string = build_date.strftime('%c')
-            boardinfo['Manufacturing Date'] = time_string
+        if has_pdi is not None:
+            boardinfo["Silicon Revision"] = "PROD"
+        else:
+            boardinfo["Silicon Revision"] = ""
 
-            offset = 0xe
-            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-            length &= 0x3f
-            boardinfo["Manufacturer"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+        build_date = datetime.datetime(1996, 1, 1)
+        minutes  = (eeprom_data[0xd] << 16 | eeprom_data[0xc] << 8 | eeprom_data[0xb])
+        time_delta = datetime.timedelta(minutes=minutes)
+        build_date += time_delta
+        time_string = build_date.strftime('%c')
+        boardinfo['Manufacturing Date'] = time_string
 
-            offset = offset + length + 1
-            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-            length &= 0x3f
-            boardinfo["Product Name"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+        offset = 0xe
+        length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+        length &= 0x3f
+        boardinfo["Manufacturer"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
 
-            offset = offset + length + 1
-            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-            length &= 0x3f
-            boardinfo["Board Serial Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+        offset = offset + length + 1
+        length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+        length &= 0x3f
+        boardinfo["Product Name"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
 
-            offset = offset + length + 1
-            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-            length &= 0x3f
-            boardinfo["Board Part Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+        offset = offset + length + 1
+        length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+        length &= 0x3f
+        boardinfo["Board Serial Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
 
-            offset = offset + length + 1
-            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-            length &= 0x3f
-            #/* Skip FRU File ID */
-            offset = offset + length + 1
-            length = int.from_bytes(eeprom_data[offset:offset+1], "big")
-            length &= 0x3f
-            boardinfo["Board Revision"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
-        except IOError:
-            logging.error(f"Onboard {eeprom.Name} Eeprom read failed!")
-        finally:
-            i2c.close()
+        offset = offset + length + 1
+        length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+        length &= 0x3f
+        boardinfo["Board Part Number"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
+
+        offset = offset + length + 1
+        length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+        length &= 0x3f
+        #/* Skip FRU File ID */
+        offset = offset + length + 1
+        length = int.from_bytes(eeprom_data[offset:offset+1], "big")
+        length &= 0x3f
+        boardinfo["Board Revision"] = eeprom_data[(offset+1):((offset+1) + length)].decode("utf-8").strip('\x00')
         return boardinfo
 
     def EnableVoltage(self, o):

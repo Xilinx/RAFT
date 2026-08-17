@@ -23,6 +23,12 @@ EEPROM_BOARD_FIELDS_START = 0x0E
 EEPROM_BOARD_NAME_INDEX = 1
 EEPROM_BOARD_REVISION_INDEX = 5
 
+# Legacy FRU EEPROM probe candidates when eeprom_cc* is not present in sysfs.
+LEGACY_FRU_EEPROM_CANDIDATES = [
+    ("Common", "/dev/i2c-1", 0x54),
+    ("Legacy", "/dev/i2c-11", 0x54),
+]
+
 
 class BoardIdentityError(RuntimeError):
     pass
@@ -36,6 +42,26 @@ class BoardEEPROM:
 
 
 _identity_cache: tuple[str, str] | None = None
+
+
+# Build FRU EEPROM candidates from eeprom_cc* sysfs nodes (any suffix).
+def find_fru_eeprom_cc_candidates() -> list[tuple[str, str, int]]:
+    candidates = []
+    nvmem_path = "/sys/bus/nvmem/devices"
+    if not os.path.isdir(nvmem_path):
+        return candidates
+    for name in sorted(os.listdir(nvmem_path)):
+        if not name.startswith("eeprom_cc"):
+            continue
+        path = os.path.realpath(os.path.join(nvmem_path, name))
+        while path != "/":
+            entry = os.path.basename(path)
+            if "-" in entry and entry.rsplit("-", 1)[0].isdigit():
+                bus_n, addr = entry.rsplit("-", 1)
+                candidates.append((name, f"/dev/i2c-{bus_n}", int(addr, 16)))
+                break
+            path = os.path.dirname(path)
+    return candidates
 
 
 # Find I2C device path and address in sysfs by driver name.
@@ -59,6 +85,22 @@ def find_i2c_device_by_name(target_name: str) -> tuple[str | None, int | None]:
         except OSError:
             continue
     return None, None
+
+
+# Return ordered FRU EEPROM bus/address candidates for runtime or startup use.
+def fru_eeprom_candidates(eeprom: BoardEEPROM | None = None) -> list[tuple[str, str, int]]:
+    if eeprom is not None and eeprom.I2C_Bus and eeprom.I2C_Addr:
+        return [(eeprom.Name, eeprom.I2C_Bus, eeprom.I2C_Addr)]
+
+    candidates = find_fru_eeprom_cc_candidates()
+    if candidates:
+        return candidates
+
+    candidates = list(LEGACY_FRU_EEPROM_CANDIDATES)
+    device_path, device_address = find_i2c_device_by_name("24c128")
+    if device_path:
+        candidates.append(("Custom", device_path, device_address))
+    return candidates
 
 
 # Read string field `index` by walking FRU type/length fields from `start`.
@@ -94,12 +136,7 @@ def eeprom_read_field(eeprom_data, start: int, index: int, area_end: int) -> str
 # Read FRU EEPROM contents; optionally record the bus/address in *eeprom*.
 def get_eeprom_data(eeprom: BoardEEPROM | None = None) -> bytes:
     eeprom_data = bytearray(256)
-    candidates = [
-        ("Common", "/dev/i2c-1", 0x54),
-        ("Legacy", "/dev/i2c-11", 0x54),
-    ]
-
-    for name, bus, addr in candidates:
+    for name, bus, addr in fru_eeprom_candidates(eeprom):
         i2c = None
         try:
             i2c = I2C(bus)
@@ -111,27 +148,6 @@ def get_eeprom_data(eeprom: BoardEEPROM | None = None) -> bytes:
             return bytes(msgs[1].data)
         except Exception:
             log.debug("EEPROM read failed on %s (%s)", name, bus)
-        finally:
-            if i2c is not None:
-                i2c.close()
-
-    device_path, device_address = find_i2c_device_by_name("24c128")
-    if device_path:
-        i2c = None
-        try:
-            i2c = I2C(device_path)
-            msgs = [I2C.Message([0x0, 0x0]), I2C.Message(eeprom_data, read=True)]
-            i2c.transfer(device_address, msgs)
-            if eeprom is not None:
-                eeprom.Name, eeprom.I2C_Bus, eeprom.I2C_Addr = (
-                    "Custom",
-                    device_path,
-                    device_address,
-                )
-            log.debug("EEPROM read succeeded on custom device (%s)", device_path)
-            return bytes(msgs[1].data)
-        except Exception:
-            log.debug("Custom EEPROM read failed")
         finally:
             if i2c is not None:
                 i2c.close()
