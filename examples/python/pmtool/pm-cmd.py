@@ -1,9 +1,9 @@
-#!/usr/bin/env python
-# Copyright (C) 2023-2025 Advanced Micro Devices, Inc.  All rights reserved.
+#!/usr/bin/env python3
+# Copyright (C) 2023 - 2026 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim, Sree Parvathi Anish"
-__copyright__ = "Copyright 2023-2025, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023 - 2026, Advanced Micro Devices, Inc."
 
 import os
 import sys
