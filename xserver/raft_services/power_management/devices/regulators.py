@@ -1,8 +1,8 @@
-# Copyright (C) 2024-2026 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2024 - 2026 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2024-2026, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2024 - 2026, Advanced Micro Devices, Inc."
 
 from enum import IntEnum
 from periphery import I2C, GPIO
@@ -481,17 +481,18 @@ class PMBusRegulator:
         return byte
 
 class MPSRegulator:
-    def __init__(self, device_path, device_address, page=-1, phase=-1, fb_ratio=1, alert_gpio_pin=None):
-        """
-        Initialize a MPS(MPM54) device with a specific page (output).
+    # MPM54322/MPM54522 I2C register map (BUCKx_CTRL1/2/3, VOUT GO bit).
+    BUCK1_CTRL1 = 0x01
+    BUCK1_CTRL2 = 0x02
+    BUCK1_CTRL3 = 0x03
+    BUCK2_CTRL1 = 0x06
+    BUCK2_CTRL2 = 0x07
+    BUCK2_CTRL3 = 0x08
+    VOUT_GO_BIT = 0x80
 
-        :param device_path: I2C bus number (e.g., 1 for /dev/i2c-1)
-        :param device_address: I2C address of the PMIC
-        :param page: Page number corresponding to the output
-        :param phase: Phase number corresponding to the output
-        :param fb_ratio: Feedback Ratio corresponding to the output
-        :param alert_gpio_pin: Optional GPIO pin for ALERT (None if not used)
-        """
+    def __init__(self, device_path, device_address, page=-1, phase=-1, fb_ratio=1, alert_gpio_pin=None):
+        # Initialize an MPS (MPM54322/MPM54522) regulator for the given I2C
+        # device and buck page.
         self.i2c = I2C(device_path)
         self.addr = int(device_address, 0)
         self.page = page
@@ -515,14 +516,14 @@ class MPSRegulator:
         return str(str_info)
 
     def close(self):
-        """Clean up resources."""
+        # Clean up I2C and ALERT GPIO resources.
         self.i2c.close()
         if self.alert_gpio:
             self.alert_gpio.close()
 
     def enable_output(self):
+        # Enable output via OPERATION register (0x0D).
         pm_print("enable_output")
-        """Enable output via OPERATION command."""
         OPERATION = 0x0D
         temp = self._read_byte(OPERATION)
         mask = 0
@@ -537,6 +538,7 @@ class MPSRegulator:
         self._write_byte(OPERATION, temp)
 
     def shutdown_output(self):
+        # Disable output via OPERATION register (0x0D).
         pm_print("shutdown_output")
         OPERATION = 0x0D
         temp = self._read_byte(OPERATION)
@@ -552,12 +554,44 @@ class MPSRegulator:
         self._write_byte(OPERATION, temp)
 
     def set_voltage(self, value):
-        pm_print("set_voltage")
-        #self.shutdown_output()
-        #VOUT_COMMAND = 0x21
-        #raw_value = self._unscaled_value(value, self.vout_scaling)
-        #self._write_word(raw_value)
-        #self.enable_output()
+        # Set output voltage on MPM54322/MPM54522 via VOUT_SETTING + GO.
+        # Output range is enforced by board JSON Minimum/Maximum_Volt in
+        # pm.py.
+        pm_print(f"set_voltage({value})")
+
+        # Step 1: Convert requested output voltage (V) to the PMIC target in mV
+        # at the FB node.
+        # read_voltage() does the inverse: Vout = (raw * 16mV) / fb_ratio, so we
+        # multiply by fb_ratio here.
+        setting_mv = round(value * self.fb_ratio * 1000)
+
+        # Step 2: Split setting_mv (11 bits) into setting_low [2:0] (3 bits)
+        # and setting_high [10:3] (8 bits).
+        setting_low = setting_mv & 0x7
+        setting_high = (setting_mv >> 3) & 0xFF
+
+        # Step 3: Pick the buck-1 or buck-2 control register set from board
+        # JSON Page_Select.
+        if self.page >= 1:
+            ctrl1, ctrl2, ctrl3 = self.BUCK2_CTRL1, self.BUCK2_CTRL2, self.BUCK2_CTRL3
+        else:
+            ctrl1, ctrl2, ctrl3 = self.BUCK1_CTRL1, self.BUCK1_CTRL2, self.BUCK1_CTRL3
+
+        # Step 4: Read ctrl1 and ctrl2 before any writes so an I2C read
+        # failure cannot leave a partially programmed voltage target.
+        ctrl1_val = self._read_byte(ctrl1)
+        ctrl2_val = self._read_byte(ctrl2)
+
+        # Step 5: Merge VOUTx_SETTING_LOW into ctrl2 (bits 2:0), preserving
+        # other ctrl2 fields.
+        ctrl2_val = (ctrl2_val & ~0x07) | setting_low
+
+        # Step 6: Write VOUTx_SETTING_LOW/HIGH, then assert VOUTx_GO.
+        self._write_byte(ctrl2, ctrl2_val)
+        self._write_byte(ctrl3, setting_high)
+        self._write_byte(ctrl1, ctrl1_val | self.VOUT_GO_BIT)
+        pm_print("setting_mv={0} ctrl=0x{1:02x}/0x{2:02x}/0x{3:02x}".format(
+            setting_mv, ctrl1, ctrl2, ctrl3))
 
     def read_all(self):
         values = {}
@@ -572,7 +606,8 @@ class MPSRegulator:
             READ_VOUT += self.page * 2
         raw_voltage = self._read_byte(READ_VOUT)
         pm_print("raw_voltage(0x{0:02x}) 0x{1:02x}".format(READ_VOUT, raw_voltage))
-        voltage = ((raw_voltage * 16) / 1000) / self.fb_ratio # 16mV per LSB and mV to V
+        # 16mV per LSB and mV to V
+        voltage = ((raw_voltage * 16) / 1000) / self.fb_ratio
         return round(voltage, 4)
 
     def read_current(self):
@@ -581,18 +616,13 @@ class MPSRegulator:
             READ_IOUT += self.page * 2
         raw_current = self._read_byte(READ_IOUT)
         pm_print("raw_current(0x{0:02x}) 0x{1:02x}".format(READ_IOUT, raw_current))
-        return ((raw_current * 50) / 1000) # 50mA per LSB and mV to V
+        # 50mA per LSB and mA to A
+        return ((raw_current * 50) / 1000)
 
     def read_temperature(self):
-        """Read and scale output temperature using TEMPERATURE command."""
-        """     000: < 80°C
-                001: 85°C
-                010: 95°C
-                011: 105°C
-                100: 115°C
-                101: 125°C
-                110: 135°C
-                111: ≥ 140°C """
+        # Read junction temperature from TEMPERATURE register (0x11).
+        # Encoded in upper 3 bits: 000 < 80°C, 001 85°C, 010 95°C, 011 105°C,
+        # 100 115°C, 101 125°C, 110 135°C, 111 ≥ 140°C.
         TEMPERATURE = 0x11
         raw_temp = self._read_byte(TEMPERATURE)
         return ((((raw_temp & 0xE0) >> 5) * 5) + 80)
@@ -627,14 +657,18 @@ class MPSRegulator:
             self.i2c.transfer(self.addr, [write_msg])
         except IOError:
             pm_print("IOError: {0}@0x{1:02x}".format(self.i2c.devpath, self.addr))
+            raise IOError(
+                "Failed to write 0x{0:02x} to {1}@0x{2:02x}".format(
+                    command, self.i2c.devpath, self.addr))
 
     def _read_byte(self, command):
-        byte = None
         try:
             write_msg = I2C.Message([command])
             read_msg = I2C.Message([0x00], read=True)
             self.i2c.transfer(self.addr, [write_msg, read_msg])
-            byte = read_msg.data[0]
-        except:
+            return read_msg.data[0]
+        except IOError:
             pm_print("IOError: {0}@0x{1:02x}".format(self.i2c.devpath, self.addr))
-        return byte
+            raise IOError(
+                "Failed to read 0x{0:02x} from {1}@0x{2:02x}".format(
+                    command, self.i2c.devpath, self.addr))
