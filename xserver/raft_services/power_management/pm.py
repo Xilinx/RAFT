@@ -1,8 +1,8 @@
-# Copyright (C) 2023-2025 Advanced Micro Devices, Inc.  All rights reserved.
+# Copyright (C) 2023 - 2026 Advanced Micro Devices, Inc.  All rights reserved.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2023-2025, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023 - 2026, Advanced Micro Devices, Inc."
 
 import os
 import sys
@@ -34,14 +34,12 @@ class PM(object):
     pmic = None
     temps = []
     status = None
-    pdi_file = ""
 
-    def __init__(self, json_data, board_name, eeprom):
+    def __init__(self, json_data, board_name, board_revision=""):
         self.logger = self.GetLogger()
-        self.boardeeprom = eeprom
         self.board_name = board_name
+        self.board_revision = board_revision
         board_data = json_data[board_name]
-        self.pdi_file = None
 
         if 'FEATURE' in board_data:
             self.feature_list = board_data['FEATURE']['List']
@@ -139,9 +137,6 @@ class PM(object):
                         'Controller': None
                     }
                     self.gpios.append(temp_g)
-
-        if 'Boot Config' in board_data:
-            self.pdi_file = board_data['Boot Config']['PDI']
 
         try:
             self.status = Stats()
@@ -487,10 +482,11 @@ class PM(object):
 
     ## Process functions
     def _get_board_info(self):
-        if self.boardeeprom is None:
-            raise ValueError(f'Board Eeprom undefined')
-        else:
-            return self.pmic.GetBoardInfo(self.boardeeprom, self.pdi_file)
+        # Board name/revision resolved at RAFT startup (sc-board-id or EEPROM).
+        return {
+            "Product Name": self.board_name,
+            "Product Revision": self.board_revision,
+        }
 
     def _list_feature(self):
         if len(self.feature_list) == 0:

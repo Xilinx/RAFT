@@ -176,7 +176,7 @@ def run_sc_board_id(
     return value or None
 
 
-# Resolve product name and revision from sc-board-id or FRU EEPROM.
+# Resolve board name and revision from sc-board-id or FRU EEPROM.
 def get_board_identity(
     eeprom: BoardEEPROM | None = None,
     *,
@@ -188,15 +188,15 @@ def get_board_identity(
         return _identity_cache
 
     if os.path.isfile(sc_board_id):
-        product_name = run_sc_board_id("--name", sc_board_id=sc_board_id)
-        product_revision = run_sc_board_id("--func-rev", sc_board_id=sc_board_id)
-        if product_name and product_revision:
-            product_name = product_name.upper()
-            product_revision = product_revision.upper()
+        board_name = run_sc_board_id("--name", sc_board_id=sc_board_id)
+        board_revision = run_sc_board_id("--func-rev", sc_board_id=sc_board_id)
+        if board_name and board_revision:
+            board_name = board_name.upper()
+            board_revision = board_revision.upper()
             log.info("Board identity from %s", sc_board_id)
-            log.info("Product name: %s", product_name)
-            log.info("Product revision: %s", product_revision)
-            identity = (product_name, product_revision)
+            log.info("Board name: %s", board_name)
+            log.info("Board revision: %s", board_revision)
+            identity = (board_name, board_revision)
             if use_cache:
                 _identity_cache = identity
             return identity
@@ -207,31 +207,31 @@ def get_board_identity(
 
     eeprom_data = get_eeprom_data(eeprom)
     board_area_end = EEPROM_BOARD_AREA + eeprom_data[EEPROM_BOARD_AREA + 1] * 8
-    product_name = eeprom_read_field(
+    board_name = eeprom_read_field(
         eeprom_data,
         EEPROM_BOARD_FIELDS_START,
         EEPROM_BOARD_NAME_INDEX,
         board_area_end,
     )
-    product_revision = eeprom_read_field(
+    board_revision = eeprom_read_field(
         eeprom_data,
         EEPROM_BOARD_FIELDS_START,
         EEPROM_BOARD_REVISION_INDEX,
         board_area_end,
     )
 
-    if not product_name:
-        raise BoardIdentityError("Board EEPROM product name is missing or invalid.")
-    if not product_revision:
+    if not board_name:
+        raise BoardIdentityError("Board EEPROM name is missing or invalid.")
+    if not board_revision:
         log.warning(
-            "Board EEPROM product revision is missing or invalid; "
+            "Board EEPROM revision is missing or invalid; "
             "falling back to base board JSON."
         )
 
     log.info("Board identity from EEPROM")
-    log.info("Product name: %s", product_name)
-    log.info("Product revision: %s", product_revision or "(none)")
-    identity = (product_name, product_revision)
+    log.info("Board name: %s", board_name)
+    log.info("Board revision: %s", board_revision or "(none)")
+    identity = (board_name, board_revision)
     if use_cache:
         _identity_cache = identity
     return identity
@@ -240,17 +240,17 @@ def get_board_identity(
 # Pick revision-specific or base board JSON under *board_dir*.
 def resolve_board_json_path(
     board_dir: str,
-    product_name: str,
-    product_revision: str = "",
+    board_name: str,
+    board_revision: str = "",
 ) -> str | None:
-    if product_revision:
-        rev_file = os.path.join(board_dir, f"{product_name}-{product_revision}.json")
+    if board_revision:
+        rev_file = os.path.join(board_dir, f"{board_name}-{board_revision}.json")
         if os.path.isfile(rev_file):
             log.info("Board file (revision): %s", rev_file)
             return rev_file
         log.info("Board file (revision) not found: %s", rev_file)
 
-    base_file = os.path.join(board_dir, f"{product_name}.json")
+    base_file = os.path.join(board_dir, f"{board_name}.json")
     if os.path.isfile(base_file):
         log.info("Board file: %s", base_file)
         return base_file

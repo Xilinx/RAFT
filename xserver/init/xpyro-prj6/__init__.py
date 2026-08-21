@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-# Copyright (C) 2023-2026 Advanced Micro Devices, Inc.
+# Copyright (C) 2023 - 2026 Advanced Micro Devices, Inc.
 # SPDX-License-Identifier: BSD-3-Clause
 
 __author__ = "Salih Erim"
-__copyright__ = "Copyright 2023-2026, Advanced Micro Devices, Inc."
+__copyright__ = "Copyright 2023 - 2026, Advanced Micro Devices, Inc."
 
 import os
 import sys
@@ -27,8 +27,6 @@ from utils import get_ip_and_port
 
 RAFT_DIR = '/usr/share/raft/'
 BOARD_PATH = os.path.join(RAFT_DIR, 'xserver/raft_services/power_management/board')
-
-onboard = board_identity.BoardEEPROM()
 
 # -------------------------
 # Robust Logging Setup
@@ -80,12 +78,12 @@ def start_pyro_daemon():
         exit_program("No network interface found. Cannot start Pyro4 daemon.")
 
     try:
-        product_name, product_revision = board_identity.get_board_identity(onboard)
+        board_name, board_revision = board_identity.get_board_identity()
     except board_identity.BoardIdentityError as exc:
         exit_program(str(exc))
 
     json_file = board_identity.resolve_board_json_path(
-        BOARD_PATH, product_name, product_revision
+        BOARD_PATH, board_name, board_revision
     )
 
     if json_file is None or not is_valid_json_file(json_file):
@@ -95,7 +93,7 @@ def start_pyro_daemon():
         json_data = json.load(f)
 
     try:
-        pm_obj = PM(json_data, product_name, onboard)
+        pm_obj = PM(json_data, board_name, board_revision)
         daemon = Pyro4.Daemon(host=IPADDR, port=PORT)
         uri = daemon.register(pm_obj, objectId="PM")
 

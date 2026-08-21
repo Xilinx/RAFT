@@ -41,17 +41,17 @@ import board_identity  # noqa: E402
 # Resolve board JSON path using RAFT board identity (sc-board-id or EEPROM).
 def board_json_path() -> str:
     try:
-        product_name, product_revision = board_identity.get_board_identity()
+        board_name, board_revision = board_identity.get_board_identity()
     except board_identity.BoardIdentityError as exc:
         raise SystemExit(str(exc)) from exc
 
     path = board_identity.resolve_board_json_path(
-        BOARD_DIR, product_name, product_revision
+        BOARD_DIR, board_name, board_revision
     )
     if path is None:
         raise SystemExit(
-            f"Board JSON not found for {product_name}"
-            + (f"-{product_revision}" if product_revision else "")
+            f"Board JSON not found for {board_name}"
+            + (f"-{board_revision}" if board_revision else "")
         )
     return path
 
@@ -103,7 +103,7 @@ def _domain_for_rail(rail_name: str, domain_rails: dict[str, list[str]]) -> str:
 # Load and validate board JSON for the installed platform.
 def load_board_config() -> BoardConfig:
     try:
-        product_name, _product_revision = board_identity.get_board_identity()
+        board_name, _board_revision = board_identity.get_board_identity()
     except board_identity.BoardIdentityError as exc:
         raise SystemExit(str(exc)) from exc
 
@@ -114,7 +114,7 @@ def load_board_config() -> BoardConfig:
     with open(path, "r") as f:
         json_data = json.load(f)
 
-    name = product_name
+    name = board_name
     if name not in json_data:
         raise SystemExit(f"Board key {name!r} not in {path}")
 
