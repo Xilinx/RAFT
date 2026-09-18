@@ -83,8 +83,20 @@ class TriggerMonitor:
     # Stop the monitor thread and release the GPIO line request.
     def stop(self, timeout: float = 5.0) -> None:
         self._stop.set()
-        if self._thread is not None and self._thread.is_alive():
-            self._thread.join(timeout=timeout)
+        thread = self._thread
+        if thread is not None and thread.is_alive():
+            thread.join(timeout=timeout)
+            if thread.is_alive():
+                # The watcher is still inside wait_edge_events or a callback and
+                # is using the line request.  Releasing it here would pull the
+                # request out from under a live thread; _run releases it from
+                # its own finally once it unblocks, so leave it alone.
+                log.warning(
+                    "trigger monitor thread did not stop within %.1fs; "
+                    "leaving the GPIO line request to its own cleanup",
+                    timeout,
+                )
+                return
         self._thread = None
         self._release_request()
 

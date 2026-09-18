@@ -81,13 +81,52 @@ While **armed** the daemon holds the trigger line (`consumer=pmcapture-trigger`)
 GPIO **assert** (active level) starts sampling; **deassert** stops the window.
 No I2C traffic until a window is active.
 
+## Control socket — `acquire` / `release`
+
+Other System Controller services reserve the shared I2C bus by sending one JSON
+line per connection to `/run/pmcapture/control.sock`, using the same protocol as
+**`start`** / **`stop`**. `sc_appd` does this around every `sc_app` transaction,
+and the RAFT xserver PM service does it around every bus operation of its own,
+which covers its Pyro clients and `raft-pm-cmd`.
+
+Both commands are served on the control socket only. The `pmcapture` CLI has no
+**`acquire`** or **`release`** subcommand, because a window lasts one
+transaction of the service holding it and could not outlive a CLI invocation.
+
+- **`{"cmd":"acquire","holder":"sc_appd","pid":<pid>}`** — Grants an exclusive
+  window only while the daemon is **idle**. Repeating it with the same `holder`
+  and `pid` is idempotent (`"ok": true`). If a capture session is active, a
+  **`start`** is in progress, the daemon is **armed**, or another holder owns the
+  lock, the reply is `"ok": false` with **`system busy`** in the `error` member.
+
+- **`{"cmd":"release","holder":"sc_appd","pid":<pid>}`** — Clears the lock when
+  `holder` and `pid` match the current owner. Releasing an unlocked daemon
+  returns `"ok": true` (`"not locked"`).
+
+While the lock is held, **`start`** and **`arm`** fail with
+**`system busy: exclusive lock held by <holder> (pid <pid>)`**, and the
+**`status`** reply carries an **`exclusive`** object (`holder`, `pid`, `since`).
+The holder is not written to `status.json`: it changes once per bus
+transaction, so publishing it would rewrite the file twice for every client
+operation to describe state that is stale by the time anything reads it.
+
+Being **armed** also blocks **`acquire`**, which fails with
+**`system busy: pmcapture armed for triggered capture (disarm first)`**. A trigger
+can assert at any moment, and a window that started late or lost bus time would
+misrepresent the event, so triggered captures take priority over bus requests.
+Run **`pmcapture disarm`** to release the board for `sc_app` and RAFT bus
+operations.
+
+If a holder exits without releasing, the daemon reclaims the lock as soon as it
+notices the holder's pid is gone, so a crashed `sc_appd` cannot wedge capture.
+
 ## `start` options (overview)
 
 | Flag | Meaning |
 |------|---------|
 | **`-r` / `--rails`** | Default **`all`** (every **POWER SENSORS** entry). Comma-separated **POWER DOMAIN** names (e.g. `LPD,AIE`) or **POWER SENSOR** names (e.g. `VCCINT_1,VCC_AIE_1`). Legacy values `power_domains` / `power_sensors` are treated as **`all`**. |
 | **`-c` / `--capture-config`** | Optional JSON (see below); CLI overrides unset fields. |
-| **`-o` / `--output`** | `file` (default) or `tcp` (newline-delimited JSON stream; daemon implements TCP — BEAM dashboard consumer tracked in SSW-18337). |
+| **`-o` / `--output`** | `file` (default) or `tcp` (newline-delimited JSON stream; daemon implements TCP). |
 | **`-t` / `--rate`** | Sample rate Hz (0.1–50, default 20). |
 | **`-d` / `--duration`** | Seconds; `0` = until **`stop`** or daemon exit. |
 | **`-f` / `--output-file`** | File path; if omitted, auto name under `/data/pmcapture/` (`capture_<board>_<timestamp>.<ext>` or `…_gpioN.<ext>`). |
@@ -171,7 +210,7 @@ sudo pmcapture start \
 # Capture from JSON profile
 sudo pmcapture start --duration 60 --capture-config /data/pmcapture/subset.json
 
-# TCP streaming (BEAM dashboard consumer tracked in SSW-18337)
+# TCP streaming
 sudo pmcapture start --output tcp --port 18094 --rails all --client beam
 pmcapture stop
 ```

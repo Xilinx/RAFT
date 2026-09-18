@@ -195,6 +195,13 @@ def _print_status(resp: dict, *, as_json: bool = False) -> None:
         sampling = "yes" if resp.get("sampling_active") else "no"
         print(f"  sampling_active: {sampling}")
 
+    exclusive = resp.get("exclusive")
+    if exclusive:
+        print(
+            f"  exclusive lock: {exclusive.get('holder')} "
+            f"(pid {exclusive.get('pid')})"
+        )
+
     trigger = resp.get("trigger")
     if trigger:
         print(f"  trigger: {trigger.get('gpio')} (active={trigger.get('active')})")
@@ -228,6 +235,10 @@ def _print_status(resp: dict, *, as_json: bool = False) -> None:
             print(f"  file: {sess['output_file']}")
         if sess.get("sample_count") is not None:
             print(f"  samples: {sess.get('sample_count')}")
+        # Printed last so it is the line the operator leaves with: it says
+        # the samples above may not be trustworthy.
+        if sess.get("error"):
+            print(f"  {_format_cli_error(sess['error'])}")
 
 # Handle pmcapture status subcommand.
 def _cmd_status(args) -> int:

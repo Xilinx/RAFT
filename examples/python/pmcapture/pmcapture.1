@@ -50,8 +50,11 @@ at a time.
 Use \fBarm\fR to enter GPIO-triggered file capture: the daemon watches a
 board trigger line (libgpiod v2 edge events) and starts a capture session
 on assert and stops it on deassert. While armed, manual \fBstart\fR is
-rejected. Use \fBdisarm\fR to release the trigger line and return to idle.
-No I2C traffic occurs until a GPIO-gated capture window is active.
+rejected, and so are \fBacquire\fR requests from \fBsc_appd\fR and the RAFT
+xserver, so arming reserves the board for triggered capture. Use
+\fBdisarm\fR to release the trigger line, return to idle, and let bus
+operations proceed. No I2C traffic occurs until a GPIO-gated capture window
+is active.
 .PP
 Board sensor layout is read from RAFT
 .I xserver/raft_services/power_management/board/<BOARD>.json
@@ -192,10 +195,24 @@ Program modules.
 .TP
 .I /run/pmcapture/control.sock
 Daemon control socket (JSON request/response, one line per message).
+It also accepts \fBacquire\fR and \fBrelease\fR commands, used by
+\fBsc_appd\fR and the RAFT xserver PM service to reserve the shared I2C
+bus for one transaction. They are served on this socket only; the
+\fBpmcapture\fR CLI has no \fBacquire\fR or \fBrelease\fR subcommand,
+since a window lasts one transaction of the service that holds it and
+could not outlive a CLI invocation. An exclusive window is granted only
+while the daemon is \fBidle\fR: \fBacquire\fR is refused as \fIsystem
+busy\fR while a session is running or while the daemon is \fBarmed\fR,
+since a triggered capture takes priority over bus requests. Conversely,
+while a holder owns the window, \fBstart\fR and \fBarm\fR are refused as
+\fIsystem busy\fR until the matching \fBrelease\fR. A lock whose holder
+process has exited is reclaimed automatically.
 .TP
 .I /run/pmcapture/status.json
 Daemon and session state (\fIidle\fR, \fIarmed\fR, \fIrunning\fR, or
-\fIerror\fR; optional \fItrigger\fR and session metadata).
+\fIerror\fR; optional \fItrigger\fR and session metadata). The exclusive
+holder is not published here, because it changes once per bus transaction;
+use \fBstatus\fR on the control socket to read it live.
 .TP
 .I /data/pmcapture/
 Default directory for auto-generated capture logs (created on first file
