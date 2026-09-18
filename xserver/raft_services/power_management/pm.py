@@ -20,6 +20,38 @@ from devices.sysmon import Sysmon
 from devices.gpio import *
 from utils import get_python_log_levels
 from pm_types import *
+from pmcapture_lock import BusBusy, I2C_DENIED, bus_lock
+
+# Exposed APIs that do not contend for the shared bus, so they skip the
+# pmcapture handshake.  Anything absent from this set is arbitrated, which
+# makes the safe behavior the default: a new API that does touch hardware is
+# locked until someone deliberately exempts it.  The GPIO calls are left out
+# on purpose, since GPIO lines can sit behind an I2C expander depending on
+# the board.
+#
+# GetBoardInfo is exempt because the board name and revision are resolved
+# once at RAFT startup, by default from the sc-board-id utility, and the call
+# only hands back those cached values.
+#
+# GetTemperature is exempt on bus topology: every board file that configures
+# Temperature names the in-band "versal-isa-0000" Sysmon, read through hwmon
+# sysfs, and the kernel reaches that device over a dedicated I2C bus rather
+# than the segments pmcapture samples, so there is nothing to contend for.
+NO_I2C_ACCESS_CALLERS = frozenset({
+    "getboardinfo",
+    "listfeature",
+    "listpowerdomains",
+    "listrailsofdomain",
+    "listpowersensors",
+    "listvoltages",
+    "listtemperatures",
+    "gettemperature",
+    "listgpio",
+    "listunits",
+    "getunit",
+    "listavailablescales",
+    "setscale",
+})
 
 class HardwareError(Exception):
     pass
@@ -237,7 +269,11 @@ class PM(object):
                 if 'gpio' not in self.feature_list:
                     raise Exception(f"Unsupported feature: gpio")
 
-            data = process_function(*args, **kwargs)
+            if caller_name in NO_I2C_ACCESS_CALLERS:
+                data = process_function(*args, **kwargs)
+            else:
+                with bus_lock.window():
+                    data = process_function(*args, **kwargs)
             return {
                 "status": "success",
                 "data": data,
@@ -248,6 +284,19 @@ class PM(object):
                 "status": "failure",
                 "data": None,
                 "message": f"Hardware error: {str(e)}"
+            }
+        except BusBusy as e:
+            self.logger.warning(f'{sys._getframe(1).f_code.co_name}{args} : {str(e)}')
+            # The fixed "error" string lets a client recognize "the bus was
+            # not granted" without parsing the message, which is what
+            # raft-pm-cmd needs to print the same wording as the other
+            # arbitrating clients.  The reason stays in "message" for BEAM
+            # and the REST layer.
+            return {
+                "status": "failure",
+                "data": None,
+                "error": I2C_DENIED,
+                "message": str(e)
             }
         except ValueError as e:
             self.logger.error(f'{sys._getframe(1).f_code.co_name}{args} : {str(e)}')

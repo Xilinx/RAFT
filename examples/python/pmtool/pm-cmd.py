@@ -19,6 +19,22 @@ from pm_client import PM_Client
 
 client = PM_Client()
 
+# Bus arbitration refusals.  A denied request comes back with its "error"
+# field set to this exact string, which lets the refusal be recognized without
+# matching on wording that may change.  The PM service is what sets it, as
+# pmcapture_lock.I2C_DENIED, and the value is spelled out again here rather
+# than imported because this CLI reaches the service over Pyro and does not
+# load its modules.  Every character-based client prints one identical line
+# for this condition, so an operator sees the same thing whichever tool they
+# happen to be using, and the specific reason is read from "pmcapture status"
+# or the daemon journal.
+I2C_DENIED = "i2c_arbitration_denied"
+I2C_DENIED_TEXT = "ERROR: I2C access permission was not granted by the arbiter"
+
+
+def arbitration_denied(response):
+    return isinstance(response, dict) and response.get("error") == I2C_DENIED
+
 class CustomHelpFormatter(argparse.HelpFormatter):
     """Custom formatter to show subcommand groups with proper argument types."""
     def __init__(self, prog, command_groups):
@@ -88,6 +104,11 @@ def print_response(response):
         else:
             print(json.dumps(response['data'], indent=2))
         sys.exit(os.EX_OK)
+    elif arbitration_denied(response):
+        # Printed as plain text, not JSON, so it matches what the other
+        # character-based clients print, character for character.
+        print(I2C_DENIED_TEXT)
+        sys.exit(os.EX_SOFTWARE)
     else:
         print(json.dumps(response['message'], indent=2))
         sys.exit(os.EX_SOFTWARE)
@@ -406,6 +427,11 @@ def cmd_dump_power_log(args):
         msg = resp.get("message", "")
 
         if status != "success":
+            # One wording for a refused bus, the same one every other
+            # character-based client prints, so a per-rail COMMENT does not
+            # disagree with the single-command path.
+            if arbitration_denied(resp):
+                return (False, data, I2C_DENIED_TEXT)
             if is_error_string(msg):
                 return (False, data, msg.strip())
             return (False, data, msg or "Operation failed")
