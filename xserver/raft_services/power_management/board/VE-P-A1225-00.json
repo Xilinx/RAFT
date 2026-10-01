@@ -1,5 +1,5 @@
 {
-	"License" : "Copyright (c) 2025 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
+	"License" : "Copyright (c) 2025 - 2026 Advanced Micro Devices, Inc.  All rights reserved. SPDX-License-Identifier: MIT",
 
 	"VE-P-A1225-00" : {
 		"FEATURE" : {
@@ -114,8 +114,8 @@
 				"Maximum_Current" : 100,
 				"Phase_Multiplier" : 1
 			},
-			"VCC_SEIO_104" : {
-				"Name" : "VCC_SEIO_104",
+			"VCC_EIO_104" : {
+				"Name" : "VCC_EIO_104",
 				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x59",
@@ -123,8 +123,8 @@
 				"Maximum_Current" : 1000,
 				"Phase_Multiplier" : 1
 			},
-			"VCCIO_SEIO_104" : {
-				"Name" : "VCCIO_SEIO_104",
+			"VCCIO_EIO_104" : {
+				"Name" : "VCCIO_EIO_104",
 				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x5A",
@@ -132,8 +132,8 @@
 				"Maximum_Current" : 1500,
 				"Phase_Multiplier" : 1
 			},
-			"VCC_SVIP_204" : {
-				"Name" : "VCC_SVIP_204",
+			"VCC_VIP_204" : {
+				"Name" : "VCC_VIP_204",
 				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x5B",
@@ -141,8 +141,8 @@
 				"Maximum_Current" : 1000,
 				"Phase_Multiplier" : 1
 			},
-			"VCCIO_SVIP_204" : {
-				"Name" : "VCCIO_SVIP_204",
+			"VCCIO_VIP_204" : {
+				"Name" : "VCCIO_VIP_204",
 				"Part_Name" : "INA226",
 				"I2C_Bus" : "/dev/i2c-0",
 				"I2C_Address" : "0x5C",
@@ -374,8 +374,8 @@
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
 			},
-			"VR_VCC_SEIO_104" : {
-				"Name" : "VR_VCC_SEIO_104",
+			"VR_VCC_EIO_104" : {
+				"Name" : "VR_VCC_EIO_104",
 				"Part_Name" : "TPS546A24A",
 				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
@@ -385,8 +385,8 @@
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
 			},
-			"VR_VCCIO_SEIO_104" : {
-				"Name" : "VR_VCCIO_SEIO_104",
+			"VR_VCCIO_EIO_104" : {
+				"Name" : "VR_VCCIO_EIO_104",
 				"Part_Name" : "TPS546A24A",
 				"Maximum_Volt" : 1.98,
 				"Typical_Volt" : 1.8,
@@ -396,8 +396,8 @@
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
 			},
-			"VR_VCC_SVIP_204" : {
-				"Name" : "VR_VCC_SVIP_204",
+			"VR_VCC_VIP_204" : {
+				"Name" : "VR_VCC_VIP_204",
 				"Part_Name" : "TPS546A24A",
 				"Maximum_Volt" : 0.88,
 				"Typical_Volt" : 0.8,
@@ -407,8 +407,8 @@
 				"PMBus_VOUT_MODE" : 1,
 				"Page_Select" : -1
 			},
-			"VR_VCCIO_SVIP_204" : {
-				"Name" : "VR_VCCIO_SVIP_204",
+			"VR_VCCIO_VIP_204" : {
+				"Name" : "VR_VCCIO_VIP_204",
 				"Part_Name" : "TPS546A24A",
 				"Maximum_Volt" : 1.98,
 				"Typical_Volt" : 1.8,
@@ -533,7 +533,7 @@
 			}
 		},
 		"Temperature" : {
-			"Name" : "Versal-APEX",
+			"Name" : "Versal-Gen2",
 			"Sensor" : "versal-isa-0000"
 		}
 	}
