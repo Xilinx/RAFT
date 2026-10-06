@@ -251,9 +251,9 @@ class PM_Client(object):
         self.logger.debug("offregulator()")
         return self.PM.OFFRegulator(name)
 
-    def getvoltage(self, name):
+    def getvoltage(self, name, include_all=False):
         self.logger.debug("GetVoltage()")
-        return self.PM.GetVoltage(name)
+        return self.PM.GetVoltage(name, include_all)
 
     def setvoltage(self, name, value):
         self.logger.debug("SetVoltage()")

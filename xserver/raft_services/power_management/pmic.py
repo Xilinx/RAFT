@@ -140,8 +140,10 @@ class PMIC(object):
         self.logger.debug(f"OFFRegulator({cnt.gpio_name}@{cnt.gpio_chip}:{cnt.gpio_number})")
         cnt.set_low()
 
-    def GetVoltage(self, o):
-        self.logger.debug("GetVoltage(0x{0:02x}@{1})".format(o.addr, o.i2c.devpath))
+    def GetVoltage(self, o, include_all=False):
+        self.logger.debug("GetVoltage(0x{0:02x}@{1}, {2})".format(o.addr, o.i2c.devpath, include_all))
+        if include_all:
+            return o.read_voltage_all()
         return o.read_voltage()
 
     def SetVoltage(self, o, val):

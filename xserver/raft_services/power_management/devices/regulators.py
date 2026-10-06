@@ -19,8 +19,12 @@ class PMBUS(IntEnum):
     VOUT_MODE =     0x20
     VOUT_COMMAND =  0x21
     VOUT_MAX =      0X24
-    VOUT_MIN =      0x2B
     VOUT_SCALE_LOOP = 0x29
+    VOUT_MIN =      0x2B
+    VOUT_OV_FAULT_LIMIT = 0x40
+    VOUT_OV_WARN_LIMIT = 0x42
+    VOUT_UV_WARN_LIMIT = 0x43
+    VOUT_UV_FAULT_LIMIT = 0x44
     STATUS_BYTE =   0x79
     STATUS_WORD =   0x79
     STATUS_VOUT =   0x7A
@@ -46,6 +50,21 @@ PMBUS_IEEE754_EXP_OFFSET = 25
 PMBUS_IEEE754_MIN_MANTISSA = 0x400
 PMBUS_IEEE754_MAX_MANTISSA = 0x7FF
 PMBUS_IEEE754_VOUT_SCALE = 1000
+
+MPQ72963_READ_VOUT_LSB_V = 1.5625e-3
+MPQ72963_MFR_VR_CONFIG = 0xBA
+MPQ72963_VDIFF_GAIN_BIT = 0x40
+MPQ72963_VOUT_COMMAND_MASK = 0x1FF
+MPQ72963_VOUT_COMMAND_LSB_V = 5e-3
+MPQ72963_VOUT_COMMAND_HALF_GAIN_LSB_V = 10e-3
+MPQ72963_LIMIT_MASK = 0x3F
+# Datasheet gives "10mV ~ 640mV" for this 6-bit field, which may mean
+# (raw + 1) * 10mV; raw * 10mV is used until confirmed with MPS.
+MPQ72963_LIMIT_LSB_V = 10e-3
+OV_LIMIT_REGS = frozenset({
+    PMBUS.VOUT_OV_FAULT_LIMIT,
+    PMBUS.VOUT_OV_WARN_LIMIT,
+})
 
 # Decode PMBus VOUT IEEE754 half-precision register data to volts.
 def _pmbus_ieee754_reg_to_volts(reg):
@@ -112,6 +131,10 @@ def _pmbus_volts_to_ieee754_reg(value):
 def pm_print(printstr):
     if(PM_LOWLEVEL_DEBUG):
         print(printstr)
+
+class VoutLimitsNotSupported(Exception):
+    """Raised when a regulator does not respond to the OV/UV limit registers (40h-44h)."""
+
 
 class PMBusRegulator:
     vout_scaling = ScalingType.LINEAR16
@@ -222,11 +245,102 @@ class PMBusRegulator:
             raw_voltage = self._read_byte(PMBUS.VOUT_COMMAND)
         else:
             raw_voltage = self._read_word(PMBUS.READ_VOUT)
-        if not raw_voltage:
+        if raw_voltage is None:
             return None
         else:
             pm_print("raw_voltage 0x{0:04x}".format(raw_voltage))
             return round(self._rawvalue_2_value(raw_voltage, self.vout_scaling), 4)
+
+    def _mpq72963_vid_step(self):
+        """VOUT_COMMAND LSB for the selected page, set by MFR_VR_CONFIG (BAh) bit[6]."""
+        vr_config = self._read_word(MPQ72963_MFR_VR_CONFIG)
+        if vr_config is None:
+            raise IOError("failed to read MFR_VR_CONFIG from {0}@0x{1:02x}".format(
+                self.i2c.devpath, self.addr))
+        if vr_config & MPQ72963_VDIFF_GAIN_BIT:
+            return MPQ72963_VOUT_COMMAND_HALF_GAIN_LSB_V
+        return MPQ72963_VOUT_COMMAND_LSB_V
+
+    def _read_target_voltage(self):
+        """Read programmed setpoint from VOUT_COMMAND."""
+        if not self.vout_scaling:
+            return None
+        if self.page >= 0:
+            self._select_page()
+        if self.name in ("MPQ2283", "MPQ2285", "MPQ2287"):
+            raw = self._read_byte(PMBUS.VOUT_COMMAND)
+        else:
+            raw = self._read_word(PMBUS.VOUT_COMMAND)
+        if raw is None:
+            return None
+        if self.name == "MPQ72963":
+            step = self._mpq72963_vid_step()
+            return round((raw & MPQ72963_VOUT_COMMAND_MASK) * step, 4)
+        self._get_vout_mode()
+        return round(self._rawvalue_2_value(raw, self.vout_scaling), 4)
+
+    def _read_vout_limit(self, register, target, relative):
+        """Read one OV/UV limit register and convert it to volts."""
+        raw = self._read_word(register)
+        if raw is None:
+            return None
+
+        if self.name == "MPQ72963":
+            # Fixed offset from the target: bits[5:0] at 10mV/LSB.
+            offset = (raw & MPQ72963_LIMIT_MASK) * MPQ72963_LIMIT_LSB_V
+            if register in OV_LIMIT_REGS:
+                value = target + offset
+            else:
+                value = target - offset
+            return round(value, 4), raw
+
+        value = self._rawvalue_2_value(raw, ScalingType.LINEAR16)
+        if relative:
+            # Relative limits are a multiplier of VOUT_COMMAND (e.g. 1.1 = +10%).
+            value *= target
+        return round(value, 4), raw
+
+    def read_voltage_all(self):
+        """Read output voltage, target setpoint, and OV/UV fault/warning limits."""
+        pm_print("read_voltage_all()")
+        if not self.vout_scaling:
+            raise IOError("voltage scaling is not defined for this regulator")
+
+        if self.page >= 0:
+            self._select_page()
+
+        voltage = self.read_voltage()
+        if voltage is None:
+            raise IOError("failed to read voltage from regulator")
+
+        target = self._read_target_voltage()
+        if target is None:
+            raise IOError("failed to read VOUT_COMMAND from regulator")
+
+        # vout_mode is 0x18 (absolute) unless PMBus_VOUT_MODE=1 and the chip
+        # reported otherwise in read_voltage().
+        relative = bool(self.vout_mode & 0x80)
+
+        limits = {
+            "Overvoltage_Fault_Limit": PMBUS.VOUT_OV_FAULT_LIMIT,
+            "Overvoltage_Warning_Limit": PMBUS.VOUT_OV_WARN_LIMIT,
+            "Undervoltage_Warning_Limit": PMBUS.VOUT_UV_WARN_LIMIT,
+            "Undervoltage_Fault_Limit": PMBUS.VOUT_UV_FAULT_LIMIT,
+        }
+
+        result = {"Voltage": voltage, "Target_Voltage": target}
+        for name, register in limits.items():
+            limit = self._read_vout_limit(register, target, relative)
+            if limit is None:
+                raise VoutLimitsNotSupported(
+                    f"{self.name} did not respond to {name} (0x{register:02x})")
+            value, raw = limit
+            result[name] = {
+                "value": value,
+                "register": register,
+                "raw": raw,
+            }
+        return result
 
     def read_current(self):
         """Read and scale output current using READ_IOUT command."""
@@ -370,7 +484,7 @@ class PMBusRegulator:
             raw_value = ((value / VOUT_SL) - 206.25e-3) / 6.25e-3
             #value = ((raw_value * 6.25e-3) + 206.25e-3) * VOUT_SL
         elif self.name == "MPQ72963":
-            raw_value = value / 5e-3
+            raw_value = value / self._mpq72963_vid_step()
         else:
             raw_value = 0 # implement !
         return round(raw_value)
@@ -599,6 +713,9 @@ class MPSRegulator:
         values['current'] = self.read_current()
         values['temperature'] = self.read_temperature()
         return values
+
+    def read_voltage_all(self):
+        raise VoutLimitsNotSupported("Regulator has no OV/UV limit registers")
 
     def read_voltage(self):
         READ_VOUT = 0x12

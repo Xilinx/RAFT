@@ -202,6 +202,16 @@ if 'voltage' in list_features['data']:
         ret = handle.getvoltage(voltage)
         print(json.dumps(ret, indent=2))
 
+        print_header(f'######## GET {voltage} VOLTAGE LIMITS ##########')
+        #Description:
+        #   Gets voltage value with OV/UV fault and warning limits.
+        #Input Arguments:
+        #   Voltage regulator name
+        #Return:
+        #   ret: Voltage value and OV/UV limits
+        ret = handle.getvoltage(voltage, True)
+        print(json.dumps(ret, indent=2))
+
         print_header(f'######## GET "{voltage}" REGULATOR ##########')
         #Description:
         #   Gets voltage regulator telemetry values.

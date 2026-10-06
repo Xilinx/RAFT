@@ -18,6 +18,7 @@ from pmic import PMIC
 from devices.stats import Stats
 from devices.sysmon import Sysmon
 from devices.gpio import *
+from devices.regulators import VoutLimitsNotSupported
 from utils import get_python_log_levels
 from pm_types import *
 from pmcapture_lock import BusBusy, I2C_DENIED, bus_lock
@@ -393,9 +394,9 @@ class PM(object):
         self.logger.info(f"OFFRegulator({voltage_name})")
         return self.handle_request(self._off_regulator, voltage_name)
 
-    def GetVoltage(self, voltage_name):
-        self.logger.info(f"GetVoltage({voltage_name})")
-        return self.handle_request(self._get_voltage, voltage_name)
+    def GetVoltage(self, voltage_name, include_all=False):
+        self.logger.info(f"GetVoltage({voltage_name}, {include_all})")
+        return self.handle_request(self._get_voltage, voltage_name, include_all)
 
     def SetVoltage(self, voltage_name, new_value):
         self.logger.info(f"SetVoltage({voltage_name}, {new_value})")
@@ -828,13 +829,29 @@ class PM(object):
                 else:
                     self.pmic.OFFRegulator(v._gpiocnt)
 
-    def _get_voltage(self, voltage_name):
+    def _get_voltage(self, voltage_name, include_all=False):
         v = self.__find_voltage(voltage_name)
         if v is None:
             raise ValueError(f'{voltage_name} does not exits')
         else:
             if v._output is None:
                 raise Exception(f'{voltage_name} regulator is not defined')
+            elif include_all:
+                try:
+                    readings = self.pmic.GetVoltage(v._output, include_all=True)
+                except VoutLimitsNotSupported as e:
+                    raise Exception(f'{voltage_name}: {e}')
+                data = {}
+                for key, reading in readings.items():
+                    if isinstance(reading, dict) and "value" in reading:
+                        entry = {
+                            "value": self._scale(reading["value"], "voltage"),
+                            "register": f"0x{reading['register']:02x}",
+                            "raw": f"0x{reading['raw']:x}",
+                        }
+                        data[key] = entry
+                    else:
+                        data[key] = self._scale(reading, "voltage")
             else:
                 data = {"Voltage" : self._scale(self.pmic.GetVoltage(v._output), "voltage")}
         return data

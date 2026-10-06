@@ -113,6 +113,25 @@ def print_response(response):
         print(json.dumps(response['message'], indent=2))
         sys.exit(os.EX_SOFTWARE)
 
+def print_voltage_all_response(response):
+    if response['status'] != 'success':
+        print_response(response)
+        return
+
+    data = response['data']
+    print(f"Voltage(V):\t{data['Voltage']:.2f}")
+
+    for key, entry in data.items():
+        if key in ("Voltage", "Target_Voltage"):
+            continue
+        if not isinstance(entry, dict):
+            continue
+        print(
+            f"{key}(V):\t{entry['value']:.2f}\t"
+            f"(Reg {entry['register']}:\t{entry['raw']})"
+        )
+    sys.exit(os.EX_OK)
+
 def main():
     # Define command groups
     command_groups = {
@@ -166,8 +185,10 @@ def main():
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to enable"}})
     add_command("disablevoltage", "Disable a specific voltage regulator output", voltage_action,
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to disable"}})
-    add_command("getvoltage", "Get current voltage level", voltage_action,
-                arguments={"voltage_name": {"type": str, "help": "Voltage rail to set"}})
+    add_command("getvoltage", "Get current voltage level, optionally including OV/UV limits", voltage_action,
+                arguments={"voltage_name": {"type": str, "help": "Voltage rail to get"}},
+                optional_arguments={"--all": {"action": "store_true", "dest": "include_all",
+                                              "help": "Include OV/UV fault and warning limits"}})
     add_command("setvoltage", "Set a new voltage level", voltage_action,
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to set"},
                            "value": {"type": float, "help": "New voltage value"}})
@@ -269,7 +290,11 @@ def voltage_action(args):
         case "disablevoltage":
             print_response(client.disablevoltage(args.voltage_name))
         case "getvoltage":
-            print_response(client.getvoltage(args.voltage_name))
+            response = client.getvoltage(args.voltage_name, args.include_all)
+            if args.include_all:
+                print_voltage_all_response(response)
+            else:
+                print_response(response)
         case "setvoltage":
             print_response(client.setvoltage(args.voltage_name, args.value))
         case "setbootvoltage":
@@ -692,4 +717,3 @@ def cmd_dump_power_log(args):
 if __name__ == "__main__":
     # call main
     main()
-
