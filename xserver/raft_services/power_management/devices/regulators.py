@@ -66,6 +66,44 @@ OV_LIMIT_REGS = frozenset({
     PMBUS.VOUT_OV_WARN_LIMIT,
 })
 
+# MPQ70170 Page_Select: 0-4 = BUCK1-BUCK5, 5-8 = LDO1-LDO4.
+MPQ70170_NUM_BUCKS = 5
+MPQ70170_NUM_LDOS = 4
+MPQ70170_BUCK1_CTRL = 0x04
+MPQ70170_BUCK1_VOUT1 = 0x0E
+MPQ70170_BUCK1_PG = 0x18
+MPQ70170_LDO1_CTRL = 0x1D
+MPQ70170_LDO1_VOUT = 0x23
+MPQ70170_LDO1_PG = 0x27
+MPQ70170_EN_BIT = 0x01
+MPQ70170_BUCK_VSET_BIT = 0x08
+MPQ70170_BUCK_MAX_CODE = 0xFD
+MPQ70170_LDO_VLEVEL_MASK = 0x7F
+MPQ70170_LDO_MAX_CODE = 0x4A
+# PG OV/UV threshold codes are a percentage of the setpoint at or above
+# these voltages, and steps of 10mV below them.
+MPQ70170_BUCK_PG_PERCENT_MIN_V = 1.1
+MPQ70170_LDO_PG_PERCENT_MIN_V = 1.0
+MPQ70170_PG_STEPS = (3, 3.5, 4, 5, 6, 7, 8, 10)
+
+def _mpq70170_buck_code_to_volts(code):
+    if code <= 0x0F:
+        return 0.3 + code * 20e-3
+    if code <= 0x73:
+        return 0.6 + (code - 15) * 5e-3
+    if code <= 0xAB:
+        return 1.1 + (code - 115) * 10e-3
+    if code <= MPQ70170_BUCK_MAX_CODE:
+        return 1.66 + (code - 171) * 20e-3
+    return None
+
+def _mpq70170_ldo_code_to_volts(code):
+    if code <= 0x1C:
+        return 0.3 + code * 25e-3
+    if code <= MPQ70170_LDO_MAX_CODE:
+        return 1.0 + (code - 28) * 50e-3
+    return None
+
 # Decode PMBus VOUT IEEE754 half-precision register data to volts.
 def _pmbus_ieee754_reg_to_volts(reg):
     # 16-bit word: [15]=sign, [14:10]=exponent, [9:0]=mantissa.
@@ -789,3 +827,145 @@ class MPSRegulator:
             raise IOError(
                 "Failed to read 0x{0:02x} from {1}@0x{2:02x}".format(
                     command, self.i2c.devpath, self.addr))
+
+class MPQ70170Regulator:
+    """MPQ70170 PMIC rail (plain I2C register map, not PMBus)."""
+
+    def __init__(self, device_path, device_address, page=-1, phase=-1):
+        if not 0 <= page < MPQ70170_NUM_BUCKS + MPQ70170_NUM_LDOS:
+            raise ValueError(f"MPQ70170 Page_Select must be 0-8, got {page}")
+        self.name = "MPQ70170"
+        self.i2c = I2C(device_path)
+        self.addr = int(device_address, 0)
+        self.page = page
+        self.phase = phase
+        self.is_buck = page < MPQ70170_NUM_BUCKS
+        if self.is_buck:
+            self.ctrl_reg = MPQ70170_BUCK1_CTRL + page * 2
+            self.pg_reg = MPQ70170_BUCK1_PG + page
+        else:
+            ldo = page - MPQ70170_NUM_BUCKS
+            self.ctrl_reg = MPQ70170_LDO1_CTRL + ldo
+            self.pg_reg = MPQ70170_LDO1_PG + ldo
+
+    def __str__(self):
+        str_info = {
+            k: v
+            for k, v in self.__dict__.items()
+            if k not in ['i2c'] and v
+        }
+        return str(str_info)
+
+    def close(self):
+        self.i2c.close()
+
+    def enable_output(self):
+        ctrl = self._read_byte(self.ctrl_reg)
+        self._write_byte_verified(self.ctrl_reg, ctrl | MPQ70170_EN_BIT)
+
+    def shutdown_output(self):
+        ctrl = self._read_byte(self.ctrl_reg)
+        self._write_byte_verified(self.ctrl_reg, ctrl & ~MPQ70170_EN_BIT)
+
+    def _vout_reg(self):
+        """Return the active setpoint register (BUCKx_VOUT1/2 per VSET, or LDOx_VOUT)."""
+        if not self.is_buck:
+            return MPQ70170_LDO1_VOUT + (self.page - MPQ70170_NUM_BUCKS)
+        reg = MPQ70170_BUCK1_VOUT1 + self.page * 2
+        if self._read_byte(self.ctrl_reg) & MPQ70170_BUCK_VSET_BIT:
+            reg += 1
+        return reg
+
+    def _code_to_volts(self, code):
+        if self.is_buck:
+            return _mpq70170_buck_code_to_volts(code)
+        return _mpq70170_ldo_code_to_volts(code & MPQ70170_LDO_VLEVEL_MASK)
+
+    def read_voltage(self):
+        """Return the programmed setpoint; the part has no output voltage telemetry."""
+        vout_reg = self._vout_reg()
+        raw = self._read_byte(vout_reg)
+        pm_print("raw_voltage(0x{0:02x}) 0x{1:02x}".format(vout_reg, raw))
+        value = self._code_to_volts(raw)
+        if value is None:
+            raise IOError("invalid VOUT code 0x{0:02x} in register 0x{1:02x}".format(raw, vout_reg))
+        return round(value, 4)
+
+    def set_voltage(self, value):
+        pm_print(f"set_voltage({value})")
+        max_code = MPQ70170_BUCK_MAX_CODE if self.is_buck else MPQ70170_LDO_MAX_CODE
+        decode = _mpq70170_buck_code_to_volts if self.is_buck else _mpq70170_ldo_code_to_volts
+        if not decode(0) <= value <= decode(max_code):
+            raise ValueError("{0}V is outside the MPQ70170 range {1}V-{2}V".format(
+                value, decode(0), round(decode(max_code), 4)))
+        code = min(range(max_code + 1), key=lambda c: abs(decode(c) - value))
+
+        vout_reg = self._vout_reg()
+        if not self.is_buck:
+            # Preserve BYPASS_LDOx (bit 7).
+            code |= self._read_byte(vout_reg) & ~MPQ70170_LDO_VLEVEL_MASK & 0xFF
+        self._write_byte_verified(vout_reg, code)
+        pm_print("vout_reg 0x{0:02x} code 0x{1:02x}".format(vout_reg, code))
+
+    def _pg_threshold(self, code, target, above):
+        percent_min_v = MPQ70170_BUCK_PG_PERCENT_MIN_V if self.is_buck else MPQ70170_LDO_PG_PERCENT_MIN_V
+        step = MPQ70170_PG_STEPS[code]
+        if target >= percent_min_v:
+            offset = target * step / 100
+        else:
+            offset = step * 10e-3
+        return round(target + offset if above else target - offset, 4)
+
+    def read_voltage_all(self):
+        """Return the setpoint and power-good OV/UV thresholds (BUCKx_PG/LDOx_PG)."""
+        target = self.read_voltage()
+        raw = self._read_byte(self.pg_reg)
+        result = {"Voltage": target, "Target_Voltage": target}
+        result["Power_Good_OV_Threshold"] = {
+            "value": self._pg_threshold((raw >> 3) & 0x7, target, above=True),
+            "register": self.pg_reg,
+            "raw": raw,
+        }
+        result["Power_Good_UV_Threshold"] = {
+            "value": self._pg_threshold(raw & 0x7, target, above=False),
+            "register": self.pg_reg,
+            "raw": raw,
+        }
+        return result
+
+    def read_current(self):
+        return None
+
+    def read_temperature(self):
+        return None
+
+    def read_telemetry_all(self):
+        return [None, None, self.read_voltage(), None, None, None, None]
+
+    def _write_byte_verified(self, command, value):
+        # Writes are silently dropped while REGISTER_LOCK (0x9A) is locked or
+        # PEC is enabled in COMM_CFG (0x96), so confirm with a readback.
+        self._write_byte(command, value)
+        readback = self._read_byte(command)
+        if readback != value:
+            raise IOError(
+                "MPQ70170 {0}@0x{1:02x} ignored write 0x{2:02x} to 0x{3:02x} "
+                "(read back 0x{4:02x}); check REGISTER_LOCK (0x9A) and PEC (0x96)".format(
+                    self.i2c.devpath, self.addr, value, command, readback))
+
+    def _write_byte(self, command, value):
+        try:
+            self.i2c.transfer(self.addr, [I2C.Message([command, value])])
+        except IOError:
+            raise IOError("Failed to write 0x{0:02x} to {1}@0x{2:02x}".format(
+                command, self.i2c.devpath, self.addr))
+
+    def _read_byte(self, command):
+        try:
+            write_msg = I2C.Message([command])
+            read_msg = I2C.Message([0x00], read=True)
+            self.i2c.transfer(self.addr, [write_msg, read_msg])
+            return read_msg.data[0]
+        except IOError:
+            raise IOError("Failed to read 0x{0:02x} from {1}@0x{2:02x}".format(
+                command, self.i2c.devpath, self.addr))

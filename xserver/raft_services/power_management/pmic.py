@@ -65,6 +65,11 @@ class PMIC(object):
                     v._output = PMBusRegulator(device_name=v.part_name, device_path=v.i2c_bus, device_address=v.i2c_address, page=v.page_select, pmbus_vout_mode=v.pmbus_vout_mode, phase=v.phase)
                 case 'MPM54322' | 'MPM54522':
                     v._output = MPSRegulator(device_path=v.i2c_bus, device_address=v.i2c_address, page=v.page_select, phase=v.phase, fb_ratio=v.fb_ratio)
+                case 'MPQ70170':
+                    try:
+                        v._output = MPQ70170Regulator(device_path=v.i2c_bus, device_address=v.i2c_address, page=v.page_select, phase=v.phase)
+                    except ValueError as e:
+                        self.logger.error(f"{v.name}: {e}")
                 case _:
                     v._output = None #DefaultRegulator(device_path=v.i2c_bus, device_address=v.i2c_address)
             if v._output is None:
