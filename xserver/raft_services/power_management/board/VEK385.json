@@ -385,7 +385,7 @@
 				"Part_Name": "MPQ2285",
 				"Maximum_Volt": 1.32,
 				"Typical_Volt": 1.2,
-				"Minimum_Volt": 1.08,
+				"Minimum_Volt": 0.81,
 				"I2C_Bus": "/dev/i2c-4",
 				"I2C_Address": "0x02",
 				"PMBus_VOUT_MODE": 1,
