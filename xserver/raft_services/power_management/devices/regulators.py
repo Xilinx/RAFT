@@ -367,17 +367,20 @@ class PMBusRegulator:
         }
 
         result = {"Voltage": voltage, "Target_Voltage": target}
+        limits_available = True
         for name, register in limits.items():
             limit = self._read_vout_limit(register, target, relative)
             if limit is None:
-                raise VoutLimitsNotSupported(
-                    f"{self.name} did not respond to {name} (0x{register:02x})")
+                limits_available = False
+                break
             value, raw = limit
             result[name] = {
                 "value": value,
                 "register": register,
                 "raw": raw,
             }
+        if not limits_available:
+            result["Limits_NA"] = True
         return result
 
     def read_current(self):
@@ -753,7 +756,14 @@ class MPSRegulator:
         return values
 
     def read_voltage_all(self):
-        raise VoutLimitsNotSupported("Regulator has no OV/UV limit registers")
+        voltage = self.read_voltage()
+        if voltage is None:
+            raise IOError("failed to read voltage from regulator")
+        return {
+            "Voltage": voltage,
+            "Target_Voltage": voltage,
+            "Limits_NA": True,
+        }
 
     def read_voltage(self):
         READ_VOUT = 0x12

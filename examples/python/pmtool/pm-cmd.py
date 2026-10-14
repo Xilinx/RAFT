@@ -119,17 +119,20 @@ def print_voltage_all_response(response):
         return
 
     data = response['data']
-    print(f"Voltage(V):\t{data['Voltage']:.2f}")
+    if isinstance(data.get("Voltage"), str):
+        print(data["Voltage"])
+    else:
+        print(f"Voltage(V):\t{data['Voltage']:.2f}")
 
-    for key, entry in data.items():
-        if key in ("Voltage", "Target_Voltage"):
-            continue
-        if not isinstance(entry, dict):
-            continue
-        print(
-            f"{key}(V):\t{entry['value']:.2f}\t"
-            f"(Reg {entry['register']}:\t{entry['raw']})"
-        )
+        for key, entry in data.items():
+            if key in ("Voltage", "Target_Voltage"):
+                continue
+            if not isinstance(entry, dict):
+                continue
+            print(
+                f"{key}(V):\t{entry['value']:.2f}\t"
+                f"(Reg {entry['register']}:\t{entry['raw']})"
+            )
     sys.exit(os.EX_OK)
 
 def main():

@@ -18,7 +18,6 @@ from pmic import PMIC
 from devices.stats import Stats
 from devices.sysmon import Sysmon
 from devices.gpio import *
-from devices.regulators import VoutLimitsNotSupported
 from utils import get_python_log_levels
 from pm_types import *
 from pmcapture_lock import BusBusy, I2C_DENIED, bus_lock
@@ -53,6 +52,28 @@ NO_I2C_ACCESS_CALLERS = frozenset({
     "listavailablescales",
     "setscale",
 })
+
+
+def _format_voltage_all_display(data):
+    lines = []
+    if "Voltage" in data and not isinstance(data["Voltage"], str):
+        lines.append(f"Voltage(V): {data['Voltage']:.2f}")
+    if "Target_Voltage" in data and not isinstance(data["Target_Voltage"], str):
+        lines.append(f"Target_Voltage: {data['Target_Voltage']:.2f}")
+    if data.get("Limits_NA"):
+        lines.append("N/A")
+    else:
+        for key, entry in data.items():
+            if key in ("Voltage", "Target_Voltage", "Limits_NA"):
+                continue
+            if not isinstance(entry, dict) or "value" not in entry:
+                continue
+            lines.append(
+                f"{key}(V): {entry['value']:.2f} "
+                f"(Reg {entry['register']}: {entry['raw']})"
+            )
+    return "\n".join(lines)
+
 
 class HardwareError(Exception):
     pass
@@ -837,10 +858,7 @@ class PM(object):
             if v._output is None:
                 raise Exception(f'{voltage_name} regulator is not defined')
             elif include_all:
-                try:
-                    readings = self.pmic.GetVoltage(v._output, include_all=True)
-                except VoutLimitsNotSupported as e:
-                    raise Exception(f'{voltage_name}: {e}')
+                readings = self.pmic.GetVoltage(v._output, include_all=True)
                 data = {}
                 for key, reading in readings.items():
                     if isinstance(reading, dict) and "value" in reading:
@@ -852,6 +870,7 @@ class PM(object):
                         data[key] = entry
                     else:
                         data[key] = self._scale(reading, "voltage")
+                return {"Voltage": _format_voltage_all_display(data)}
             else:
                 data = {"Voltage" : self._scale(self.pmic.GetVoltage(v._output), "voltage")}
         return data
