@@ -71,20 +71,13 @@ MPQ70170_NUM_BUCKS = 5
 MPQ70170_NUM_LDOS = 4
 MPQ70170_BUCK1_CTRL = 0x04
 MPQ70170_BUCK1_VOUT1 = 0x0E
-MPQ70170_BUCK1_PG = 0x18
 MPQ70170_LDO1_CTRL = 0x1D
 MPQ70170_LDO1_VOUT = 0x23
-MPQ70170_LDO1_PG = 0x27
 MPQ70170_EN_BIT = 0x01
 MPQ70170_BUCK_VSET_BIT = 0x08
 MPQ70170_BUCK_MAX_CODE = 0xFD
 MPQ70170_LDO_VLEVEL_MASK = 0x7F
 MPQ70170_LDO_MAX_CODE = 0x4A
-# PG OV/UV threshold codes are a percentage of the setpoint at or above
-# these voltages, and steps of 10mV below them.
-MPQ70170_BUCK_PG_PERCENT_MIN_V = 1.1
-MPQ70170_LDO_PG_PERCENT_MIN_V = 1.0
-MPQ70170_PG_STEPS = (3, 3.5, 4, 5, 6, 7, 8, 10)
 
 def _mpq70170_buck_code_to_volts(code):
     if code <= 0x0F:
@@ -332,7 +325,11 @@ class PMBusRegulator:
                 value = target - offset
             return round(value, 4), raw
 
-        value = self._rawvalue_2_value(raw, ScalingType.LINEAR16)
+        # Limits share the VOUT_MODE data format (PMBus Part II 8.4).
+        if self.vout_scaling == ScalingType.VID:
+            value = self._rawvalue_2_value(raw, ScalingType.VID)
+        else:
+            value = self._rawvalue_2_value(raw, ScalingType.LINEAR16)
         if relative:
             # Relative limits are a multiplier of VOUT_COMMAND (e.g. 1.1 = +10%).
             value *= target
@@ -366,20 +363,20 @@ class PMBusRegulator:
             "Undervoltage_Fault_Limit": PMBUS.VOUT_UV_FAULT_LIMIT,
         }
 
-        result = {"Voltage": voltage, "Target_Voltage": target}
-        limits_available = True
+        # Parts may implement only some limits (e.g. TPS53681 has no warning
+        # limits); a limit that fails to read is left out and shown as N/A.
+        result = {"Voltage": voltage}
         for name, register in limits.items():
             limit = self._read_vout_limit(register, target, relative)
             if limit is None:
-                limits_available = False
-                break
+                continue
             value, raw = limit
             result[name] = {
                 "value": value,
                 "register": register,
                 "raw": raw,
             }
-        if not limits_available:
+        if not any(name in result for name in limits):
             result["Limits_NA"] = True
         return result
 
@@ -761,7 +758,6 @@ class MPSRegulator:
             raise IOError("failed to read voltage from regulator")
         return {
             "Voltage": voltage,
-            "Target_Voltage": voltage,
             "Limits_NA": True,
         }
 
@@ -852,11 +848,9 @@ class MPQ70170Regulator:
         self.is_buck = page < MPQ70170_NUM_BUCKS
         if self.is_buck:
             self.ctrl_reg = MPQ70170_BUCK1_CTRL + page * 2
-            self.pg_reg = MPQ70170_BUCK1_PG + page
         else:
             ldo = page - MPQ70170_NUM_BUCKS
             self.ctrl_reg = MPQ70170_LDO1_CTRL + ldo
-            self.pg_reg = MPQ70170_LDO1_PG + ldo
 
     def __str__(self):
         str_info = {
@@ -917,31 +911,9 @@ class MPQ70170Regulator:
         self._write_byte_verified(vout_reg, code)
         pm_print("vout_reg 0x{0:02x} code 0x{1:02x}".format(vout_reg, code))
 
-    def _pg_threshold(self, code, target, above):
-        percent_min_v = MPQ70170_BUCK_PG_PERCENT_MIN_V if self.is_buck else MPQ70170_LDO_PG_PERCENT_MIN_V
-        step = MPQ70170_PG_STEPS[code]
-        if target >= percent_min_v:
-            offset = target * step / 100
-        else:
-            offset = step * 10e-3
-        return round(target + offset if above else target - offset, 4)
-
     def read_voltage_all(self):
-        """Return the setpoint and power-good OV/UV thresholds (BUCKx_PG/LDOx_PG)."""
-        target = self.read_voltage()
-        raw = self._read_byte(self.pg_reg)
-        result = {"Voltage": target, "Target_Voltage": target}
-        result["Power_Good_OV_Threshold"] = {
-            "value": self._pg_threshold((raw >> 3) & 0x7, target, above=True),
-            "register": self.pg_reg,
-            "raw": raw,
-        }
-        result["Power_Good_UV_Threshold"] = {
-            "value": self._pg_threshold(raw & 0x7, target, above=False),
-            "register": self.pg_reg,
-            "raw": raw,
-        }
-        return result
+        """Return the setpoint; this part has no OV/UV limit registers."""
+        return {"Voltage": self.read_voltage(), "Limits_NA": True}
 
     def read_current(self):
         return None

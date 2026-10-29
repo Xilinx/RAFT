@@ -53,25 +53,28 @@ NO_I2C_ACCESS_CALLERS = frozenset({
     "setscale",
 })
 
+VOUT_LIMIT_NAMES = (
+    "Overvoltage_Fault_Limit",
+    "Overvoltage_Warning_Limit",
+    "Undervoltage_Warning_Limit",
+    "Undervoltage_Fault_Limit",
+)
+
 
 def _format_voltage_all_display(data):
     lines = []
     if "Voltage" in data and not isinstance(data["Voltage"], str):
         lines.append(f"Voltage(V): {data['Voltage']:.2f}")
-    if "Target_Voltage" in data and not isinstance(data["Target_Voltage"], str):
-        lines.append(f"Target_Voltage: {data['Target_Voltage']:.2f}")
-    if data.get("Limits_NA"):
-        lines.append("N/A")
-    else:
-        for key, entry in data.items():
-            if key in ("Voltage", "Target_Voltage", "Limits_NA"):
-                continue
-            if not isinstance(entry, dict) or "value" not in entry:
-                continue
+    for key in VOUT_LIMIT_NAMES:
+        entry = None if data.get("Limits_NA") else data.get(key)
+        label = f"{key.replace('_', ' ')}(V):"
+        if isinstance(entry, dict) and "value" in entry:
             lines.append(
-                f"{key}(V): {entry['value']:.2f} "
+                f"{label} {entry['value']:.2f} "
                 f"(Reg {entry['register']}: {entry['raw']})"
             )
+        else:
+            lines.append(f"{label} N/A")
     return "\n".join(lines)
 
 
@@ -868,6 +871,8 @@ class PM(object):
                             "raw": f"0x{reading['raw']:x}",
                         }
                         data[key] = entry
+                    elif key == "Limits_NA":
+                        data[key] = reading
                     else:
                         data[key] = self._scale(reading, "voltage")
                 return {"Voltage": _format_voltage_all_display(data)}

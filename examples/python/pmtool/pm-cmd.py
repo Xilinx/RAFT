@@ -125,12 +125,10 @@ def print_voltage_all_response(response):
         print(f"Voltage(V):\t{data['Voltage']:.2f}")
 
         for key, entry in data.items():
-            if key in ("Voltage", "Target_Voltage"):
-                continue
             if not isinstance(entry, dict):
                 continue
             print(
-                f"{key}(V):\t{entry['value']:.2f}\t"
+                f"{key.replace('_', ' ')}(V):\t{entry['value']:.2f}\t"
                 f"(Reg {entry['register']}:\t{entry['raw']})"
             )
     sys.exit(os.EX_OK)
@@ -164,7 +162,8 @@ def main():
         # Add optional arguments
         if optional_arguments:
             for arg_name, arg_options in optional_arguments.items():
-                cmd_parser.add_argument(arg_name, **arg_options)
+                names = arg_name if isinstance(arg_name, tuple) else (arg_name,)
+                cmd_parser.add_argument(*names, **arg_options)
 
         cmd_parser.set_defaults(func=func)
 
@@ -190,8 +189,8 @@ def main():
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to disable"}})
     add_command("getvoltage", "Get current voltage level, optionally including OV/UV limits", voltage_action,
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to get"}},
-                optional_arguments={"--all": {"action": "store_true", "dest": "include_all",
-                                              "help": "Include OV/UV fault and warning limits"}})
+                optional_arguments={("-a", "--all"): {"action": "store_true", "dest": "include_all",
+                                                   "help": "Include OV/UV fault and warning limits"}})
     add_command("setvoltage", "Set a new voltage level", voltage_action,
                 arguments={"voltage_name": {"type": str, "help": "Voltage rail to set"},
                            "value": {"type": float, "help": "New voltage value"}})
